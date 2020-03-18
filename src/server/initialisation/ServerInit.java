@@ -11,12 +11,14 @@ import java.util.Properties;
 
 // Class initiates connection to the database with a db.props file
 public class ServerInit {
+    public static Connection conn;
+
     public static void initaliseConnection() {
         String url = "";
         String username = "";
         String password = "";
 
-        Connection conn = null;
+        conn = null;
 
         // Attempt to open file 'db.props' and retrieve DB connection information
         try {
@@ -33,20 +35,12 @@ public class ServerInit {
         }
         // Attempt to make the connection to the DB
         try {
-            Connection con= DriverManager.getConnection(url, username, password);
+            conn = DriverManager.getConnection(url, username, password);
 
             System.out.println("Connection Successful!");
 
         } catch (SQLException e) {
             throw new Error("Connection unsuccessful", e);
-        } finally {
-            try {
-                if (conn != null) {
-                    conn.close();
-                }
-            } catch (SQLException ex) {
-                System.out.println(ex.getMessage());
-            }
         }
     }
 }
