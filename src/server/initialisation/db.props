@@ -1,0 +1,4 @@
+# MariaDB DB properties
+jdbc.url=jdbc:mariadb://localhost:3307
+jdbc.username=root
+jdbc.password=password

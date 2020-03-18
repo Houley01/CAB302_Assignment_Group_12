@@ -2,13 +2,25 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="57c14702-2382-4ef5-b85a-aefdf299fb0f" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/mariadb_java_client_2_5_4.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/server/Server.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/server/initialisation/ServerInit.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/server/initialisation/db.props" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CAB302_Assignment_Group_X.iml" beforeDir="false" afterPath="$PROJECT_DIR$/CAB302_Assignment_Group_X.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/server/placeholder.txt" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Class" />
+      </list>
+    </option>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -22,11 +34,57 @@
   </component>
   <component name="PropertiesComponent">
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
-    <property name="project.structure.last.edited" value="Modules" />
-    <property name="project.structure.proportion" value="0.0" />
-    <property name="project.structure.side.proportion" value="0.0" />
-    <property name="settings.editor.selected.configurable" value="project.propVCSSupport.Mappings" />
+    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/src/server/lib/mariadb-java-client-2.5.4.jar!/" />
+    <property name="project.structure.last.edited" value="Libraries" />
+    <property name="project.structure.proportion" value="0.15" />
+    <property name="project.structure.side.proportion" value="0.2" />
+    <property name="settings.editor.selected.configurable" value="configurable.group.tools" />
+  </component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\joel_\Documents\QUT\2020\Semester_One\CAB302\Assignment\CAB302_Assignment_Group_12\src\server\initialisation" />
+      <recent name="C:\Users\joel_\Documents\QUT\2020\Semester_One\CAB302\Assignment\CAB302_Assignment_Group_12\src\server\lib" />
+    </key>
+  </component>
+  <component name="RunManager" selected="Application.Server">
+    <configuration name="Server" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="server.Server" />
+      <module name="CAB302_Assignment_Group_X" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="server.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="ServerInit" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="server.initialisation.ServerInit" />
+      <module name="CAB302_Assignment_Group_X" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="server.initialisation.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="mariadb-java-client-2.5.4.jar" type="JarApplication" temporary="true">
+      <option name="JAR_PATH" value="$PROJECT_DIR$/src/server/mariadb-java-client-2.5.4.jar" />
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Application.Server" />
+        <item itemvalue="Application.ServerInit" />
+        <item itemvalue="JAR Application.mariadb-java-client-2.5.4.jar" />
+      </list>
+    </recent_temporary>
   </component>
   <component name="SvnConfiguration">
     <configuration />
@@ -51,13 +109,35 @@
       <screen x="0" y="0" width="1920" height="1080" />
     </state>
     <state x="552" y="198" key="#Project_Structure/1920.-4.1920.1080/0.0.1920.1080@0.0.1920.1080" timestamp="1584345021336" />
-    <state x="740" y="281" key="FileChooserDialogImpl" timestamp="1584345435227">
-      <screen x="0" y="0" width="1920" height="1080" />
+    <state x="414" y="175" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1584508956980">
+      <screen x="0" y="0" width="1920" height="1040" />
     </state>
+    <state x="414" y="175" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1584508956980" />
+    <state x="740" y="271" key="FileChooserDialogImpl" timestamp="1584510492584">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="740" y="271" key="FileChooserDialogImpl/0.0.1920.1040@0.0.1920.1040" timestamp="1584510492584" />
     <state x="740" y="281" key="FileChooserDialogImpl/1920.-4.1920.1080/0.0.1920.1080@0.0.1920.1080" timestamp="1584345435227" />
-    <state x="461" y="182" key="SettingsEditor" timestamp="1584345440107">
-      <screen x="0" y="0" width="1920" height="1080" />
+    <state width="1877" height="282" key="GridCell.Tab.0.bottom" timestamp="1584511832511">
+      <screen x="0" y="0" width="1920" height="1040" />
     </state>
+    <state width="1877" height="282" key="GridCell.Tab.0.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1584511832511" />
+    <state width="1877" height="282" key="GridCell.Tab.0.center" timestamp="1584511832511">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="1877" height="282" key="GridCell.Tab.0.center/0.0.1920.1040@0.0.1920.1040" timestamp="1584511832511" />
+    <state width="1877" height="282" key="GridCell.Tab.0.left" timestamp="1584511832511">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="1877" height="282" key="GridCell.Tab.0.left/0.0.1920.1040@0.0.1920.1040" timestamp="1584511832511" />
+    <state width="1877" height="282" key="GridCell.Tab.0.right" timestamp="1584511832511">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="1877" height="282" key="GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040" timestamp="1584511832511" />
+    <state x="740" y="140" key="SettingsEditor" timestamp="1584510494414">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="740" y="140" key="SettingsEditor/0.0.1920.1040@0.0.1920.1040" timestamp="1584510494414" />
     <state x="461" y="182" key="SettingsEditor/1920.-4.1920.1080/0.0.1920.1080@0.0.1920.1080" timestamp="1584345440107" />
     <state x="656" y="364" key="com.intellij.ide.util.TipDialog" timestamp="1584345371366">
       <screen x="0" y="0" width="1920" height="1080" />
