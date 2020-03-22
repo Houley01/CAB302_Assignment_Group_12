@@ -7,6 +7,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import java.io.File;  // Import the File class
+import java.io.FileNotFoundException;  // Import this class to handle errors
+import java.util.Scanner; // Import the Scanner class to read text files
+
 public class databaseCreation {
     // Check if the database has tables
     public static void checkDB() throws SQLException {
@@ -38,23 +42,19 @@ public class databaseCreation {
 
     // Create the database and tables if they don't exist
     public static void createDB() throws SQLException {
-        String[] dbCreationQueries = {"CREATE DATABASE IF NOT EXISTS cab302", "USE cab302", "CREATE TABLE IF NOT EXISTS `billboards` (\n" +
-                "  `idbillboards` int(11) NOT NULL,\n" +
-                "  PRIMARY KEY (`idbillboards`)\n" +
-                ") ENGINE=InnoDB DEFAULT CHARSET=latin1", "CREATE TABLE IF NOT EXISTS `schedules` (\n" +
-                "  `idschedules` int(11) NOT NULL,\n" +
-                "  PRIMARY KEY (`idschedules`)\n" +
-                ") ENGINE=InnoDB DEFAULT CHARSET=latin1", "CREATE TABLE IF NOT EXISTS `users` (\n" +
-                "  `idusers` int(11) NOT NULL,\n" +
-                "  PRIMARY KEY (`idusers`)\n" +
-                ") ENGINE=InnoDB DEFAULT CHARSET=latin1;"};
-
         Statement stmt = ServerInit.conn.createStatement();
-        ResultSet rs = null;
 
-        for (String query : dbCreationQueries) {
-            rs = stmt.executeQuery(query);
-            rs.next();
+        try {
+            File myObj = new File("src/server/resources/cab302_db_queries.sql");
+            Scanner myReader = new Scanner(myObj);
+            while (myReader.hasNextLine()) {
+                String data = myReader.nextLine();
+                stmt.execute(data);
+            }
+            myReader.close();
+        } catch (FileNotFoundException e) {
+            System.out.println("File doesn't exist");
+            e.printStackTrace();
         }
     }
 }
