@@ -2,7 +2,18 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="57c14702-2382-4ef5-b85a-aefdf299fb0f" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/src/server/databaseCreation/TestDatabaseCreation.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/server/initialisation/TestServerInit.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CAB302_Assignment_Group_X.iml" beforeDir="false" afterPath="$PROJECT_DIR$/CAB302_Assignment_Group_X.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/CAB302_Assignment_Group_X/server/Server.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/CAB302_Assignment_Group_X/server/Server.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/CAB302_Assignment_Group_X/server/databaseCreation/databaseCreation.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/CAB302_Assignment_Group_X/server/databaseCreation/databaseCreation.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/CAB302_Assignment_Group_X/server/initialisation/ServerInit.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/CAB302_Assignment_Group_X/server/initialisation/ServerInit.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/CAB302_Assignment_Group_X/server/initialisation/db.props" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/CAB302_Assignment_Group_X/server/initialisation/db.props" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/controlpanel/GUITest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/controlpanel/GUITest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/server/Server.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/server/Server.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/server/databaseCreation/databaseCreation.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/server/databaseCreation/databaseCreation.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/server/initialisation/ServerInit.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/server/initialisation/ServerInit.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -27,6 +38,10 @@
     <option name="showLibraryContents" value="true" />
   </component>
   <component name="PropertiesComponent">
+    <property name="Downloaded.Files.Path.Enabled" value="false" />
+    <property name="Repository.Attach.Annotations" value="false" />
+    <property name="Repository.Attach.JavaDocs" value="false" />
+    <property name="Repository.Attach.Sources" value="false" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$/src/server/lib/mariadb-java-client-2.5.4.jar!/" />
@@ -55,8 +70,38 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="ServerInit" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
-      <option name="MAIN_CLASS_NAME" value="server.initialisation.ServerInit" />
+    <configuration name="TestDatabaseCreation" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="CAB302_Assignment_Group_X" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="server.databaseCreation.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="server.databaseCreation" />
+      <option name="MAIN_CLASS_NAME" value="server.databaseCreation.TestDatabaseCreation" />
+      <option name="TEST_OBJECT" value="class" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="TestDatabaseCreation.testDatabaseExists" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="CAB302_Assignment_Group_X" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="server.databaseCreation.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="server.databaseCreation" />
+      <option name="MAIN_CLASS_NAME" value="server.databaseCreation.TestDatabaseCreation" />
+      <option name="METHOD_NAME" value="testDatabaseExists" />
+      <option name="TEST_OBJECT" value="method" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="TestServerInit" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="CAB302_Assignment_Group_X" />
       <extension name="coverage">
         <pattern>
@@ -64,24 +109,43 @@
           <option name="ENABLED" value="true" />
         </pattern>
       </extension>
+      <option name="PACKAGE_NAME" value="server.initialisation" />
+      <option name="MAIN_CLASS_NAME" value="server.initialisation.TestServerInit" />
+      <option name="TEST_OBJECT" value="class" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="mariadb-java-client-2.5.4.jar" type="JarApplication" temporary="true">
-      <option name="JAR_PATH" value="$PROJECT_DIR$/src/server/mariadb-java-client-2.5.4.jar" />
-      <method v="2" />
+    <configuration name="TestServerInit.testDatabaseConnection" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="CAB302_Assignment_Group_X" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="server.initialisation.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="server.initialisation" />
+      <option name="MAIN_CLASS_NAME" value="server.initialisation.TestServerInit" />
+      <option name="METHOD_NAME" value="testDatabaseConnection" />
+      <option name="TEST_OBJECT" value="method" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
     </configuration>
     <list>
       <item itemvalue="Application.Server" />
-      <item itemvalue="Application.ServerInit" />
-      <item itemvalue="JAR Application.mariadb-java-client-2.5.4.jar" />
+      <item itemvalue="JUnit.TestServerInit" />
+      <item itemvalue="JUnit.TestServerInit.testDatabaseConnection" />
+      <item itemvalue="JUnit.TestDatabaseCreation.testDatabaseExists" />
+      <item itemvalue="JUnit.TestDatabaseCreation" />
     </list>
     <recent_temporary>
       <list>
         <item itemvalue="Application.Server" />
-        <item itemvalue="Application.ServerInit" />
-        <item itemvalue="JAR Application.mariadb-java-client-2.5.4.jar" />
+        <item itemvalue="JUnit.TestDatabaseCreation.testDatabaseExists" />
+        <item itemvalue="JUnit.TestDatabaseCreation" />
+        <item itemvalue="JUnit.TestServerInit" />
+        <item itemvalue="JUnit.TestServerInit.testDatabaseConnection" />
       </list>
     </recent_temporary>
   </component>
@@ -116,30 +180,34 @@
     </state>
     <state x="414" y="175" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1584508956980" />
     <state x="414" y="182" key="#com.intellij.execution.impl.EditConfigurationsDialog/1920.-4.1920.1080/0.0.1920.1080@0.0.1920.1080" timestamp="1584524151522" />
+    <state x="557" y="151" key="#server.initialisation_in_CAB302_Assignment_Group_X" timestamp="1585396730568">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="557" y="151" key="#server.initialisation_in_CAB302_Assignment_Group_X/0.0.1920.1040@0.0.1920.1040" timestamp="1585396730568" />
     <state x="740" y="271" key="FileChooserDialogImpl" timestamp="1584510492584">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="740" y="271" key="FileChooserDialogImpl/0.0.1920.1040@0.0.1920.1040" timestamp="1584510492584" />
     <state x="740" y="281" key="FileChooserDialogImpl/1920.-4.1920.1080/0.0.1920.1080@0.0.1920.1080" timestamp="1584345435227" />
-    <state width="1877" height="295" key="GridCell.Tab.0.bottom" timestamp="1584524421825">
-      <screen x="0" y="0" width="1920" height="1080" />
+    <state width="1877" height="282" key="GridCell.Tab.0.bottom" timestamp="1585405311959">
+      <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="282" key="GridCell.Tab.0.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1584519836769" />
+    <state width="1877" height="282" key="GridCell.Tab.0.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1585405311959" />
     <state width="1877" height="295" key="GridCell.Tab.0.bottom/1920.-4.1920.1080/0.0.1920.1080@0.0.1920.1080" timestamp="1584524421825" />
-    <state width="1877" height="295" key="GridCell.Tab.0.center" timestamp="1584524421825">
-      <screen x="0" y="0" width="1920" height="1080" />
+    <state width="1877" height="282" key="GridCell.Tab.0.center" timestamp="1585405311958">
+      <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="282" key="GridCell.Tab.0.center/0.0.1920.1040@0.0.1920.1040" timestamp="1584519836768" />
+    <state width="1877" height="282" key="GridCell.Tab.0.center/0.0.1920.1040@0.0.1920.1040" timestamp="1585405311958" />
     <state width="1877" height="295" key="GridCell.Tab.0.center/1920.-4.1920.1080/0.0.1920.1080@0.0.1920.1080" timestamp="1584524421825" />
-    <state width="1877" height="295" key="GridCell.Tab.0.left" timestamp="1584524421825">
-      <screen x="0" y="0" width="1920" height="1080" />
+    <state width="1877" height="282" key="GridCell.Tab.0.left" timestamp="1585405311958">
+      <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="282" key="GridCell.Tab.0.left/0.0.1920.1040@0.0.1920.1040" timestamp="1584519836768" />
+    <state width="1877" height="282" key="GridCell.Tab.0.left/0.0.1920.1040@0.0.1920.1040" timestamp="1585405311958" />
     <state width="1877" height="295" key="GridCell.Tab.0.left/1920.-4.1920.1080/0.0.1920.1080@0.0.1920.1080" timestamp="1584524421825" />
-    <state width="1877" height="295" key="GridCell.Tab.0.right" timestamp="1584524421825">
-      <screen x="0" y="0" width="1920" height="1080" />
+    <state width="1877" height="282" key="GridCell.Tab.0.right" timestamp="1585405311958">
+      <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="282" key="GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040" timestamp="1584519836768" />
+    <state width="1877" height="282" key="GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040" timestamp="1585405311958" />
     <state width="1877" height="295" key="GridCell.Tab.0.right/1920.-4.1920.1080/0.0.1920.1080@0.0.1920.1080" timestamp="1584524421825" />
     <state x="740" y="140" key="SettingsEditor" timestamp="1584510494414">
       <screen x="0" y="0" width="1920" height="1040" />
@@ -150,5 +218,9 @@
       <screen x="0" y="0" width="1920" height="1080" />
     </state>
     <state x="656" y="364" key="com.intellij.ide.util.TipDialog/1920.-4.1920.1080/0.0.1920.1080@0.0.1920.1080" timestamp="1584523476796" />
+    <state x="664" y="413" key="com.intellij.jarRepository.RepositoryAttachDialog-DOWNLOAD" timestamp="1585396659624">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="664" y="413" key="com.intellij.jarRepository.RepositoryAttachDialog-DOWNLOAD/0.0.1920.1040@0.0.1920.1040" timestamp="1585396659624" />
   </component>
 </project>

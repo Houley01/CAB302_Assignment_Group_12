@@ -13,7 +13,7 @@ import java.util.Scanner; // Import the Scanner class to read text files
 
 public class databaseCreation {
     // Check if the database has tables
-    public static void checkDB() throws SQLException {
+    public static void checkDatabaseExistence() throws SQLException {
         System.out.println("Checking if DB exists...");
 
         DatabaseMetaData dbm = ServerInit.conn.getMetaData();
@@ -36,12 +36,12 @@ public class databaseCreation {
         // check for database existing and requiring to create the database
         if (!databaseExists) {
             System.out.println("Creating DB: cab302...");
-            createDB();
+            createDatabase();
         }
     }
 
     // Create the database and tables if they don't exist
-    public static void createDB() throws SQLException {
+    public static void createDatabase() throws SQLException {
         Statement stmt = ServerInit.conn.createStatement();
 
         try {
