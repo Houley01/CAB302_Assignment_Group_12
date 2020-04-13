@@ -1,8 +1,11 @@
 package controlpanel;
 
+//import resources.GetPropertyValues;
+
 import javax.swing.*;
 import java.awt.*;
-
+import java.io.*;
+import java.net.*;
 
 public class controlPanel extends JFrame {
 
@@ -10,6 +13,7 @@ public class controlPanel extends JFrame {
 //    private static final boolean ICONIFIABLE = true;
 //    private static final boolean MAXIMIZABLE = true;
 //    private static final boolean RESIZABLE = true;
+    private static String token;
     public static final int WINDOWWIDTH = 900;
     public static final int WINDOWHIGHT = 800;
 
@@ -40,7 +44,7 @@ public class controlPanel extends JFrame {
         setVisible(true);
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
 //        Create and instance of the program
         controlPanel program = new controlPanel();
 //        Allow the program to be seen.

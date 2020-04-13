@@ -3,6 +3,7 @@ package controlpanel;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.IOException;
 
 class login extends JFrame
 {
@@ -49,7 +50,11 @@ class login extends JFrame
                 String user = usernameText.getText();
                 String pass = passwordText.getText();
 //              Add Hash function here
-                controller.sendLoginInfo(user, pass);
+                try {
+                    controller.sendLoginInfo(user, pass);
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
             }
         });
         return window;

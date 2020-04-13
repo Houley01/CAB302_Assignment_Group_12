@@ -5,7 +5,7 @@ import org.junit.jupiter.api.*;
 
 import javax.swing.*;
 
-public class GUITest {
+public class ControlPanelTest {
     /*
     * The following test are for testing the Control Panel packages
     */
