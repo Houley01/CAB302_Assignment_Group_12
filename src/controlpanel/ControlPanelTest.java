@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.*;
 
 import javax.swing.*;
+import java.io.IOException;
 
 public class ControlPanelTest {
     /*
@@ -73,6 +74,30 @@ public class ControlPanelTest {
      *  assertNotEquals(hashA, hashB);
      * }
      */
+
+    // Test login successfully when server is running
+    @Test
+    public void loginCheckCorrect() throws IOException {
+        assertEquals(true,controller.connectionToSever("testuser","password"));
+    }
+
+    // Test login unsuccessfully when server is running
+    @Test
+    public void loginCheckIncorrect() throws IOException {
+        assertEquals(true,controller.connectionToSever("testuser","passwrord"));
+    }
+
+    // Test connection to server exists
+    @Test
+    public void serverConnectionCheckOnLogin() throws IOException {
+        assertEquals(true,controller.connectionToSever("testuser","password"));
+    }
+
+    // Test connection to server doesn't exist regardless of login information
+    @Test
+    public void serverConnectionCheckOnLoginFalse() throws IOException {
+        assertEquals(false,controller.connectionToSever("testuser","password"));
+    }
 
 
 }

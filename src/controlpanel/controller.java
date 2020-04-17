@@ -11,45 +11,66 @@ public class controller {
      *  @para user == username
      *  @para password is an array of Char values
      */
-    private static void connectionToSever(String username, String pass) throws IOException {
-        //      Gathers the information from server.config file
-        resources.GetPropertyValues properties = new resources.GetPropertyValues();
-        properties.readPropertyFile();
+    public static Boolean connectionToSever(String username, String pass) throws IOException {
+        try {
+            // Gathers the information from server.config file
+            resources.GetPropertyValues properties = new resources.GetPropertyValues();
+            properties.readPropertyFile();
 
-//        create a socket connect
-        Socket client = new Socket(properties.serverName,  properties.port);
+            // Create a socket connect
+            Socket client = new Socket(properties.serverName,  properties.port);
 
-        OutputStream outputStream = client.getOutputStream();
-        InputStream inputStream = client.getInputStream();
+            OutputStream outputStream = client.getOutputStream();
 
-        ObjectOutputStream send = new ObjectOutputStream(outputStream);
-        ObjectInputStream receiver = new ObjectInputStream(inputStream);
+            System.out.println(outputStream);
+
+            InputStream inputStream = client.getInputStream();
+
+            ObjectOutputStream send = new ObjectOutputStream(outputStream);
+            ObjectInputStream receiver = new ObjectInputStream(inputStream);
 
 //        Send the server which function it needs to run
-        send.writeUTF("Login");
-        send.writeUTF(username);
-        send.writeUTF(pass);
-        send.flush(); // Must be done before switching to reading state
+            send.writeUTF("Login");
+            send.writeUTF(username);
+            send.writeUTF(pass);
+            send.flush(); // Must be done before switching to reading state
 
-//        If the server send back a true or false message decides what to do.
-        if (receiver.readBoolean() == true) {
-            System.out.println("correct username and password"); // DEBUG CODE
+            // If the server connection was made, use this variable to determine whether
+            // Login was successful or not
+            Boolean loginSuccess = false;
 
-        } else {
-//          Alert the user that they have incorrectly entered they username or password with
-//          a pop up window.
-            System.out.println("wrong username or password"); // DEBUG CODE
-// IMPLEMENT AN ERROR MESSAGE FOR USER
-            DialogWindow.showErrorPane("Incorrect Login Information", "Error");
+            // If the server send back a true or false message decides what to do.
+            if (receiver.readBoolean() == true) {
+                System.out.println("correct username and password"); // DEBUG CODE
+                DialogWindow.showInformationPane("Successful Login", "Success");
+                loginSuccess = true;
+            } else {
+                // Alert the user that they have incorrectly entered they username or password with
+                // a pop up window.
+                System.out.println("wrong username or password"); // DEBUG CODE
+                // IMPLEMENT AN ERROR MESSAGE FOR USER
+                DialogWindow.showErrorPane("Incorrect Login Information", "Error");
 
 //            JOptionPane.showMessageDialog(login.loginScreen(), "Incorrect Login Information",
 //                    "Error", JOptionPane.ERROR_MESSAGE);
-        }
+            }
 
 //      End connections
-        send.close();
-        receiver.close();
-        client.close();
+            send.close();
+            receiver.close();
+            client.close();
+
+            return loginSuccess;
+        } catch (IOException e) {
+            // Developer message
+            System.out.println("Server connection doesn't exist.");
+
+            // User pop up window
+            DialogWindow.showErrorPane("Server is offline", "Error");
+
+            // Return false that the connection to the server wasn't made
+            return false;
+        }
     }
 
     /*
