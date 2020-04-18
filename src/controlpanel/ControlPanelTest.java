@@ -75,29 +75,17 @@ public class ControlPanelTest {
      * }
      */
 
-    // Test login successfully when server is running
+    // Test user login successfully
     @Test
-    public void loginCheckCorrect() throws IOException {
-        assertEquals(true,controller.connectionToSever("testuser","password"));
+    public void testLogin() throws IOException {
+        controller.sendLoginInfo("testuser","password");
+        assertEquals(true, controller.loginSuccessful);
     }
 
-    // Test login unsuccessfully when server is running
+    // Test user login unsuccessfully
     @Test
-    public void loginCheckIncorrect() throws IOException {
-        assertEquals(true,controller.connectionToSever("testuser","passwrord"));
+    public void testLoginFail() throws IOException {
+        controller.sendLoginInfo("testuser","passwofeferd");
+        assertEquals(false, controller.loginSuccessful);
     }
-
-    // Test connection to server exists
-    @Test
-    public void serverConnectionCheckOnLogin() throws IOException {
-        assertEquals(true,controller.connectionToSever("testuser","password"));
-    }
-
-    // Test connection to server doesn't exist regardless of login information
-    @Test
-    public void serverConnectionCheckOnLoginFalse() throws IOException {
-        assertEquals(false,controller.connectionToSever("testuser","password"));
-    }
-
-
 }
