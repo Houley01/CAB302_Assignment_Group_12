@@ -19,7 +19,7 @@ class login extends JFrame
     public static JInternalFrame loginScreen() {
         JInternalFrame window = new JInternalFrame( "Login Screen");
         window.setSize(250, 100);
-        window.setLocation((controlPanel.WINDOWWIDTH/2) - 125, (controlPanel.WINDOWHIGHT/2) - 100);
+        window.setLocation((controlPanel.WINDOWWIDTH/2) - 125, (controlPanel.WINDOWHEIGHT/2) - 100);
         window.setLayout(new GridLayout(3,2));
 
         JLabel usernameLabel = new JLabel("Username:");
@@ -49,7 +49,6 @@ class login extends JFrame
             public void actionPerformed(ActionEvent e) {
                 String user = usernameText.getText();
                 String pass = passwordText.getText();
-//              Add Hash function here
                 try {
                     controller.sendLoginInfo(user, pass);
                 } catch (IOException ex) {
