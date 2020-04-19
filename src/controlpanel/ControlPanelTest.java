@@ -78,14 +78,14 @@ public class ControlPanelTest {
     // Test user login successfully
     @Test
     public void testLogin() throws IOException {
-        controller.sendLoginInfo("testuser","password");
+        controller.authenticateUserLogin("testuser","password");
         assertEquals(true, controller.loginSuccessful);
     }
 
     // Test user login unsuccessfully
     @Test
     public void testLoginFail() throws IOException {
-        controller.sendLoginInfo("testuser","passwofeferd");
+        controller.authenticateUserLogin("testuser","passwofeferd");
         assertEquals(false, controller.loginSuccessful);
     }
 }

@@ -14,19 +14,21 @@ class login extends JFrame
         this.usernameText = usernameText;
     }
 
+    static JInternalFrame window = new JInternalFrame( "Login Screen");
 
 
     public static JInternalFrame loginScreen() {
-        JInternalFrame window = new JInternalFrame( "Login Screen");
         window.setSize(250, 100);
         window.setLocation((controlPanel.WINDOWWIDTH/2) - 125, (controlPanel.WINDOWHEIGHT/2) - 100);
         window.setLayout(new GridLayout(3,2));
 
         JLabel usernameLabel = new JLabel("Username:");
-        JTextField usernameText = new JTextField(15);
+        //        REMOVE PASSWORD........................\/  USED TO FILL IN TEXT FIELD
+        JTextField usernameText = new JTextField("admin", 15);
         //      Password
         JLabel passwordLabel = new JLabel("Password:");
-        passwordText = new JPasswordField(15); // Hides the Password from the screen
+        //        REMOVE PASSWORD...................\/  USED TO FILL IN TEXT FIELD
+        passwordText = new JPasswordField("password", 15); // Hides the Password from the screen
 
 
         JButton loginButton = new JButton("Login");
@@ -50,7 +52,11 @@ class login extends JFrame
                 String user = usernameText.getText();
                 String pass = passwordText.getText();
                 try {
-                    controller.sendLoginInfo(user, pass);
+                    if(controller.authenticateUserLogin(user, pass) == true) {
+//                        window.setVisible(false);
+//                        listBillboards.listBillboards().setVisible(true);
+                        controller.hideLoginScreen();
+                    };
                 } catch (IOException ex) {
                     ex.printStackTrace();
                 }
