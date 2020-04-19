@@ -4,6 +4,8 @@ package controlpanel;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.*;
 import java.net.*;
 
@@ -15,39 +17,12 @@ public class controlPanel extends JFrame {
 //    private static final boolean RESIZABLE = true;
     private static String token;
     public static final int WINDOWWIDTH = 900;
-    public static final int WINDOWHIGHT = 800;
-
-    public controlPanel() {
-        super("Control Panel");
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
-
-        JDesktopPane pane = new JDesktopPane();
-
-        /*
-         *
-         * Calls the login window setup.
-         * Height and Width are setup in the login class
-         * Location set in login class.
-         */
-        JInternalFrame loginWindow = login.loginScreen();
-        loginWindow.setVisible(true);
-
-        pane.add(loginWindow);
-
-
-        getContentPane().add(pane);
-
-        // Display the window.
-        setPreferredSize(new Dimension(WINDOWWIDTH, WINDOWHIGHT));
-        setLocation(new Point(500, 0));
-        pack();
-        setVisible(true);
-    }
+    public static final int WINDOWHEIGHT = 800;
+//    public JDesktopPane pane = new JDesktopPane();
+//    private static JPasswordField passwordText;
+//    private static JTextField  usernameText;
 
     public static void main(String[] args) throws IOException {
-//        Create and instance of the program
-        controlPanel program = new controlPanel();
-//        Allow the program to be seen.
-        program.setVisible(true);
+        new ControlPanelFrameHandler();
     }
 }

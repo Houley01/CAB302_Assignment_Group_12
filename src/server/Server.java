@@ -11,14 +11,20 @@ public class Server {
     private static Boolean connectionInitiated;
 
     public static void main(String[] args) throws IOException, SQLException {
+
+        // Gathers the information from server.config file
+        resources.GetPropertyValues properties = new resources.GetPropertyValues();
+        properties.readPropertyFile();
+
         connectionInitiated = ServerInit.initaliseConnection();
 
         if (connectionInitiated) {
             databaseCreation.checkDatabaseExistence();
         }
 
+//        Reads the port number from the server.properties file
+        ServerSocket serverSocket =  new ServerSocket(properties.port);
 
-        ServerSocket serverSocket =  new ServerSocket(8888);
         while(true) {
             Socket server = serverSocket.accept();
             System.out.println("Connected to " + server.getInetAddress());
@@ -26,10 +32,6 @@ public class Server {
             ObjectInputStream receiver = new ObjectInputStream(server.getInputStream());
             ObjectOutputStream send = new ObjectOutputStream(server.getOutputStream());
 
-//            System.out.println(receiver.readUTF()); // Writes to console
-
-//            send.writeUTF("Welcome client!"); // Sends information to client
-//            send.flush();
 
             String request = receiver.readUTF();
 
@@ -63,7 +65,6 @@ public class Server {
             }
 
 
-
 //      End connections
             receiver.close();
             send.close();
@@ -71,6 +72,7 @@ public class Server {
         }
 
     }
+
     static boolean checkUserDetails(String uName, String pass) throws SQLException {
         String query = "SELECT * FROM `users` WHERE `user` = \""+ uName + "\";";
 
