@@ -52,7 +52,7 @@ class login extends JFrame
                 String user = usernameText.getText();
                 String pass = passwordText.getText();
                 try {
-                    if(controller.authenticateUserLogin(user, pass) == true) {
+                    if(controller.authenticateUserLogin(user, pass)) {
 //                        window.setVisible(false);
 //                        listBillboards.listBillboards().setVisible(true);
                         controller.hideLoginScreen();

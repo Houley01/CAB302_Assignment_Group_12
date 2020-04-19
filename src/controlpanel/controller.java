@@ -10,7 +10,7 @@ public class controller {
     public static boolean loginSuccessful = false;
 
     // Attempts to make a connection to the server
-    static Socket connectionToSever() throws IOException {
+    static Socket connectionToServer() throws IOException {
         try {
             // Gathers the information from server.config file
             resources.GetPropertyValues properties = new resources.GetPropertyValues();
@@ -22,6 +22,7 @@ public class controller {
             // If the server connection was made
             return client;
         } catch (IOException e) {
+            e.printStackTrace();
             // Developer message
             System.out.println("Server connection doesn't exist.");
 
@@ -123,8 +124,6 @@ public class controller {
         client.close();
     }
 
-
-
     /*
      *  Sends the username and password to server
      */
@@ -132,7 +131,7 @@ public class controller {
         System.out.println("user: " + username); // Debugging use
         System.out.println("Password: " + password); // Debugging use
 
-        Socket client = connectionToSever();
+        Socket client = connectionToServer();
 
         if (client.isConnected()) {
             // connects to the server with information and attempts to authenticate the user
@@ -153,7 +152,7 @@ public class controller {
 
 
             // If the server send back a true or false message decides what to do.
-            if (receiver.readBoolean() == true) {
+            if (receiver.readBoolean()) {
                 System.out.println("correct username and password"); // DEBUG CODE
                 loginSuccessful = true;
             } else {
