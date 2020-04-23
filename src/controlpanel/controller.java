@@ -177,7 +177,54 @@ public class controller {
 
     public static void hideLoginScreen() {
         login.window.setVisible(false);
-        listBillboards.window.setVisible(true);
+        ControlPanelFrameHandler.bar.setVisible(true);
+    }
+
+    public static void showCreateBillboard() {
+        if (createBillboards.window.isVisible() == true) {
+            createBillboards.window.setVisible(false);
+        } else if (createBillboards.window.isVisible() == false) {
+            createBillboards.window.setVisible(true);
+        }
+    }
+
+    public static void showListBillboard() {
+        if (listBillboards.window.isVisible() == true) {
+            listBillboards.window.setVisible(false);
+        } else if (listBillboards.window.isVisible() == false) {
+            listBillboards.window.setVisible(true);
+        }
+    }
+
+    public static void showSchedule() {
+        if (scheduleBillboards.window.isVisible() == true) {
+            scheduleBillboards.window.setVisible(false);
+        } else if (scheduleBillboards.window.isVisible() == false) {
+            scheduleBillboards.window.setVisible(true);
+        }
+    }
+
+    public static void showEditUser() {
+        if (usersPage.window.isVisible() == true) {
+            usersPage.window.setVisible(false);
+        } else if (usersPage.window.isVisible() == false) {
+            usersPage.window.setVisible(true);
+        }
+    }
+
+    public static void showHelpScreen() {
+        // TEMP FUNC
+        System.out.println("HELP INFO");
+        // if (helpScreen.window.isVisible() == true) {
+        //     helpScreen.window.setVisible(false);
+        // } else if (helpScreen.window.isVisible() == false) {
+        //     helpScreen.window.setVisible(true);
+        // }
+    }
+
+    public static void logout() {
+//       EXIT FOR THE MOMENT WILL CHANGE to login page
+        System.exit(0);
     }
 
 }

@@ -1,6 +1,7 @@
 package controlpanel;
 
 import javax.swing.*;
+import javax.swing.event.MenuListener;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
@@ -9,15 +10,47 @@ import java.net.*;
 public class ControlPanelFrameHandler extends JFrame {
     public static final int WINDOWWIDTH = 900;
     public static final int WINDOWHEIGHT = 800;
+    static JMenuBar bar = new JMenuBar();
 
     public JDesktopPane pane = new JDesktopPane();
     private JInternalFrame logWindow = login.loginScreen(); // The internal Windows
-
     private JInternalFrame listBillboardWindow = listBillboards.listBillboards();
+    private JInternalFrame createBillboardWindow = createBillboards.createBillboards();
+    private JInternalFrame scheduleBillboardWindow = scheduleBillboards.scheduleBillboards();
+    private JInternalFrame userWindow = usersPage.userPage();
+
+
 
     public ControlPanelFrameHandler() {
         super("Control Panel");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
+
+
+//      Master Frame Content
+        JButton menuItemCreate = new JButton("Create Billboards");
+        JButton menuItemList = new JButton("List Billboards");
+        JButton menuItemSchedule = new JButton("Schedule Billboards");
+        JButton menuItemEditUser = new JButton("Edit User Settings");
+        JButton menuItemHelp = new JButton("Help");
+        JButton menuItemLogout = new JButton("Logout");
+
+//      Menu Item Action Listener Caller
+        menuItemCreate.addActionListener(new menuCreateButton());
+        menuItemList.addActionListener(new menuItemListBillboard());
+        menuItemSchedule.addActionListener(new menuScheduleButton());
+        menuItemEditUser.addActionListener(new menuEditUserButton());
+        menuItemHelp.addActionListener(new menuHelpButton());
+        menuItemLogout.addActionListener(new menuLogoutButton());
+
+        bar.add(menuItemCreate);
+        bar.add(menuItemList);
+        bar.add(menuItemSchedule);
+        bar.add(menuItemEditUser);
+        bar.add(menuItemHelp);
+        bar.add(menuItemLogout);
+        setJMenuBar(bar);
+        bar.setVisible(false);
+
 //       // JInternalFrame List
 
 ////        LOGIN Section \/
@@ -29,22 +62,25 @@ public class ControlPanelFrameHandler extends JFrame {
 //        BILLBOARD LIST /\
 
 //        CREATE BILLBOARD \/
-
+        createBillboardWindow.setVisible(false);
 //        CREATE BILLBOARD /\
 
-//        EDIT USER \/
-
-//        EDIT USER /\
-
 //        Schedule Billboards \/
-
+        scheduleBillboardWindow.setVisible(false);
 //        Schedule Billboards /\
 
+//        EDIT USER \/
+        userWindow.setVisible(false);
+//        EDIT USER /\
 
 //        MASTER DISPLAY
 //        Add to the master window
         pane.add(logWindow);
         pane.add(listBillboardWindow);
+        pane.add(createBillboardWindow);
+        pane.add(scheduleBillboardWindow);
+        pane.add(userWindow);
+
 
         getContentPane().add(pane);
 
@@ -55,4 +91,40 @@ public class ControlPanelFrameHandler extends JFrame {
         setVisible(true);
     }
 
+//    Action Listeners
+    private class menuCreateButton implements ActionListener {
+        public void actionPerformed(ActionEvent e) {
+            controller.showCreateBillboard();
+        }
+    }
+
+    private class menuItemListBillboard implements ActionListener {
+        public void actionPerformed(ActionEvent e) {
+            controller.showListBillboard();
+        }
+    }
+
+    private class menuScheduleButton implements ActionListener {
+        public void actionPerformed(ActionEvent e) {
+            controller.showSchedule();
+        }
+    }
+
+    private class menuEditUserButton implements ActionListener {
+        public void actionPerformed(ActionEvent e) {
+            controller.showEditUser();
+        }
+    }
+
+    private class menuHelpButton implements ActionListener {
+        public void actionPerformed(ActionEvent e) {
+            controller.showHelpScreen();
+        }
+    }
+
+    private class menuLogoutButton implements ActionListener {
+        public void actionPerformed(ActionEvent e) {
+            controller.logout();
+        }
+    }
 }
