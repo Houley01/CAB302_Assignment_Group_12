@@ -15,7 +15,6 @@ public class controlPanel extends JFrame {
 //    private static final boolean ICONIFIABLE = true;
 //    private static final boolean MAXIMIZABLE = true;
 //    private static final boolean RESIZABLE = true;
-    private static String token;
     public static final int WINDOWWIDTH = 900;
     public static final int WINDOWHEIGHT = 800;
 //    public JDesktopPane pane = new JDesktopPane();

@@ -8,6 +8,8 @@ import java.net.*;
 public class controller {
 
     public static boolean loginSuccessful = false;
+    private static String loggedInUser;
+    private static String token;
 
     // Attempts to make a connection to the server
     static Socket connectionToServer() throws IOException {
@@ -127,7 +129,7 @@ public class controller {
     /*
      *  Sends the username and password to server
      */
-    static boolean authenticateUserLogin(String username, String password) throws IOException {
+    static boolean authenticateUserLogin(String username, String password) throws IOException, ClassNotFoundException {
         System.out.println("user: " + username); // Debugging use
         System.out.println("Password: " + password); // Debugging use
 
@@ -155,6 +157,8 @@ public class controller {
             if (receiver.readBoolean()) {
                 System.out.println("correct username and password"); // DEBUG CODE
                 loginSuccessful = true;
+                loggedInUser = username;
+                getAuthToken();
             } else {
                 // Alert the user that they have incorrectly entered they username or password with
                 // a pop up window.
@@ -173,6 +177,35 @@ public class controller {
 
         }
         return loginSuccessful;
+    }
+
+    public static void getAuthToken() throws IOException, ClassNotFoundException {
+        Socket client = connectionToServer();
+
+        // connects to the server with information and attempts to get the auth token for the user after successful login
+        if (client.isConnected()) {
+
+            OutputStream outputStream = client.getOutputStream();
+
+
+            InputStream inputStream = client.getInputStream();
+
+            ObjectOutputStream send = new ObjectOutputStream(outputStream);
+            ObjectInputStream receiver = new ObjectInputStream(inputStream);
+
+            send.writeUTF("AuthToken");
+            send.writeUTF(loggedInUser);
+            send.flush(); // Must be done before switching to reading state
+
+            // Store the auth token for the user
+            token = (String) receiver.readObject();
+            System.out.println(token);
+
+//      End connections
+            send.close();
+            receiver.close();
+            client.close();
+        }
     }
 
     public static void hideLoginScreen() {

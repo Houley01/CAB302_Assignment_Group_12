@@ -5,6 +5,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.IOException;
 
+
 class login extends JFrame
 {
     private static JPasswordField passwordText;
@@ -57,7 +58,7 @@ class login extends JFrame
 //                        listBillboards.listBillboards().setVisible(true);
                         controller.hideLoginScreen();
                     };
-                } catch (IOException ex) {
+                } catch (IOException | ClassNotFoundException ex) {
                     ex.printStackTrace();
                 }
             }

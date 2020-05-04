@@ -12,10 +12,14 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.Base64;
+import java.util.HashMap;
+import java.util.Date;
 
 public class Server {
     private static Boolean connectionInitiated;
+    private static HashMap<String, String[]> usersAuthenticated = new HashMap<String, String[]>();
 
     public static void main(String[] args) throws IOException, SQLException, InvalidKeySpecException, NoSuchAlgorithmException {
 
@@ -47,6 +51,13 @@ public class Server {
                     String pass = receiver.readUTF();
                     // func check username and database
                     send.writeBoolean(checkUserDetails(uname, pass));
+                    send.flush();
+                }
+                // Auth token after successful login
+                if (request.equals("AuthToken")) {
+                    String uname = receiver.readUTF();
+                    // Generate an authentication token for the user
+                    send.writeObject(generateAuthToken(uname));
                     send.flush();
                 }
                 // Create Billboard Information
@@ -146,5 +157,69 @@ public class Server {
         SecretKey key = f.generateSecret(new PBEKeySpec(
                 password.toCharArray(), salt, 20*1000, 256));
         return Base64.getEncoder().encodeToString(key.getEncoded());
+    }
+
+    private static String generateAuthToken(String username) {
+        // Below creates the auth token for the user
+        SecureRandom secureRandom = new SecureRandom();
+        Base64.Encoder base64Encoder = Base64.getUrlEncoder();
+        byte[] randomBytes = new byte[24];
+        secureRandom.nextBytes(randomBytes);
+        String token = base64Encoder.encodeToString(randomBytes);
+
+        // Current time in milliseconds
+        long currentTime = System.currentTimeMillis();
+        // Expiry time of auth token (24 hours)
+        long authTokenExpiryTime = 86400000;
+        // Expiry time of session token
+        long expiryDate = currentTime + authTokenExpiryTime;
+        // Get expiry value to string to store in hashmap
+        String expiry = String.valueOf(expiryDate);
+
+        Date dateOfExpiry = new Date(expiryDate);
+
+        System.out.println("Username: " + username);
+        System.out.println("AuthToken: " + token);
+        System.out.println("Expiry: " + dateOfExpiry);
+
+        usersAuthenticated.put(username,new String[] {token, expiry});
+
+        return token;
+    }
+
+    // Check if the authentication token is still valid and hasn't expired or doesn't match up with what the server has stored for the user
+    // This check is to be done when the user does an action that involves the server
+    private static boolean checkTokenIsValid(String username, String token) {
+        // Check that a user has been given an auth token
+        if(usersAuthenticated.containsKey(username)) {
+
+            // Contains the auth token and expiry date for the user
+            ArrayList<String> userValues = new ArrayList<String>();
+            // Store the auth token and expiry date for the user
+            for(String s:usersAuthenticated.get(username)){
+                userValues.add(s);
+            }
+
+            // Check that the token given to the server matches the token stored in the server
+            if (token == userValues.get(0)) {
+                // Current time in milliseconds
+                long currentTime = System.currentTimeMillis();
+                // Expiry time for user
+                long expiry = Long.parseLong(userValues.get(1));
+
+                // Check that the token hasn't expired yet and is still valid
+                if (expiry < currentTime) {
+                    System.out.println("Not yet expired");
+                    return true;
+                }
+                else {
+                    return false;
+                }
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
     }
 }
