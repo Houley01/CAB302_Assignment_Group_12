@@ -21,7 +21,7 @@ public class ControlPanelFrameHandler extends JFrame {
 
 
 
-    public ControlPanelFrameHandler() {
+    public ControlPanelFrameHandler() throws IOException {
         super("Control Panel");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
 
@@ -110,7 +110,7 @@ public class ControlPanelFrameHandler extends JFrame {
         }
     }
 
-    private class menuEditUserButton implements ActionListener {
+    public static class menuEditUserButton implements ActionListener {
         public void actionPerformed(ActionEvent e) {
             controller.showEditUser();
         }

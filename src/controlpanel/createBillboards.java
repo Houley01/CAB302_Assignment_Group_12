@@ -2,6 +2,9 @@ package controlpanel;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.IOException;
 
 public class createBillboards {
     static JInternalFrame window = new JInternalFrame("Create Billboard", false, false, true);
@@ -17,7 +20,7 @@ public class createBillboards {
         JLabel requirements = new JLabel("Requirements");
         requirements.setVerticalTextPosition(JLabel.TOP);
         requirements.setHorizontalTextPosition(JLabel.LEFT);
-        requirements.setFont(new Font("Ariel", Font.BOLD, 20));
+        requirements.setFont(controlPanel.titleFont);
 
 //        Heading - "Title"
         JLabel title = new JLabel("Billboard Title");
@@ -38,26 +41,38 @@ public class createBillboards {
         selectBG.setVerticalTextPosition(JLabel.BOTTOM);
         selectBG.setHorizontalTextPosition(JLabel.LEFT);
 //        Button - Browse
-        JButton imageSelect = new JButton("Browse", new ImageIcon("src\\controlpanel\\browseicon.png"));
+        JButton imageSelect = new JButton("Browse", new ImageIcon("src\\controlpanel\\resources\\browseicon.png"));
         imageSelect.setBounds(100,100,140,40);
-//
+
+        //  Buttons/Label - Colour Picker text and background
+        JButton textColourPickerButton = new JButton("Text Colour");
+        JTextField textDisplayColour = new JTextField();
+        JButton backgroundColourPickerButton = new JButton("Background Colour");
+        JTextField backgroundDisplayColour = new JTextField();
+
 //        Buttons - Save and Preview
-        JButton saveBB = new JButton("Save", new ImageIcon("src\\controlpanel\\save.png"));
+        JButton saveBB = new JButton("Save", new ImageIcon("src\\controlpanel\\resources\\save.png"));
         saveBB.setBounds(100,100,140,40);
 
-        JButton previewBB = new JButton("Preview", new ImageIcon("src\\controlpanel\\preview.png"));
+        JButton previewBB = new JButton("Preview", new ImageIcon("src\\controlpanel\\resources\\preview.png"));
         previewBB.setBounds(100,100,140,40);
 
 //        Add items to GUI
         window.setLayout(new GridLayout(2,1));
         mainHeading.add(requirements);
         window.add(mainHeading);
-        window2.setLayout(new GridLayout(4,2));
         window.add(window2);
+        window2.setLayout(new GridLayout(6,2));
         window2.add(title);
         window2.add(input1);
         window2.add(text);
         window2.add(input2);
+
+        window2.add(textColourPickerButton);
+        window2.add(textDisplayColour);
+        window2.add(backgroundColourPickerButton);
+        window2.add(backgroundDisplayColour);
+
         window2.add(selectBG);
         window2.add(imageSelect);
         window2.add(saveBB);
@@ -68,8 +83,46 @@ public class createBillboards {
 
 //        Preview window - viewer.java
 
+        textColourPickerButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                ColourPicker(textDisplayColour, Color.BLACK);
+            }
+        });
+
+        backgroundColourPickerButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                ColourPicker(backgroundDisplayColour, Color.WHITE);
+            }
+        });
 
 
+
+        saveBB.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String  billboardTitle = input1.getText();
+                String  billboardText = input2.getText();
+                System.out.println(input1.getBackground());
+                try {
+                    controller.createBillboard(billboardTitle, billboardText, billboardTitle, billboardText);
+                } catch (IOException ioException) {
+                    ioException.printStackTrace();
+                }
+
+            }
+        });
         return window;
+    }
+
+    private static void ColourPicker(JComponent component, Color initialColour) {
+        // Colour chooser Pop up window
+        Color color = JColorChooser.showDialog(component,
+                "Select a colour", initialColour);
+
+        // set Background color of the JComponent
+        component.setBackground(color);
+//        System.out.println(component.getBackground()); // Used for getting colour code TEMP CODE
     }
 }
