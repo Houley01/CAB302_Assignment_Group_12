@@ -201,14 +201,14 @@ public class Server {
             }
 
             // Check that the token given to the server matches the token stored in the server
-            if (token == userValues.get(0)) {
+            if (token.equals(userValues.get(0))) {
                 // Current time in milliseconds
                 long currentTime = System.currentTimeMillis();
                 // Expiry time for user
                 long expiry = Long.parseLong(userValues.get(1));
 
                 // Check that the token hasn't expired yet and is still valid
-                if (expiry < currentTime) {
+                if (expiry > currentTime) {
                     System.out.println("Not yet expired");
                     return true;
                 }
