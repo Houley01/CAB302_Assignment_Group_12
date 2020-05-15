@@ -245,6 +245,25 @@ public class controller {
         }
     }
 
+    //      Open Admin Preferences
+    public static void showAdminPreferences() {
+        if(usersPage.adminWindow.isVisible() == true) {
+            usersPage.adminWindow.setVisible(false);
+        } else if (usersPage.adminWindow.isVisible() == false) {
+            usersPage.adminWindow.setVisible(true);
+        }
+    }
+
+    //      Open User Preferences
+    public static void ShowUserPreferences() {
+        if(usersPage.userWindow.isVisible() == true) {
+            usersPage.userWindow.setVisible(false);
+        } else if (usersPage.userWindow.isVisible() == false) {
+            usersPage.userWindow.setVisible(true);
+        }
+    }
+
+
     public static void showHelpScreen() {
         // TEMP FUNC
         System.out.println("HELP INFO");

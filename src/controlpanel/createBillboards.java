@@ -5,6 +5,9 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
+import java.io.File;
+import javax.swing.JFileChooser;
+import javax.swing.filechooser.FileSystemView;
 
 public class createBillboards {
     static JInternalFrame window = new JInternalFrame("Create Billboard", false, false, true);
@@ -77,9 +80,6 @@ public class createBillboards {
         window2.add(imageSelect);
         window2.add(saveBB);
         window2.add(previewBB);
-        
-
-
 
 //        Preview window - viewer.java
 
@@ -97,22 +97,36 @@ public class createBillboards {
             }
         });
 
-
-
         saveBB.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 String  billboardTitle = input1.getText();
                 String  billboardText = input2.getText();
                 System.out.println(input1.getBackground());
-                try {
-                    controller.createBillboard(billboardTitle, billboardText, billboardTitle, billboardText);
-                } catch (IOException ioException) {
-                    ioException.printStackTrace();
-                }
+//                try {
+////                    controller.createBillboard(billboardTitle, billboardText, billboardTitle, billboardText, );
+//                } catch (IOException ioException) {
+//                    ioException.printStackTrace();
+//                }
 
             }
         });
+
+        imageSelect.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JFileChooser browseImage = new JFileChooser((FileSystemView.getFileSystemView().getHomeDirectory()));
+
+                int returnInt = browseImage.showOpenDialog(null);
+                // int returnInt = browseImage.showSaveDialog(null);
+
+                if (returnInt == JFileChooser.APPROVE_OPTION) {
+                    File fileChosen = browseImage.getSelectedFile();
+                    System.out.println(fileChosen.getAbsolutePath());
+                }
+            }
+        });
+
         return window;
     }
 

@@ -18,6 +18,8 @@ public class ControlPanelFrameHandler extends JFrame {
     private JInternalFrame createBillboardWindow = createBillboards.createBillboards();
     private JInternalFrame scheduleBillboardWindow = scheduleBillboards.scheduleBillboards();
     private JInternalFrame userWindow = usersPage.userPage();
+    private JInternalFrame adminEditUser = usersPage.AdminEditUserWindow();
+    private JInternalFrame userEditUser = usersPage.UserEditUserWindow();
 
 
 
@@ -71,6 +73,8 @@ public class ControlPanelFrameHandler extends JFrame {
 
 //        EDIT USER \/
         userWindow.setVisible(false);
+        adminEditUser.setVisible(false);
+        userEditUser.setVisible(true);
 //        EDIT USER /\
 
 //        MASTER DISPLAY
@@ -80,6 +84,8 @@ public class ControlPanelFrameHandler extends JFrame {
         pane.add(createBillboardWindow);
         pane.add(scheduleBillboardWindow);
         pane.add(userWindow);
+        pane.add(adminEditUser);
+        pane.add(userEditUser);
 
 
         getContentPane().add(pane);
