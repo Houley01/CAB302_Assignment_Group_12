@@ -4,6 +4,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 
 
 class login extends JFrame
@@ -59,6 +61,10 @@ class login extends JFrame
                         controller.hideLoginScreen();
                     };
                 } catch (IOException | ClassNotFoundException ex) {
+                    ex.printStackTrace();
+                } catch (InvalidKeySpecException ex) {
+                    ex.printStackTrace();
+                } catch (NoSuchAlgorithmException ex) {
                     ex.printStackTrace();
                 }
             }

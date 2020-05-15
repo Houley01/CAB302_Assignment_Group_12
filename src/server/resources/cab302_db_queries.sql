@@ -8,4 +8,4 @@ ALTER TABLE `billboards` ADD CONSTRAINT `FK_billboards_users` FOREIGN KEY (`user
 ALTER TABLE `schedules` ADD CONSTRAINT `FK_schedules_billboards` FOREIGN KEY (`idBillboard`) REFERENCES `billboards` (`idBillboards`);
 ALTER TABLE `schedules` ADD CONSTRAINT `FK_schedules_users` FOREIGN KEY (`userId`) REFERENCES `users` (`idUsers`);
 ALTER TABLE `users` ADD CONSTRAINT `FK_users_permissions` FOREIGN KEY (`idPermissions`) REFERENCES `permissions` (`idPermissions`) ON UPDATE SET NULL ON DELETE SET NULL;
-INSERT INTO `cab302`.`users` (`idUsers`, `user`, `pass`, `fName`, `lName`) VALUES ('1', 'admin', 'hyrQtJqynYaK/x6jlNN1TfK2fAGFSgrHtnunPBcyW5U=$+Ad0fTMaHoasADhMd5/GqYmaZiLBQWJU5u9LaTQa4l0=', 'John', 'Smith');
+INSERT INTO `cab302`.`users` (`idUsers`, `user`, `pass`, `fName`, `lName`) VALUES ('1', 'admin', 'TNBeZf5SCG+QzxWQt21TxY0orQOFZXUY6S0RHs7/TOA=$MrRy4VfAGiWGVBahO1o0iTTXjLnNhDF+OsX9Sgbzwu0=', 'John', 'Smith');

@@ -1,9 +1,17 @@
 package controlpanel;
 
+import javax.crypto.SecretKey;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
 import javax.swing.*;
 import java.awt.*;
 import java.io.*;
 import java.net.*;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.security.spec.InvalidKeySpecException;
+import java.util.Base64;
 
 public class controller {
 
@@ -84,8 +92,8 @@ public class controller {
      *  Connection to Server Creating and editing billboards
      *
      */
-    static void createBillboard(Socket client, String BillboardName, String text, String background, int userID) throws IOException {
-
+    static void createBillboard(String BillboardName, String text, String background, int userID) throws IOException {
+        Socket client = connectionToServer();
         OutputStream outputStream = client.getOutputStream();
         InputStream inputStream = client.getInputStream();
 
@@ -129,9 +137,11 @@ public class controller {
     /*
      *  Sends the username and password to server
      */
-    static boolean authenticateUserLogin(String username, String password) throws IOException, ClassNotFoundException {
+    static boolean authenticateUserLogin(String username, String password) throws IOException, ClassNotFoundException, InvalidKeySpecException, NoSuchAlgorithmException {
         System.out.println("user: " + username); // Debugging use
         System.out.println("Password: " + password); // Debugging use
+
+        String hashedPassword = plaintextToHashedPassword(password);
 
         Socket client = connectionToServer();
 
@@ -149,7 +159,7 @@ public class controller {
 //        Send the server which function it needs to run
             send.writeUTF("Login");
             send.writeUTF(username);
-            send.writeUTF(password);
+            send.writeUTF(hashedPassword);
             send.flush(); // Must be done before switching to reading state
 
 
@@ -177,6 +187,37 @@ public class controller {
 
         }
         return loginSuccessful;
+    }
+
+    // Returns a hash of the entered password by the user to be sent to the server over the network
+    static String plaintextToHashedPassword(String password) throws InvalidKeySpecException, NoSuchAlgorithmException {
+        String hashedPassword = null;
+        try {
+            // Create MessageDigest instance for MD5
+            MessageDigest md = MessageDigest.getInstance("MD5");
+
+            //Add password bytes to digest
+            md.update(password.getBytes());
+
+            //Get the hash's bytes
+            byte[] bytes = md.digest();
+
+            //This bytes[] has bytes in decimal format;
+            //Convert it to hexadecimal format
+            StringBuilder sb = new StringBuilder();
+            for(int i=0; i< bytes.length ;i++)
+            {
+                sb.append(Integer.toString((bytes[i] & 0xff) + 0x100, 16).substring(1));
+            }
+            //Get complete hashed password in hex format
+            hashedPassword = sb.toString();
+        }
+        catch (NoSuchAlgorithmException e)
+        {
+            e.printStackTrace();
+        }
+
+        return hashedPassword;
     }
 
     public static void getAuthToken() throws IOException, ClassNotFoundException {
