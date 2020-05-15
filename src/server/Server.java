@@ -130,7 +130,7 @@ public class Server {
     }
 
     // Returns a hash of the entered password for a new user
-    private static String plaintextToHashedPassword(String password) throws InvalidKeySpecException, NoSuchAlgorithmException, IOException {
+    public static String plaintextToHashedPassword(String password) throws InvalidKeySpecException, NoSuchAlgorithmException, IOException {
         String hashedPassword = null;
         try {
             // Create MessageDigest instance for MD5
@@ -157,7 +157,12 @@ public class Server {
             e.printStackTrace();
         }
 
-        String hashedPasswordSalted = getSaltedHash(hashedPassword);
+        return hashedPassword;
+    }
+
+    // After a password has been hashed, a salt can be added to it before being stored to the server
+    public static String addSaltToHashedPassword(String password) throws InvalidKeySpecException, NoSuchAlgorithmException, IOException {
+        String hashedPasswordSalted = getSaltedHash(password);
 
         return hashedPasswordSalted;
     }

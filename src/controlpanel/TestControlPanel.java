@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 
-public class ControlPanelTest {
+public class TestControlPanel {
     /*
     * The following test are for testing the Control Panel packages
     */
@@ -76,20 +76,22 @@ public class ControlPanelTest {
      *  assertNotEquals(hashA, hashB);
      * }
      */
+
     // Test user login successfully
-    @Test
-    public void testLogin() throws IOException, ClassNotFoundException, InvalidKeySpecException, NoSuchAlgorithmException {
-        controller.authenticateUserLogin("admintest","password");
-        assertEquals(true, controller.loginSuccessful);
-    }
+//    @Test
+//    public void testLogin() throws IOException, ClassNotFoundException, InvalidKeySpecException, NoSuchAlgorithmException {
+//        controller.authenticateUserLogin("admin","password");
+//        assertEquals(true, controller.loginSuccessful);
+//    }
+//
+//    // Test user login unsuccessfully
+//    @Test
+//    public void testLoginFail() throws IOException, ClassNotFoundException, InvalidKeySpecException, NoSuchAlgorithmException {
+//        controller.authenticateUserLogin("admin","passwofeferd");
+//        assertEquals(false, controller.loginSuccessful);
+//    }
 
-    // Test user login unsuccessfully
-    @Test
-    public void testLoginFail() throws IOException, ClassNotFoundException, InvalidKeySpecException, NoSuchAlgorithmException {
-        controller.authenticateUserLogin("admin","passwofeferd");
-        assertEquals(false, controller.loginSuccessful);
-    }
-
+    // Test password is hashed before sent to server
     @Test
     public void testPasswordHash() throws InvalidKeySpecException, NoSuchAlgorithmException {
         String password = "password";
