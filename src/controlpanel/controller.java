@@ -190,7 +190,7 @@ public class controller {
     }
 
     // Returns a hash of the entered password by the user to be sent to the server over the network
-    private static String plaintextToHashedPassword(String password) throws InvalidKeySpecException, NoSuchAlgorithmException {
+    static String plaintextToHashedPassword(String password) throws InvalidKeySpecException, NoSuchAlgorithmException {
         String hashedPassword = null;
         try {
             // Create MessageDigest instance for MD5
