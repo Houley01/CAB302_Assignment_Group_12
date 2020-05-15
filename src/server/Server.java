@@ -130,7 +130,7 @@ public class Server {
     }
 
     // Returns a hash of the entered password for a new user
-    public static String plaintextToHashedPassword(String password) throws InvalidKeySpecException, NoSuchAlgorithmException, IOException {
+    static String plaintextToHashedPassword(String password) throws InvalidKeySpecException, NoSuchAlgorithmException, IOException {
         String hashedPassword = null;
         try {
             // Create MessageDigest instance for MD5

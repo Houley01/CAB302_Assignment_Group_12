@@ -25,6 +25,7 @@ public class TestServer {
 
     @Test
     public void verifyCredentialsWrongPassword() throws InvalidKeySpecException, NoSuchAlgorithmException, IOException {
+        Server serverTester = new Server();
         String[] userCredentials = {"admin", "TNBeZf5SCG+QzxWQt21TxY0orQOFZXUY6S0RHs7/TOA=$MrRy4VfAGiWGVBahO1o0iTTXjLnNhDF+OsX9Sgbzwu0="};
         String username = "admin";
         String password = "passwordwrong";
@@ -38,6 +39,7 @@ public class TestServer {
 
     @Test
     public void verifyCredentialsWrongUsername() throws InvalidKeySpecException, NoSuchAlgorithmException, IOException {
+        Server serverTester = new Server();
         String[] userCredentials = {"admin", "TNBeZf5SCG+QzxWQt21TxY0orQOFZXUY6S0RHs7/TOA=$MrRy4VfAGiWGVBahO1o0iTTXjLnNhDF+OsX9Sgbzwu0="};
         String username = "adminwrong";
         String password = "password";
@@ -51,6 +53,7 @@ public class TestServer {
 
     @Test
     public void verifyCredentialsWrong() throws InvalidKeySpecException, NoSuchAlgorithmException, IOException {
+        Server serverTester = new Server();
         String[] userCredentials = {"admin", "TNBeZf5SCG+QzxWQt21TxY0orQOFZXUY6S0RHs7/TOA=$MrRy4VfAGiWGVBahO1o0iTTXjLnNhDF+OsX9Sgbzwu0="};
         String username = "adminwrong";
         String password = "passwordwrong";
@@ -111,5 +114,64 @@ public class TestServer {
         serverTester.usersAuthenticated.put(username,new String[] {authToken, expiry});
 
         assertEquals(false, serverTester.checkTokenIsValid(username, authToken));
+    }
+
+
+    // Test confirms that the token was removed after logout
+    @Test
+    public void removeTokenOnLogout() {
+        Server serverTester = new Server();
+
+        String username = "admin";
+        serverTester.generateAuthToken(username);
+
+        // Function to add
+        //serverTester.removeToken(username);
+
+        assertEquals(false, serverTester.usersAuthenticated.containsKey(username));
+    }
+
+    @Test
+    public void editUserFirstNameTest() {
+        String[] userCredentials = {"admin", "TNBeZf5SCG+QzxWQt21TxY0orQOFZXUY6S0RHs7/TOA=$MrRy4VfAGiWGVBahO1o0iTTXjLnNhDF+OsX9Sgbzwu0=", "John", "Smith"};
+        String userToBeEdited = "notAdmin";
+
+        // Function to add
+        //Server.editUserInfo(userToBeEdited);
+
+        assertEquals(true, userCredentials[2].equals("Jack"));
+    }
+
+    @Test
+    public void editUserLastNameTest() {
+        String[] userCredentials = {"admin", "TNBeZf5SCG+QzxWQt21TxY0orQOFZXUY6S0RHs7/TOA=$MrRy4VfAGiWGVBahO1o0iTTXjLnNhDF+OsX9Sgbzwu0=", "John", "Smith"};
+        String userToBeEdited = "notAdmin";
+
+        // Function to add
+        //Server.editUserInfo(userToBeEdited);
+
+        assertEquals(true, userCredentials[3].equals("Smithers"));
+    }
+
+    // edit the billboard text and check it was successfully edited
+    @Test
+    public void editBillboardTextTest() {
+        String[] billboardToEdit = {"1", "testBillboard", "This is the text", "This is the background", "1", "current Time", ""};
+        String newText = "This is the new text";
+
+        // Function to add
+        //Server.editBillboardInfo(billboardToEdit[0], newText);
+        assertEquals(true, billboardToEdit[2].equals(newText));
+    }
+
+    // edit the billboard background and check it was successfully edited
+    @Test
+    public void editBillboardBackgroundTest() {
+        String[] billboardToEdit = {"1", "testBillboard", "This is the text", "This is the background", "1", "current Time", ""};
+        String newBackground = "This is the new background";
+
+        // Function to add
+        //Server.editBillboardInfo(billboardToEdit[0], newBackground);
+        assertEquals(true, billboardToEdit[3].equals(newBackground));
     }
 }
