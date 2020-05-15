@@ -20,7 +20,7 @@ import java.util.Date;
 
 public class Server {
     private static Boolean connectionInitiated;
-    private static HashMap<String, String[]> usersAuthenticated = new HashMap<String, String[]>();
+    static HashMap<String, String[]> usersAuthenticated = new HashMap<String, String[]>();
 
     public static void main(String[] args) throws IOException, SQLException, InvalidKeySpecException, NoSuchAlgorithmException {
 
@@ -197,7 +197,7 @@ public class Server {
         return Base64.getEncoder().encodeToString(key.getEncoded());
     }
 
-    private static String generateAuthToken(String username) {
+    static String generateAuthToken(String username) {
         // Below creates the auth token for the user
         SecureRandom secureRandom = new SecureRandom();
         Base64.Encoder base64Encoder = Base64.getUrlEncoder();
@@ -227,7 +227,7 @@ public class Server {
 
     // Check if the authentication token is still valid and hasn't expired or doesn't match up with what the server has stored for the user
     // This check is to be done when the user does an action that involves the server
-    private static boolean checkTokenIsValid(String username, String token) {
+    static boolean checkTokenIsValid(String username, String token) {
         // Check that a user has been given an auth token
         if(usersAuthenticated.containsKey(username)) {
 

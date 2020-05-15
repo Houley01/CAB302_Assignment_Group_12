@@ -1,6 +1,5 @@
 package server;
 
-import controlpanel.controller;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -61,5 +60,56 @@ public class TestServer {
         String hashedPassword = Server.plaintextToHashedPassword(password);
 
         assertEquals(false, Server.check(hashedPassword, userCredentials[1]));
+    }
+
+    @Test
+    public void verifyToken() {
+        Server serverTester = new Server();
+
+        String username = "admin";
+        String authToken = serverTester.generateAuthToken(username);
+
+        assertEquals(true, serverTester.checkTokenIsValid(username, authToken));
+    }
+
+    @Test
+    public void verifyTokenUserNotAuthenticated() {
+        Server serverTester = new Server();
+
+        String usernameFake = "adminFake";
+        String authToken = serverTester.generateAuthToken("admin");
+
+        assertEquals(false, serverTester.checkTokenIsValid(usernameFake, authToken));
+    }
+
+    @Test
+    public void verifyTokenFake() {
+        Server serverTester = new Server();
+
+        String username = "admin";
+        String authTokenFake = "hi";
+        serverTester.generateAuthToken(username);
+
+        assertEquals(false, serverTester.checkTokenIsValid(username, authTokenFake));
+    }
+
+    @Test
+    public void verifyTokenExpired() {
+        Server serverTester = new Server();
+
+        String username = "admin";
+        String authToken = "x8HpfGwROzSEQOaD2sWTW3wgKq_3d2RB";
+
+        // Current time in milliseconds
+        long currentTime = System.currentTimeMillis();
+
+        // Expiry time of auth token. This will be less than the current time of the time to check for fail
+        long authTokenExpiryTime = currentTime - 1;
+
+        String expiry = String.valueOf(authTokenExpiryTime);
+
+        serverTester.usersAuthenticated.put(username,new String[] {authToken, expiry});
+
+        assertEquals(false, serverTester.checkTokenIsValid(username, authToken));
     }
 }
