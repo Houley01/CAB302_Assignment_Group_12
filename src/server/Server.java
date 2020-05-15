@@ -8,6 +8,7 @@ import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 import java.io.*;
 import java.net.*;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
@@ -128,8 +129,40 @@ public class Server {
 //              DEBUGGING USE /\
     }
 
-    /** Computes a salted PBKDF2 hash of given plaintext password
-     suitable for storing in a database.*/
+    // Returns a hash of the entered password for a new user
+    private static String plaintextToHashedPassword(String password) throws InvalidKeySpecException, NoSuchAlgorithmException, IOException {
+        String hashedPassword = null;
+        try {
+            // Create MessageDigest instance for MD5
+            MessageDigest md = MessageDigest.getInstance("MD5");
+
+            //Add password bytes to digest
+            md.update(password.getBytes());
+
+            //Get the hash's bytes
+            byte[] bytes = md.digest();
+
+            //This bytes[] has bytes in decimal format;
+            //Convert it to hexadecimal format
+            StringBuilder sb = new StringBuilder();
+            for(int i=0; i< bytes.length ;i++)
+            {
+                sb.append(Integer.toString((bytes[i] & 0xff) + 0x100, 16).substring(1));
+            }
+            //Get complete hashed password in hex format
+            hashedPassword = sb.toString();
+        }
+        catch (NoSuchAlgorithmException e)
+        {
+            e.printStackTrace();
+        }
+
+        String hashedPasswordSalted = getSaltedHash(hashedPassword);
+
+        return hashedPasswordSalted;
+    }
+
+    // Creates a salted hash of the hashed password entered from the user that can then be used to store in the database for the user
     public static String getSaltedHash(String password) throws IOException, InvalidKeySpecException, NoSuchAlgorithmException {
         byte[] salt = SecureRandom.getInstance("SHA1PRNG").generateSeed(32);
         // store the salt with the password
@@ -138,8 +171,7 @@ public class Server {
         return Base64.getEncoder().encodeToString(salt) + "$" + hash(password, salt);
     }
 
-    /** Checks whether given plaintext password corresponds
-     to a stored salted hash of the password. */
+    //Checks the hashed password entered by the user corresponds to a stored salted hash of the password
     public static boolean check(String password, String stored) throws IOException, InvalidKeySpecException, NoSuchAlgorithmException {
         String[] saltAndHash = stored.split("\\$");
         if (saltAndHash.length != 2) {
@@ -150,6 +182,7 @@ public class Server {
         return hashOfInput.equals(saltAndHash[1]);
     }
 
+    // Returns a hash to check for hash comparison of the users entered password and the one stored in the database
     private static String hash(String password, byte[] salt) throws InvalidKeySpecException, NoSuchAlgorithmException {
         if (password == null || password.length() == 0)
             throw new IllegalArgumentException("Empty passwords are not supported.");
