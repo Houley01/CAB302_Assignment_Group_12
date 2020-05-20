@@ -20,6 +20,7 @@ public class ControlPanelFrameHandler extends JFrame {
     private JInternalFrame userWindow = usersPage.userPage();
     private JInternalFrame adminEditUser = usersPage.AdminEditUserWindow();
     private JInternalFrame userEditUser = usersPage.UserEditUserWindow();
+//    private JInternalFrame helpWindow =
 
 
 
@@ -55,6 +56,10 @@ public class ControlPanelFrameHandler extends JFrame {
 
 //       // JInternalFrame List
 
+//        HELP \/
+//        helpWindow.setVisible(false);
+//        Help /\
+
 ////        LOGIN Section \/
         logWindow.setVisible(true);
 ////        LOGIN Section /\
@@ -74,12 +79,13 @@ public class ControlPanelFrameHandler extends JFrame {
 //        EDIT USER \/
         userWindow.setVisible(false);
         adminEditUser.setVisible(false);
-        userEditUser.setVisible(true);
+        userEditUser.setVisible(false);
 //        EDIT USER /\
 
 //        MASTER DISPLAY
 //        Add to the master window
         pane.add(logWindow);
+//        pane.add(helpWindow);
         pane.add(listBillboardWindow);
         pane.add(createBillboardWindow);
         pane.add(scheduleBillboardWindow);

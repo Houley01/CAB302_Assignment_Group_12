@@ -32,6 +32,37 @@ public class usersPage {
             }
         });
 
+//        Heading - "Administrative User Settings"
+        JLabel editAdmin = new JLabel("Administrative User Settings");
+        editAdmin.setVerticalTextPosition(JLabel.TOP);
+        editAdmin.setHorizontalTextPosition(JLabel.LEFT);
+        editAdmin.setFont(controlPanel.titleFont);
+
+//        Heading - "Change Password"
+        JLabel adminPassword = new JLabel("Change Password");
+        adminPassword.setVerticalTextPosition(JLabel.TOP);
+        adminPassword.setHorizontalTextPosition(JLabel.LEFT);
+
+//        Heading - "User Permissions"
+        JLabel userPermission = new JLabel("User Permissions");
+        userPermission.setVerticalTextPosition(JLabel.TOP);
+        userPermission.setHorizontalTextPosition(JLabel.LEFT);
+
+//        Heading - "Edit User Details"
+        JLabel editUserDetails = new JLabel("Edit User Details");
+        editUserDetails.setVerticalTextPosition(JLabel.TOP);
+        editUserDetails.setHorizontalTextPosition(JLabel.LEFT);
+
+//        Heading - "Create User"
+        JLabel createUser = new JLabel("Create New User");
+        createUser.setVerticalTextPosition(JLabel.TOP);
+        createUser.setHorizontalTextPosition(JLabel.LEFT);
+
+//        Heading - "Delete User"
+        JLabel deleteUser = new JLabel("Delete a User");
+        deleteUser.setVerticalTextPosition(JLabel.TOP);
+        deleteUser.setHorizontalTextPosition(JLabel.LEFT);
+
 //      Button - Regular User
         JButton userRegular = new JButton("Regular User", new ImageIcon("src\\controlpanel\\resources\\user.png"));
         userRegular.setBounds(100,100,140,40);
@@ -43,6 +74,18 @@ public class usersPage {
             }
         });
 
+//        Heading - "User Settings"
+        JLabel editUser = new JLabel("User Settings");
+        editUser.setVerticalTextPosition(JLabel.TOP);
+        editUser.setHorizontalTextPosition(JLabel.LEFT);
+        editUser.setFont(controlPanel.titleFont);
+
+        //        Heading - "Change Password"
+        JLabel userPassword = new JLabel("Change Password");
+        userPassword.setVerticalTextPosition(JLabel.TOP);
+        userPassword.setHorizontalTextPosition(JLabel.LEFT);
+
+
 //        Add items to GUI
         window.setLayout(new GridLayout(2,1));
         mainHeading.add(editAccount);
@@ -51,6 +94,16 @@ public class usersPage {
         window2.setLayout(new GridLayout(1,2));
         window2.add(userAdmin);
         window2.add(userRegular);
+        adminWindow.setLayout(new GridLayout(6,2));
+        adminWindow.add(editAdmin);
+        adminWindow.add(adminPassword);
+        adminWindow.add(userPermission);
+        adminWindow.add(editUserDetails);
+        adminWindow.add(createUser);
+        adminWindow.add(deleteUser);
+        userWindow.setLayout(new GridLayout(2, 2));
+        userWindow.add(editUser);
+        userWindow.add(userPassword);
 
         return window;
     }
@@ -60,10 +113,11 @@ public class usersPage {
         adminWindow.setSize(300,400);
         // INSERT CONTENT HERE
 
+
         return adminWindow;
     }
 
-    static JInternalFrame userWindow = new JInternalFrame( "user Preferences", false, false, true);
+    static JInternalFrame userWindow = new JInternalFrame( "User Preferences", false, false, true);
 
     public static JInternalFrame UserEditUserWindow() {
         userWindow.setSize(300,400);
