@@ -100,11 +100,28 @@ public class createBillboards {
         saveBB.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String  billboardTitle = input1.getText();
-                String  billboardText = input2.getText();
-                System.out.println(input1.getBackground());
+                String billboardTitle = input1.getText();
+                String billboardText = input2.getText();
+//                String textColour1 = String.valueOf(textDisplayColour.getBackground().getGreen());
+//                String textColour = String.valueOf(textDisplayColour.getBackground());
+//                System.out.println(textColour);
+//                System.out.println(textColour1);
+
+                System.out.println(RGBToHex(textDisplayColour.getBackground()));
+
+//                String backgroundColour = textDisplayColour.getBackground();
+//                if ((urlTextfield.getText() == null) && (fileLocation == null) ) {
+//
+//                }
+                int urlOrImage = -1;
+//                if (urlTextfield.getText() == null) {
+//                    String image = urlTextfield.getText();
+//                } else if (fileChoosen != null ) {
+//                    String image = controller.createMD5(fileLocation);
+//                }
+
 //                try {
-////                    controller.createBillboard(billboardTitle, billboardText, billboardTitle, billboardText, );
+//                    controller.createBillboard(billboardTitle, billboardText, textColour, backgroundColour, urlOrImage, "");
 //                } catch (IOException ioException) {
 //                    ioException.printStackTrace();
 //                }
@@ -139,4 +156,35 @@ public class createBillboards {
         component.setBackground(color);
 //        System.out.println(component.getBackground()); // Used for getting colour code TEMP CODE
     }
+
+    private static String RGBToHex(Color RGB) {
+        String hex = "";
+        String temp, red, green, blue;
+
+//        Red
+        temp = Integer.toHexString(RGB.getRed());
+        if (temp.length() < 2) {
+            red = "0" + temp;
+        } else {
+            red = temp;
+        }
+
+//        Green
+        temp = Integer.toHexString(RGB.getGreen());
+        if (temp.length() < 2) {
+            green = "0" + temp;
+        } else {
+            green = temp;
+        }
+
+//        Blue
+        temp = Integer.toHexString(RGB.getBlue());
+        if (temp.length() < 2) {
+            blue = "0" + temp;
+        } else {
+            blue = temp;
+        }
+        return red+green+blue;
+    }
+
 }

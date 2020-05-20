@@ -22,7 +22,7 @@ public class Server {
     private static Boolean connectionInitiated;
     static HashMap<String, String[]> usersAuthenticated = new HashMap<String, String[]>();
 
-    public static void main(String[] args) throws IOException, SQLException, InvalidKeySpecException, NoSuchAlgorithmException {
+    public static void main(String[] args) throws IOException, SQLException, InvalidKeySpecException, NoSuchAlgorithmException, ClassNotFoundException {
 
         // Gathers the information from server.config file
         resources.GetPropertyValues properties = new resources.GetPropertyValues();
@@ -63,7 +63,8 @@ public class Server {
                 }
                 // Create Billboard Information
                 if (request.equals( "CreateBillboards")) {
-
+                    CreateBillboards(receiver, send);
+                    send.flush();
                 }
                 // Schedule Billboards
                 if (request.equals("ScheduleBillboards")) {
@@ -75,7 +76,15 @@ public class Server {
                 }
                 // List Billboards
                 if (request.equals("EditUser")) {
+                    System.out.println("EDIT USER");
+//                    for admin use
+                    String check = receiver.readUTF();
+                    if (check == "findUsername") {
+                        System.out.println("findUsername");
 
+//                        send.writeObject(getAllUsernames());
+//                        send.flush();
+                    }
                 }
                 // Viewer Request Billboards
                 if (request.equals("ViewerRequest")) {
@@ -260,4 +269,51 @@ public class Server {
             return false;
         }
     }
+
+    //    NOTE:: STILL WORKING ON THIS
+    private static Object getAllUsernames() throws SQLException {
+        Object data = new Object();
+        String query = "SELECT `user` FROM `users`";
+
+        Statement st = ServerInit.conn.createStatement();
+        st.executeQuery("USE `cab302`;");
+        ResultSet rs = st.executeQuery(query);
+        // If no user are found in database
+        if (!rs.isBeforeFirst()) {
+            System.out.println("No user in database"); // Debug use
+//            return "No User in database";
+        } else {
+            int i = 1;
+            while (rs.next())
+                System.out.println(rs.getString(i));
+            data += rs.getString(i) + ",";
+            i++;
+
+        }
+        return data;
+    }
+
+    // NOTE:: NOT FINISHED YET
+    private static void CreateBillboards(ObjectInputStream receiver, ObjectOutputStream send) throws IOException, ClassNotFoundException {
+        String username = receiver.readUTF();
+        String token = receiver.readUTF();
+        if (checkTokenIsValid(username, token)) {
+            System.out.println("true");
+            send.write(1);
+            send.flush();
+            String billboardName = receiver.readUTF();
+            String billboardText = receiver.readUTF();
+            String billboardTextColour = receiver.readUTF();
+            String billboardBackgroundColour = receiver.readUTF();
+            System.out.println(billboardName + ", "+ billboardText + ", " + billboardTextColour + ", " + billboardBackgroundColour);
+//      INSERT SQL STATEMENT HERE
+            send.writeUTF("Finished creating Billboard");
+        } else {
+            send.writeInt(0);
+            System.out.println("false");
+        }
+        send.flush();
+
+    }
+
 }

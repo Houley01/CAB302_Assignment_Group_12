@@ -44,55 +44,14 @@ public class controller {
         }
     }
 
-//    /*
-//     *  Connection to Server Login
-//     *  @para user == username
-//     *  @para password is an array of Char values
-//     */
-//    static void authenticateUserLogin(Socket client, String username, String password) throws IOException {
-//            OutputStream outputStream = client.getOutputStream();
-//
-//            System.out.println(outputStream);
-//
-//            InputStream inputStream = client.getInputStream();
-//
-//            ObjectOutputStream send = new ObjectOutputStream(outputStream);
-//            ObjectInputStream receiver = new ObjectInputStream(inputStream);
-//
-////        Send the server which function it needs to run
-//            send.writeUTF("Login");
-//            send.writeUTF(username);
-//            send.writeUTF(password);
-//            send.flush(); // Must be done before switching to reading state
-//
-//
-//            // If the server send back a true or false message decides what to do.
-//            if (receiver.readBoolean() == true) {
-//                System.out.println("correct username and password"); // DEBUG CODE
-//                DialogWindow.showInformationPane("Successful Login", "Success");
-//                loginSuccessful = true;
-//                ControlPanelFrameHandler.billboardFrame(true);
-//                ControlPanelFrameHandler.loginFrame(false);
-//            } else {
-//                // Alert the user that they have incorrectly entered they username or password with
-//                // a pop up window.
-//                System.out.println("wrong username or password"); // DEBUG CODE
-//                // IMPLEMENT AN ERROR MESSAGE FOR USER
-//                DialogWindow.showErrorPane("Incorrect Login Information", "Error");
-//                loginSuccessful = false;
-//            }
-//
-////      End connections
-//            send.close();
-//            receiver.close();
-//            client.close();
-//    }
 
     /*
      *  Connection to Server Creating and editing billboards
+     *  @parm urlOrImage (-1 == none), (0 == url), (1 == image)
      *
      */
-    static void createBillboard(String BillboardName, String text, String background, int userID) throws IOException {
+    static void createBillboard(String billboardName, String text, String textColour, String backgroundColour, int urlOrImage, String image) throws IOException {
+
         Socket client = connectionToServer();
         OutputStream outputStream = client.getOutputStream();
         InputStream inputStream = client.getInputStream();
@@ -100,11 +59,33 @@ public class controller {
         ObjectOutputStream send = new ObjectOutputStream(outputStream);
         ObjectInputStream receiver = new ObjectInputStream(inputStream);
 
-//        send.writeUTF("Hello");
-//
-//        send.flush(); // Must be done before switching to reading state
-//        System.out.println(receiver.readUTF());
 
+        send.writeUTF("CreateBillboards");
+        send.flush();
+
+        send.writeUTF(loggedInUser);
+        send.writeUTF(token);
+        send.writeInt(urlOrImage);
+        if (urlOrImage != -1 ) {
+            if (urlOrImage == 1) {
+                image = CreateMD5(image);
+            }
+            send.writeUTF(image);
+        }
+        send.flush();
+
+        int val = receiver.read();
+        if (val == 1) {
+            send.writeUTF(billboardName);
+            send.writeUTF(text);
+            send.writeUTF(textColour);
+            send.writeUTF(backgroundColour);
+//
+            send.flush(); // Must be done before switching to reading state
+            System.out.println(receiver.readUTF());
+        } else {
+
+        }
 //      End connections
         send.close();
         receiver.close();
@@ -149,8 +130,6 @@ public class controller {
             // connects to the server with information and attempts to authenticate the user
 
             OutputStream outputStream = client.getOutputStream();
-
-
             InputStream inputStream = client.getInputStream();
 
             ObjectOutputStream send = new ObjectOutputStream(outputStream);
@@ -227,8 +206,6 @@ public class controller {
         if (client.isConnected()) {
 
             OutputStream outputStream = client.getOutputStream();
-
-
             InputStream inputStream = client.getInputStream();
 
             ObjectOutputStream send = new ObjectOutputStream(outputStream);
@@ -313,6 +290,22 @@ public class controller {
         // } else if (helpScreen.window.isVisible() == false) {
         //     helpScreen.window.setVisible(true);
         // }
+    }
+
+    public static String CreateMD5(String imagePath) {
+        String base64Image = "";
+        File file = new File(imagePath);
+        try (FileInputStream imageInFile = new FileInputStream(file)) {
+            // Reading a Image file from file system
+            byte imageData[] = new byte[(int) file.length()];
+            imageInFile.read(imageData);
+            base64Image = Base64.getEncoder().encodeToString(imageData);
+        } catch (FileNotFoundException e) {
+            System.out.println("Image not found" + e);
+        } catch (IOException ioe) {
+            System.out.println("Exception while reading the Image " + ioe);
+        }
+        return base64Image;
     }
 
     public static void logout() {

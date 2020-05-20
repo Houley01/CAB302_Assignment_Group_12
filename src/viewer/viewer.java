@@ -161,6 +161,6 @@ public class viewer{
     }
 
         public static void main(String[] args) throws IOException {
-        SetupScreen(xmlReader("C:/Users/harry/Desktop/12.xml"));
+        SetupScreen(xmlReader("billboardsExamples/12.xml"));
     }
 }
