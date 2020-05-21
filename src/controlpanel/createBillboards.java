@@ -11,6 +11,7 @@ import javax.swing.filechooser.FileSystemView;
 
 public class createBillboards {
     static JInternalFrame window = new JInternalFrame("Create Billboard", false, false, true);
+    static File fileChosen;
     public static JInternalFrame createBillboards() {
         JPanel mainHeading = new JPanel();
         JPanel window2 = new JPanel();
@@ -38,6 +39,7 @@ public class createBillboards {
 //        Text Box
         JTextField input2 = new JTextField();
 
+
 //        Heading - "Select Background Image"
         JLabel selectBG = new JLabel("Select Background Image");
         selectBG.setVerticalTextPosition(JLabel.BOTTOM);
@@ -49,8 +51,10 @@ public class createBillboards {
         //  Buttons/Label - Colour Picker text and background
         JButton textColourPickerButton = new JButton("Text Colour");
         JTextField textDisplayColour = new JTextField();
+        textDisplayColour.setBackground(Color.BLACK);
         JButton backgroundColourPickerButton = new JButton("Background Colour");
         JTextField backgroundDisplayColour = new JTextField();
+        backgroundDisplayColour.setBackground(Color.WHITE);
 
         // URL/Text Box
         JLabel linkURL = new JLabel("Image URL");
@@ -107,29 +111,15 @@ public class createBillboards {
             public void actionPerformed(ActionEvent e) {
                 String billboardTitle = input1.getText();
                 String billboardText = input2.getText();
-//                String textColour1 = String.valueOf(textDisplayColour.getBackground().getGreen());
-//                String textColour = String.valueOf(textDisplayColour.getBackground());
-//                System.out.println(textColour);
-//                System.out.println(textColour1);
+                String textColour = RGBToHex(textDisplayColour.getBackground());
+                String backgroundColour = RGBToHex(backgroundColourPickerButton.getBackground());
+                String imageUrl = imageURL.getText();
 
-                System.out.println(RGBToHex(textDisplayColour.getBackground()));
-
-//                String backgroundColour = textDisplayColour.getBackground();
-//                if ((urlTextfield.getText() == null) && (fileLocation == null) ) {
-//
-//                }
-                int urlOrImage = -1;
-//                if (urlTextfield.getText() == null) {
-//                    String image = urlTextfield.getText();
-//                } else if (fileChoosen != null ) {
-//                    String image = controller.createMD5(fileLocation);
-//                }
-
-//                try {
-//                    controller.createBillboard(billboardTitle, billboardText, textColour, backgroundColour, urlOrImage, "");
-//                } catch (IOException ioException) {
-//                    ioException.printStackTrace();
-//                }
+                try {
+                    controller.createBillboard( billboardTitle,billboardText, textColour, backgroundColour, fileChosen, imageUrl);
+                } catch (IOException ioException) {
+                    ioException.printStackTrace();
+                }
 
             }
         });
@@ -143,7 +133,7 @@ public class createBillboards {
                 // int returnInt = browseImage.showSaveDialog(null);
 
                 if (returnInt == JFileChooser.APPROVE_OPTION) {
-                    File fileChosen = browseImage.getSelectedFile();
+                    fileChosen = browseImage.getSelectedFile();
                     System.out.println(fileChosen.getAbsolutePath());
                 }
             }
@@ -163,9 +153,7 @@ public class createBillboards {
     }
 
     private static String RGBToHex(Color RGB) {
-        String hex = "";
         String temp, red, green, blue;
-
 //        Red
         temp = Integer.toHexString(RGB.getRed());
         if (temp.length() < 2) {

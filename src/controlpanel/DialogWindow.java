@@ -30,7 +30,7 @@ public class DialogWindow {
     // Admin Password
     static void showPasswordSettings() {
         JFrame editPassword = new JFrame();
-        Object changePassword = JOptionPane.showInputDialog(editPassword, "Change your password:", JOptionPane.QUESTION_MESSAGE);
+        Object changePassword = JOptionPane.showInputDialog(editPassword, "Change your password:");
         System.out.println(changePassword);
     }
 //        JOptionPane pane = new JOptionPane("Please Change Password", JOptionPane.WA);
