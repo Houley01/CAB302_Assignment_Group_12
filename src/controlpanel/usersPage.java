@@ -1,6 +1,9 @@
 package controlpanel;
 
+import com.sun.source.tree.PackageTree;
+
 import javax.swing.*;
+import javax.xml.stream.FactoryConfigurationError;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -14,7 +17,7 @@ public class usersPage {
         window2.setSize(300, 150);
         window.setLocation((controlPanel.WINDOWWIDTH/2) - 300, (controlPanel.WINDOWHEIGHT/2) - 200);
 
-//        Heading - "Edit Account Information"
+//      Main Heading - "Edit Account Information"
         JLabel editAccount = new JLabel("Edit Account Information");
         editAccount.setVerticalTextPosition(JLabel.TOP);
         editAccount.setHorizontalTextPosition(JLabel.LEFT);
@@ -43,7 +46,6 @@ public class usersPage {
             }
         });
 
-
 //        Add items to GUI
         window.setLayout(new GridLayout(2,1));
         mainHeading.add(editAccount);
@@ -62,67 +64,92 @@ public class usersPage {
         // INSERT CONTENT HERE
 
         //        Heading - "Administrative User Settings"
+        JPanel mainHeading = new JPanel();
         JLabel editAdmin = new JLabel("Administrative User Settings");
         editAdmin.setVerticalTextPosition(JLabel.TOP);
         editAdmin.setHorizontalTextPosition(JLabel.LEFT);
         editAdmin.setFont(controlPanel.titleFont);
 
+        mainHeading.add(editAdmin);
+
+        JPanel adminSettings = new JPanel();
+
 //        Heading - "Change Password"
-        JLabel adminPassword = new JLabel("Change Password");
-        adminPassword.setVerticalTextPosition(JLabel.TOP);
-        adminPassword.setHorizontalTextPosition(JLabel.LEFT);
+        JButton adminPassword = new JButton("Change Password");
+        adminPassword.setBounds(100,100,140,40);
+        adminPassword.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                DialogWindow.showPasswordSettings();
+            }
+        });
 
 //        Heading - "User Permissions"
-        JLabel userPermission = new JLabel("User Permissions");
-        userPermission.setVerticalTextPosition(JLabel.TOP);
-        userPermission.setHorizontalTextPosition(JLabel.LEFT);
+        JButton userPermission = new JButton("User Permissions");
+        userPermission.setBounds(100,100,140,40);
+        userPermission.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                DialogWindow.showUserPermissions();
+            }
+        });
 
 //        Heading - "Edit User Details"
-        JLabel editUserDetails = new JLabel("Edit User Details");
-        editUserDetails.setVerticalTextPosition(JLabel.TOP);
-        editUserDetails.setHorizontalTextPosition(JLabel.LEFT);
+        JButton editUserDetails = new JButton("Edit User Details");
+        editUserDetails.setBounds(100,100,140,40);
 
 //        Heading - "Create User"
-        JLabel createUser = new JLabel("Create New User");
-        createUser.setVerticalTextPosition(JLabel.TOP);
-        createUser.setHorizontalTextPosition(JLabel.LEFT);
+        JButton createUser = new JButton("Create New User");
+        createUser.setBounds(100,100,140,40);
 
 //        Heading - "Delete User"
-        JLabel deleteUser = new JLabel("Delete a User");
-        deleteUser.setVerticalTextPosition(JLabel.TOP);
-        deleteUser.setHorizontalTextPosition(JLabel.LEFT);
+        JButton deleteUser = new JButton("Delete a User");
+        deleteUser.setBounds(100,100,140,40);
 
-        adminWindow.setLayout(new GridLayout(6,2));
+        adminWindow.setLayout(new GridLayout(2,1));
         adminWindow.add(editAdmin);
-        adminWindow.add(adminPassword);
-        adminWindow.add(userPermission);
-        adminWindow.add(editUserDetails);
-        adminWindow.add(createUser);
-        adminWindow.add(deleteUser);
+        adminWindow.add(adminSettings);
+        adminSettings.setLayout(new GridLayout(6,2));
+        adminSettings.add(adminPassword);
+        adminSettings.add(userPermission);
+        adminSettings.add(editUserDetails);
+        adminSettings.add(createUser);
+        adminSettings.add(deleteUser);
 
         return adminWindow;
     }
 
     static JInternalFrame userWindow = new JInternalFrame( "User Preferences", false, false, true);
-
     public static JInternalFrame UserEditUserWindow() {
-        userWindow.setSize(300,400);
+        userWindow.setSize(400,125);
         // INSERT CONTENT HERE
 
         //        Heading - "User Settings"
+        JPanel mainHeading = new JPanel();
         JLabel editUser = new JLabel("User Settings");
         editUser.setVerticalTextPosition(JLabel.TOP);
         editUser.setHorizontalTextPosition(JLabel.LEFT);
         editUser.setFont(controlPanel.titleFont);
 
+        mainHeading.add(editUser);
+
+        JPanel userSettings = new JPanel();
+
         //        Heading - "Change Password"
         JLabel userPassword = new JLabel("Change Password");
         userPassword.setVerticalTextPosition(JLabel.TOP);
         userPassword.setHorizontalTextPosition(JLabel.LEFT);
+        JTextField newPassword = new JTextField();
+        JButton saveChanges = new JButton("Save");
+        JButton cancelChanges = new JButton("Cancel");
 
         userWindow.setLayout(new GridLayout(2, 2));
         userWindow.add(editUser);
-        userWindow.add(userPassword);
+        userWindow.add(userSettings);
+        userSettings.setLayout(new GridLayout(2,2));
+        userSettings.add(userPassword);
+        userSettings.add(newPassword);
+        userSettings.add(saveChanges);
 
         return userWindow;
     }

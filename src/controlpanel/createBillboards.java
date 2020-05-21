@@ -17,7 +17,6 @@ public class createBillboards {
         window.setSize(600, 300);
         window2.setSize(300, 150);
         window.setLocation((controlPanel.WINDOWWIDTH/2) - 300, (controlPanel.WINDOWHEIGHT/2) - 200);
-//        window.setLayout(new GridLayout(3,2));
 
 //        Heading - "Requirements"
         JLabel requirements = new JLabel("Requirements");
