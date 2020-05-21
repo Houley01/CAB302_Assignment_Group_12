@@ -47,10 +47,10 @@ public class controller {
 
     /*
      *  Connection to Server Creating and editing billboards
-     *  @parm urlOrImage (-1 == none), (0 == url), (1 == image)
+     *
      *
      */
-    static void createBillboard(String billboardName, String text, String textColour, String backgroundColour, int urlOrImage, String image) throws IOException {
+    static void createBillboard(String billboardName, String text, String textColour, String backgroundColour, File fileChosen, String imageUrl) throws IOException {
 
         Socket client = connectionToServer();
         OutputStream outputStream = client.getOutputStream();
@@ -65,14 +65,9 @@ public class controller {
 
         send.writeUTF(loggedInUser);
         send.writeUTF(token);
-        send.writeInt(urlOrImage);
-        if (urlOrImage != -1 ) {
-            if (urlOrImage == 1) {
-                image = CreateMD5(image);
-            }
-            send.writeUTF(image);
-        }
         send.flush();
+
+
 
         int val = receiver.read();
         if (val == 1) {
@@ -80,11 +75,24 @@ public class controller {
             send.writeUTF(text);
             send.writeUTF(textColour);
             send.writeUTF(backgroundColour);
-//
+            System.out.println("file Chosen or URL");
+
+//                If the file is picked create MD5 version then send
+            if (fileChosen != null) {
+                send.writeUTF(CreateMD5(fileChosen));
+                System.out.println("FIle picked");
+//              Else if the image Url has text send the url
+            } else if (imageUrl.compareTo("") == -1 || imageUrl.compareTo("") == 1 ) {
+                send.writeUTF(imageUrl);
+                System.out.println("URL picked");
+            } else {
+                send.writeUTF("No Image");
+            }
             send.flush(); // Must be done before switching to reading state
             System.out.println(receiver.readUTF());
         } else {
-
+            DialogWindow.showErrorPane("Sorry you don't have permission to edit", "Error Can't Make Billboard");
+            send.flush();
         }
 //      End connections
         send.close();
@@ -290,9 +298,8 @@ public class controller {
          }
     }
 
-    public static String CreateMD5(String imagePath) {
+    public static String CreateMD5(File file) {
         String base64Image = "";
-        File file = new File(imagePath);
         try (FileInputStream imageInFile = new FileInputStream(file)) {
             // Reading a Image file from file system
             byte imageData[] = new byte[(int) file.length()];

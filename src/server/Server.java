@@ -301,11 +301,14 @@ public class Server {
             System.out.println("true");
             send.write(1);
             send.flush();
+
             String billboardName = receiver.readUTF();
             String billboardText = receiver.readUTF();
             String billboardTextColour = receiver.readUTF();
             String billboardBackgroundColour = receiver.readUTF();
-            System.out.println(billboardName + ", "+ billboardText + ", " + billboardTextColour + ", " + billboardBackgroundColour);
+            String billboardImage = receiver.readUTF();
+            System.out.println(billboardName + ", " + billboardText + ", " + billboardTextColour + ", " + billboardBackgroundColour + ", Image: " + billboardImage);
+//      CREATE XML FILE HERE CreateXMLFile(billboardName, billboardText, billboardTextColour, billboardBackgroundColour, billboardImage)
 //      INSERT SQL STATEMENT HERE
             send.writeUTF("Finished creating Billboard");
         } else {
