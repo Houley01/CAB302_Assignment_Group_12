@@ -13,7 +13,6 @@ public class usersPage {
         window.setSize(600, 300);
         window2.setSize(300, 150);
         window.setLocation((controlPanel.WINDOWWIDTH/2) - 300, (controlPanel.WINDOWHEIGHT/2) - 200);
-//        window.setLayout(new GridLayout(3,2));
 
 //        Heading - "Edit Account Information"
         JLabel editAccount = new JLabel("Edit Account Information");
@@ -32,7 +31,37 @@ public class usersPage {
             }
         });
 
-//        Heading - "Administrative User Settings"
+
+//      Button - Regular User
+        JButton userRegular = new JButton("Regular User", new ImageIcon("src\\controlpanel\\resources\\user.png"));
+        userRegular.setBounds(100,100,140,40);
+
+        userRegular.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                controller.ShowUserPreferences();
+            }
+        });
+
+
+//        Add items to GUI
+        window.setLayout(new GridLayout(2,1));
+        mainHeading.add(editAccount);
+        window.add(mainHeading);
+        window.add(window2);
+        window2.setLayout(new GridLayout(1,2));
+        window2.add(userAdmin);
+        window2.add(userRegular);
+
+        return window;
+    }
+
+    static JInternalFrame adminWindow = new JInternalFrame( "Admin Preferences", false, false, true);
+    public static JInternalFrame AdminEditUserWindow() {
+        adminWindow.setSize(300,400);
+        // INSERT CONTENT HERE
+
+        //        Heading - "Administrative User Settings"
         JLabel editAdmin = new JLabel("Administrative User Settings");
         editAdmin.setVerticalTextPosition(JLabel.TOP);
         editAdmin.setHorizontalTextPosition(JLabel.LEFT);
@@ -63,37 +92,6 @@ public class usersPage {
         deleteUser.setVerticalTextPosition(JLabel.TOP);
         deleteUser.setHorizontalTextPosition(JLabel.LEFT);
 
-//      Button - Regular User
-        JButton userRegular = new JButton("Regular User", new ImageIcon("src\\controlpanel\\resources\\user.png"));
-        userRegular.setBounds(100,100,140,40);
-
-        userRegular.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                controller.ShowUserPreferences();
-            }
-        });
-
-//        Heading - "User Settings"
-        JLabel editUser = new JLabel("User Settings");
-        editUser.setVerticalTextPosition(JLabel.TOP);
-        editUser.setHorizontalTextPosition(JLabel.LEFT);
-        editUser.setFont(controlPanel.titleFont);
-
-        //        Heading - "Change Password"
-        JLabel userPassword = new JLabel("Change Password");
-        userPassword.setVerticalTextPosition(JLabel.TOP);
-        userPassword.setHorizontalTextPosition(JLabel.LEFT);
-
-
-//        Add items to GUI
-        window.setLayout(new GridLayout(2,1));
-        mainHeading.add(editAccount);
-        window.add(mainHeading);
-        window.add(window2);
-        window2.setLayout(new GridLayout(1,2));
-        window2.add(userAdmin);
-        window2.add(userRegular);
         adminWindow.setLayout(new GridLayout(6,2));
         adminWindow.add(editAdmin);
         adminWindow.add(adminPassword);
@@ -101,18 +99,6 @@ public class usersPage {
         adminWindow.add(editUserDetails);
         adminWindow.add(createUser);
         adminWindow.add(deleteUser);
-        userWindow.setLayout(new GridLayout(2, 2));
-        userWindow.add(editUser);
-        userWindow.add(userPassword);
-
-        return window;
-    }
-
-    static JInternalFrame adminWindow = new JInternalFrame( "Admin Preferences", false, false, true);
-    public static JInternalFrame AdminEditUserWindow() {
-        adminWindow.setSize(300,400);
-        // INSERT CONTENT HERE
-
 
         return adminWindow;
     }
@@ -123,6 +109,23 @@ public class usersPage {
         userWindow.setSize(300,400);
         // INSERT CONTENT HERE
 
+        //        Heading - "User Settings"
+        JLabel editUser = new JLabel("User Settings");
+        editUser.setVerticalTextPosition(JLabel.TOP);
+        editUser.setHorizontalTextPosition(JLabel.LEFT);
+        editUser.setFont(controlPanel.titleFont);
+
+        //        Heading - "Change Password"
+        JLabel userPassword = new JLabel("Change Password");
+        userPassword.setVerticalTextPosition(JLabel.TOP);
+        userPassword.setHorizontalTextPosition(JLabel.LEFT);
+
+        userWindow.setLayout(new GridLayout(2, 2));
+        userWindow.add(editUser);
+        userWindow.add(userPassword);
+
         return userWindow;
     }
+
+
 }

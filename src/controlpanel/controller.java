@@ -281,15 +281,13 @@ public class controller {
         }
     }
 
-
     public static void showHelpScreen() {
-        // TEMP FUNC
-        System.out.println("HELP INFO");
-        // if (helpScreen.window.isVisible() == true) {
-        //     helpScreen.window.setVisible(false);
-        // } else if (helpScreen.window.isVisible() == false) {
-        //     helpScreen.window.setVisible(true);
-        // }
+//        System.out.println("HELP INFO");
+         if (HelpPage.window.isVisible() == true) {
+             HelpPage.window.setVisible(false);
+         } else if (HelpPage.window.isVisible() == false) {
+             HelpPage.window.setVisible(true);
+         }
     }
 
     public static String CreateMD5(String imagePath) {

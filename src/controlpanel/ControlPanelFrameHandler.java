@@ -20,14 +20,11 @@ public class ControlPanelFrameHandler extends JFrame {
     private JInternalFrame userWindow = usersPage.userPage();
     private JInternalFrame adminEditUser = usersPage.AdminEditUserWindow();
     private JInternalFrame userEditUser = usersPage.UserEditUserWindow();
-//    private JInternalFrame helpWindow =
-
-
+    private JInternalFrame helpWindow = HelpPage.HelpPage();
 
     public ControlPanelFrameHandler() throws IOException {
         super("Control Panel");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-
 
 //      Master Frame Content
         JButton menuItemCreate = new JButton("Create Billboards");
@@ -55,10 +52,6 @@ public class ControlPanelFrameHandler extends JFrame {
         bar.setVisible(false);
 
 //       // JInternalFrame List
-
-//        HELP \/
-//        helpWindow.setVisible(false);
-//        Help /\
 
 ////        LOGIN Section \/
         logWindow.setVisible(true);
@@ -92,6 +85,7 @@ public class ControlPanelFrameHandler extends JFrame {
         pane.add(userWindow);
         pane.add(adminEditUser);
         pane.add(userEditUser);
+        pane.add(helpWindow);
 
 
         getContentPane().add(pane);
