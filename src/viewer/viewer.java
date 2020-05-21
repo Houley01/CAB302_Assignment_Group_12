@@ -1,14 +1,16 @@
 package viewer;
+import javax.imageio.ImageIO;
 import javax.swing.*;
-import javax.swing.text.View;
 import java.awt.*;
 import java.awt.event.KeyListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseAdapter;
-import java.beans.XMLDecoder;
+import java.awt.image.BufferedImage;
 import java.io.*;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.*;
 
 class object{
@@ -44,7 +46,7 @@ class object{
 
         else if (tags.contains("<picture"))
         {
-            return tags.substring(tags.indexOf('"'), tags.indexOf('"', tags.indexOf('"') + 1) + 1);
+            return tags.substring(tags.indexOf('"')+1, tags.indexOf('"', tags.indexOf('"') + 1));
         }
 
         return null;
@@ -94,7 +96,9 @@ public class viewer{
         return BillboardObjects;
     }
 
-    public static void SetupScreen(LinkedHashSet<object> widgets){
+    public static void SetupScreen(LinkedHashSet<object> widgets) throws IOException {
+        GridBagConstraints c = new GridBagConstraints();
+
         KeyListener kl=new KeyAdapter()
         {
             public void keyPressed(KeyEvent evt)
@@ -111,8 +115,9 @@ public class viewer{
         };
 
         JFrame f=new JFrame();//creating instance of JFrame
+        JPanel p = new JPanel();
         f.addKeyListener(kl);
-        f.setLayout(new GridBagLayout());
+        p.setLayout(new GridBagLayout());
         ArrayList<JComponent> cps = new ArrayList<>();
 
         f.addMouseListener(new MouseAdapter() {
@@ -127,17 +132,38 @@ public class viewer{
         for (object decoration: widgets) {
             if (decoration.type == "message")
             {
-                cps.add(new JLabel("<html><h2>"+ decoration.content +"</h2></html>"));
+                cps.add(new JLabel("<html><h1>"+ decoration.content +"</h1></html>"));
             }
 
             else if (decoration.type == "information")
             {
-                cps.add(new JLabel("<html><p>"+ decoration.content +"</p></html>"));
+                cps.add(new JLabel("<html><h3>"+ decoration.content +"</h3></html>"));
             }
 
             else if (decoration.type == "picture")
             {
-                //cps.add()
+
+                if (decoration.content.contains("http"))
+                {
+                    URL url;
+                    Image image = null;
+                    try {
+                        url = new URL(decoration.content);
+                        image = ImageIO.read(url);
+                    } catch (MalformedURLException ex) {
+                        System.out.println("Malformed URL");
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    cps.add(new JLabel((new ImageIcon(image))));
+                }
+
+                else{
+                    byte[] imgBytes = Base64.getDecoder().decode(decoration.content);
+                    BufferedImage image = ImageIO.read(new ByteArrayInputStream(imgBytes));
+                    cps.add(new JLabel((new ImageIcon(image))));
+
+                }
             }
 
             else if (decoration.type == "billboard")
@@ -151,8 +177,11 @@ public class viewer{
 
         for (JComponent wid: cps)
         {
-            f.add(wid, new GridBagConstraints());
+            c.gridy++;
+            p.add(wid, c);
         }
+
+        f.getContentPane().add(p, "Center");
 
         f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         f.setExtendedState(JFrame.MAXIMIZED_BOTH);
@@ -161,6 +190,6 @@ public class viewer{
     }
 
         public static void main(String[] args) throws IOException {
-        SetupScreen(xmlReader("billboardsExamples/12.xml"));
+        SetupScreen(xmlReader("C:/Users/harry/Desktop/16.xml"));
     }
 }
