@@ -190,6 +190,6 @@ public class viewer{
     }
 
         public static void main(String[] args) throws IOException {
-        SetupScreen(xmlReader("C:/Users/harry/Desktop/16.xml"));
+        SetupScreen(xmlReader("billboardsExamples/16.xml"));
     }
 }
