@@ -53,6 +53,10 @@ public class createBillboards {
         JButton backgroundColourPickerButton = new JButton("Background Colour");
         JTextField backgroundDisplayColour = new JTextField();
 
+        // URL/Text Box
+        JLabel linkURL = new JLabel("Image URL");
+        JTextField imageURL = new JTextField();
+
 //        Buttons - Save and Preview
         JButton saveBB = new JButton("Save", new ImageIcon("src\\controlpanel\\resources\\save.png"));
         saveBB.setBounds(100,100,140,40);
@@ -65,7 +69,7 @@ public class createBillboards {
         mainHeading.add(requirements);
         window.add(mainHeading);
         window.add(window2);
-        window2.setLayout(new GridLayout(6,2));
+        window2.setLayout(new GridLayout(7,2));
         window2.add(title);
         window2.add(input1);
         window2.add(text);
@@ -75,6 +79,8 @@ public class createBillboards {
         window2.add(textDisplayColour);
         window2.add(backgroundColourPickerButton);
         window2.add(backgroundDisplayColour);
+        window2.add(linkURL);
+        window2.add(imageURL);
 
         window2.add(selectBG);
         window2.add(imageSelect);
