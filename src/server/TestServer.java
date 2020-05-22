@@ -5,13 +5,15 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
+import java.text.ParseException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class TestServer {
 
     @Test
-    public void verifyCredentials() throws InvalidKeySpecException, NoSuchAlgorithmException, IOException {
+    public void verifyCredentialsTest() throws InvalidKeySpecException, NoSuchAlgorithmException, IOException {
         String[] userCredentials = {"admin", "TNBeZf5SCG+QzxWQt21TxY0orQOFZXUY6S0RHs7/TOA=$MrRy4VfAGiWGVBahO1o0iTTXjLnNhDF+OsX9Sgbzwu0="};
         String username = "admin";
         String password = "password";
@@ -24,7 +26,7 @@ public class TestServer {
     }
 
     @Test
-    public void verifyCredentialsWrongPassword() throws InvalidKeySpecException, NoSuchAlgorithmException, IOException {
+    public void verifyCredentialsWrongPasswordTest() throws InvalidKeySpecException, NoSuchAlgorithmException, IOException {
         Server serverTester = new Server();
         String[] userCredentials = {"admin", "TNBeZf5SCG+QzxWQt21TxY0orQOFZXUY6S0RHs7/TOA=$MrRy4VfAGiWGVBahO1o0iTTXjLnNhDF+OsX9Sgbzwu0="};
         String username = "admin";
@@ -38,7 +40,7 @@ public class TestServer {
     }
 
     @Test
-    public void verifyCredentialsWrongUsername() throws InvalidKeySpecException, NoSuchAlgorithmException, IOException {
+    public void verifyCredentialsWrongUsernameTest() throws InvalidKeySpecException, NoSuchAlgorithmException, IOException {
         Server serverTester = new Server();
         String[] userCredentials = {"admin", "TNBeZf5SCG+QzxWQt21TxY0orQOFZXUY6S0RHs7/TOA=$MrRy4VfAGiWGVBahO1o0iTTXjLnNhDF+OsX9Sgbzwu0="};
         String username = "adminwrong";
@@ -52,7 +54,7 @@ public class TestServer {
     }
 
     @Test
-    public void verifyCredentialsWrong() throws InvalidKeySpecException, NoSuchAlgorithmException, IOException {
+    public void verifyCredentialsWrongTest() throws InvalidKeySpecException, NoSuchAlgorithmException, IOException {
         Server serverTester = new Server();
         String[] userCredentials = {"admin", "TNBeZf5SCG+QzxWQt21TxY0orQOFZXUY6S0RHs7/TOA=$MrRy4VfAGiWGVBahO1o0iTTXjLnNhDF+OsX9Sgbzwu0="};
         String username = "adminwrong";
@@ -66,7 +68,7 @@ public class TestServer {
     }
 
     @Test
-    public void verifyToken() {
+    public void verifyTokenTest() {
         Server serverTester = new Server();
 
         String username = "admin";
@@ -76,7 +78,7 @@ public class TestServer {
     }
 
     @Test
-    public void verifyTokenUserNotAuthenticated() {
+    public void verifyTokenUserNotAuthenticatedTest() {
         Server serverTester = new Server();
 
         String usernameFake = "adminFake";
@@ -86,7 +88,7 @@ public class TestServer {
     }
 
     @Test
-    public void verifyTokenFake() {
+    public void verifyTokenFakeTest() {
         Server serverTester = new Server();
 
         String username = "admin";
@@ -97,7 +99,7 @@ public class TestServer {
     }
 
     @Test
-    public void verifyTokenExpired() {
+    public void verifyTokenExpiredTest() {
         Server serverTester = new Server();
 
         String username = "admin";
@@ -119,7 +121,7 @@ public class TestServer {
 
     // Test confirms that the token was removed after logout
     @Test
-    public void removeTokenOnLogout() {
+    public void removeTokenOnLogoutTest() {
         Server serverTester = new Server();
 
         String username = "admin";
@@ -133,45 +135,73 @@ public class TestServer {
 
     @Test
     public void editUserFirstNameTest() {
-        String[] userCredentials = {"admin", "TNBeZf5SCG+QzxWQt21TxY0orQOFZXUY6S0RHs7/TOA=$MrRy4VfAGiWGVBahO1o0iTTXjLnNhDF+OsX9Sgbzwu0=", "John", "Smith"};
-        String userToBeEdited = "notAdmin";
+        String[] userCredentials = {"1", "admin", "TNBeZf5SCG+QzxWQt21TxY0orQOFZXUY6S0RHs7/TOA=$MrRy4VfAGiWGVBahO1o0iTTXjLnNhDF+OsX9Sgbzwu0=", "John", "Smith"};
+        String[] firstNameToBeEdited = {"1", "admin", "TNBeZf5SCG+QzxWQt21TxY0orQOFZXUY6S0RHs7/TOA=$MrRy4VfAGiWGVBahO1o0iTTXjLnNhDF+OsX9Sgbzwu0=", "Jack", "Smith"};
 
         // Function to add
-        //Server.editUserInfo(userToBeEdited);
+        //String[] userCredentialsModified = Server.editUserInfo(userCredentials, firstNameToBeEdited);
 
-        assertEquals(true, userCredentials[2].equals("Jack"));
+        //assertEquals(true, userCredentialsModified.equals(firstNameToBeEdited));
     }
 
     @Test
     public void editUserLastNameTest() {
-        String[] userCredentials = {"admin", "TNBeZf5SCG+QzxWQt21TxY0orQOFZXUY6S0RHs7/TOA=$MrRy4VfAGiWGVBahO1o0iTTXjLnNhDF+OsX9Sgbzwu0=", "John", "Smith"};
-        String userToBeEdited = "notAdmin";
+        String[] userCredentials = {"1", "admin", "TNBeZf5SCG+QzxWQt21TxY0orQOFZXUY6S0RHs7/TOA=$MrRy4VfAGiWGVBahO1o0iTTXjLnNhDF+OsX9Sgbzwu0=", "John", "Smith"};
+        String[] lastNameToBeEdited = {"1", "admin", "TNBeZf5SCG+QzxWQt21TxY0orQOFZXUY6S0RHs7/TOA=$MrRy4VfAGiWGVBahO1o0iTTXjLnNhDF+OsX9Sgbzwu0=", "Jack", "Smithers"};
 
         // Function to add
-        //Server.editUserInfo(userToBeEdited);
+        //String[] userCredentialsModified = Server.editUserInfo(userCredentials, lastNameToBeEdited);
 
-        assertEquals(true, userCredentials[3].equals("Smithers"));
+        //assertEquals(true, userCredentialsModified.equals(lastNameToBeEdited));
+    }
+
+    // Check that a billboard can be created
+    @Test
+    public void createBillboardTest() throws ParseException {
+        String[] billboardInfoToCreate = {"this is the title", "1", "current Time", "", "file location"};
+        // Function to add
+        boolean wasBillboardCreated = Server.CreateBillboard(billboardInfoToCreate);
+        assertEquals(true, wasBillboardCreated);
+    }
+
+    // Check that a billboard can be created with no required data
+    @Test
+    public void createBillboardNoDataTest() throws ParseException {
+        String[] billboardInfoToCreate = {"", "1", "current Time", "", ""};
+        // Function to add
+        boolean wasBillboardCreated = Server.CreateBillboard(billboardInfoToCreate);
+        assertEquals(false, wasBillboardCreated);
+    }
+
+    // Check that a billboard can be scheduled
+    @Test
+    public void scheduleBillboardTest() {
+        String[] billboardInfoToSchedule = {"1", "this is the title", "1", "current Time", "Time Modified", "file location"};
+
+        // Function to add
+        //String[] scheduledBillboard = Server.scheduleBillboard(billboardInfoToSchedule);
+        //assertNotNull(scheduledBillboard);
+    }
+
+    // edit the various billboard fields and check it was successfully edited
+    @Test
+    public void editBillboardTest() {
+        String[] billboardToEdit = {"1", "testBillboard", "1", "current Time", "Time Modified", "This is the file location"};
+        String[] newBillboardInfo = {"1", "testBillboardNew", "1", "current Time", "Time Modified", "This is the new file location"};
+
+        // Function to add
+        //String[] billboardToEditModified = Server.editBillboardInfo(billboardToEdit, newBillboardInfo);
+        //assertEquals(true, billboardToEditModified.equals(newBillboardInfo));
     }
 
     // edit the billboard text and check it was successfully edited
     @Test
-    public void editBillboardTextTest() {
-        String[] billboardToEdit = {"1", "testBillboard", "This is the text", "This is the background", "1", "current Time", ""};
-        String newText = "This is the new text";
+    public void editBillboardTitleTest() {
+        String[] billboardToEdit = {"1", "this is the title", "1", "current Time", "Time Modified", "file location"};
+        String[] newTitle = {"1", "this is the new title", "1", "current Time", "Time Modified", "file location"};
 
         // Function to add
-        //Server.editBillboardInfo(billboardToEdit[0], newText);
-        assertEquals(true, billboardToEdit[2].equals(newText));
-    }
-
-    // edit the billboard background and check it was successfully edited
-    @Test
-    public void editBillboardBackgroundTest() {
-        String[] billboardToEdit = {"1", "testBillboard", "This is the text", "This is the background", "1", "current Time", ""};
-        String newBackground = "This is the new background";
-
-        // Function to add
-        //Server.editBillboardInfo(billboardToEdit[0], newBackground);
-        assertEquals(true, billboardToEdit[3].equals(newBackground));
+        //String[] billboardToEditModified = Server.editBillboardInfo(billboardToEdit, newTitle);
+        //assertEquals(true, billboardToEditModified.equals(newTitle));
     }
 }

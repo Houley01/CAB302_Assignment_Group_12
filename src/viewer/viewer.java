@@ -13,91 +13,94 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
 
-class object{
-    public String type, colour, content;
+// this class stores all attributes of component on the billboard
+class billboardDecor{
+    public String type, colour, content; // the class has three attributes stored
 
-    String colourFinder(String tags){
-        if (tags.contains("colour="))
+    String colourFinder(String tags){ // this function is used to find if there is a colour in the xml object
+        if (tags.contains("background=")) // if there is a "background" tag
         {
-            return tags.substring((tags.indexOf("colour=") + 7), (tags.indexOf("colour=") + 16));
+            return tags.substring((tags.indexOf("background=") + 12), (tags.indexOf("background=") + 19)); // there will be a colour to find
         }
 
+        if (tags.contains("colour=")) // if there is a "colour" tag
+        {
+            return tags.substring((tags.indexOf("colour=") + 8), (tags.indexOf("colour=") + 15)); // then there will be a colour to find
+        }
+
+        // otherwise return null
         return null;
     }
 
     String typeFinder(String tags){
-        String[] objectTypes = {"information", "message", "picture", "billboard"};
+        String[] objectTypes = {"information", "message", "picture", "billboard"}; // there are 4 possible types
 
-        for (String type: objectTypes){
-            if (tags.contains("<" + type))
+        for (String type: objectTypes){ // check in the tags for each object type
+            if (tags.contains("<" + type )) // if the tags include a tag with one of the types in it
             {
-                return type;
+                return type; // return the object type it is
             }
         }
 
-        return null;
+        return null; // return null if none of these are found
     }
 
     String contentFinder(String tags){
-        if (tags.contains("<information") || tags.contains("<message"))
+        if (tags.contains("<information") || tags.contains("<message")) // if it is information or a message
         {
-            return tags.substring(tags.indexOf(">") + 1, tags.indexOf("</"));
+            return tags.substring(tags.indexOf(">") + 1, tags.indexOf("</")); // retrieve the content
         }
 
-        else if (tags.contains("<picture"))
+        else if (tags.contains("<picture")) // if it a picture
         {
-            return tags.substring(tags.indexOf('"')+1, tags.indexOf('"', tags.indexOf('"') + 1));
+            return tags.substring(tags.indexOf('"')+1, tags.indexOf('"', tags.indexOf('"') + 1)); // retrieve the url or base64 stored in the quotation marks
         }
 
-        return null;
+        return null; // return null if no content is found
     }
 
-    public object(String tags)
+    public billboardDecor(String tags) // set the objects varaibles
     {
-        type = typeFinder(tags);
-        colour = colourFinder(tags);
-        content = contentFinder(tags);
+        type = typeFinder(tags); // generate the type
+        colour = colourFinder(tags); // generate the colour
+        content = contentFinder(tags); // generate the content
     }
 }
 
-public class viewer{
-    public static LinkedHashSet<object> xmlReader(String filePath) throws IOException {
-        BufferedReader reader;
-        LinkedHashSet<String> RawBillboardObjects = new LinkedHashSet<>();
-        LinkedHashSet<object> BillboardObjects = new LinkedHashSet<>();
+public class viewer{ 
+    public static LinkedHashSet<billboardDecor> xmlReader(String filePath) throws IOException {
+        BufferedReader reader; // buffered reader to read the xml file line by line
+        LinkedHashSet<String> RawBillboardObjects = new LinkedHashSet<>(); // make linkedhashset to store all the tags
+        LinkedHashSet<billboardDecor> BillboardObjects = new LinkedHashSet<>(); // make linkedhashset to store all objects
 
-        try {
-            reader = new BufferedReader(new FileReader(filePath));
-            String line = reader.readLine();
+        try { // try reading the xml file
+            reader = new BufferedReader(new FileReader(filePath)); 
+            String line = reader.readLine(); // store the individual line in a string 
 
-            while (line != null) {
-                if (!line.equals("</billboard>") && !line.contains("?xml version"))
+            while (line != null) { // when there are more lines of the xml file
+                if (!line.equals("</billboard>") && !line.contains("?xml version")) // check if the line stores object
                 {
-                    RawBillboardObjects.add(line);
+                    RawBillboardObjects.add(line); // if line important add it to linked hashset
                 }
 
-                line = reader.readLine();
+                line = reader.readLine(); // set the string to the next line
             }
 
-            reader.close();
+            reader.close(); // close the reader when no more lines left
 
-        } catch (IOException e) {
+        } catch (IOException e) { // throw an exception if the xml can't be read
             e.printStackTrace();
         }
 
-        for (String tags: RawBillboardObjects) {
-            BillboardObjects.add(new object(tags));
+        for (String tags: RawBillboardObjects) { // for each valid line in the xml
+            BillboardObjects.add(new billboardDecor(tags)); // convert it to an object for the billboard to display
         }
-
-        for(object stuff: BillboardObjects){
-            System.out.println(stuff.colour + stuff.type + stuff.content);
-        }
-
-        return BillboardObjects;
+        
+        return BillboardObjects; // return the set including all billboard objects
     }
 
-    public static void SetupScreen(LinkedHashSet<object> widgets) throws IOException {
-        GridBagConstraints c = new GridBagConstraints();
+    public static void SetupScreen(LinkedHashSet<billboardDecor> widgets) throws IOException {
+        GridBagConstraints c = new GridBagConstraints(); // set up constraints 
 
         KeyListener kl=new KeyAdapter()
         {
@@ -115,10 +118,10 @@ public class viewer{
         };
 
         JFrame f=new JFrame();//creating instance of JFrame
-        JPanel p = new JPanel();
-        f.addKeyListener(kl);
-        p.setLayout(new GridBagLayout());
-        ArrayList<JComponent> cps = new ArrayList<>();
+        JPanel p = new JPanel();//creating instance of jpanel
+        f.addKeyListener(kl);//include esc listener
+        p.setLayout(new GridBagLayout());//set panel layout to place objects above eachother in the centre 
+        ArrayList<JComponent> cps = new ArrayList<>();//components to add to the billboard 
 
         f.addMouseListener(new MouseAdapter() {
             @Override
@@ -127,69 +130,68 @@ public class viewer{
             }
 
 
-        });
+        }); // if the screen is clicked exit 
 
-        for (object decoration: widgets) {
-            if (decoration.type == "message")
-            {
-                cps.add(new JLabel("<html><h1>"+ decoration.content +"</h1></html>"));
+        for (billboardDecor decoration: widgets) { // instantiate all of the objects
+            if (decoration.type == "message") 
+            { // add large font label for a message
+                cps.add(new JLabel("<html><h1><font size=\"45\" color = " + decoration.colour +">"+ decoration.content +"</font></h1></html>"));
             }
 
             else if (decoration.type == "information")
-            {
-                cps.add(new JLabel("<html><h3>"+ decoration.content +"</h3></html>"));
+            { // add small font label for information
+                cps.add(new JLabel("<html><h1><font color = " + decoration.colour +">"+ decoration.content +"</font></h1></html>"));
             }
 
             else if (decoration.type == "picture")
             {
 
-                if (decoration.content.contains("http"))
+                if (decoration.content.contains("http")) // if the picture is a url
                 {
-                    URL url;
+                    URL url; 
                     Image image = null;
                     try {
-                        url = new URL(decoration.content);
-                        image = ImageIO.read(url);
+                        url = new URL(decoration.content); // convert string to url
+                        image = ImageIO.read(url); // read the url to image
                     } catch (MalformedURLException ex) {
                         System.out.println("Malformed URL");
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-                    cps.add(new JLabel((new ImageIcon(image))));
+                    cps.add(new JLabel((new ImageIcon(image)))); // create image stored in label
                 }
 
                 else{
-                    byte[] imgBytes = Base64.getDecoder().decode(decoration.content);
-                    BufferedImage image = ImageIO.read(new ByteArrayInputStream(imgBytes));
-                    cps.add(new JLabel((new ImageIcon(image))));
-
+                    byte[] imgBytes = Base64.getDecoder().decode(decoration.content); //convert the string to base64
+                    BufferedImage image = ImageIO.read(new ByteArrayInputStream(imgBytes)); // decode the base64 bytes into image
+                    cps.add(new JLabel((new ImageIcon(image)))); // create image stored in label
                 }
             }
 
-            else if (decoration.type == "billboard")
+            else if (decoration.type == "billboard") // if its a billboard
             {
-                if (decoration.colour != null)
+                if (decoration.colour != null) // change the 
                 {
-                    f.setBackground(Color.decode(decoration.colour));
+                    p.setBackground(Color.decode(decoration.colour));
                 }
             }
         }
 
         for (JComponent wid: cps)
         {
-            c.gridy++;
-            p.add(wid, c);
+            c.gridy++; // place each component on its own line
+            p.add(wid, c); // add all the widgets 
         }
 
-        f.getContentPane().add(p, "Center");
+        f.getContentPane().add(p, "Center"); // place the panel centred
 
-        f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        f.setExtendedState(JFrame.MAXIMIZED_BOTH);
+        f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); // exit the app when closed
+        f.setExtendedState(JFrame.MAXIMIZED_BOTH); // true fullscreen it 
         f.setUndecorated(true);
-        f.setVisible(true);
+        f.setVisible(true); // show gui
     }
 
         public static void main(String[] args) throws IOException {
-        SetupScreen(xmlReader("billboardsExamples/16.xml"));
+        SetupScreen(xmlReader("billboardsExamples/15.xml")); // call the xml reader and give return to setupscreen
     }
 }

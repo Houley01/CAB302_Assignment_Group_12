@@ -13,6 +13,8 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 import java.sql.*;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
@@ -22,7 +24,7 @@ public class Server {
     private static Boolean connectionInitiated;
     static HashMap<String, String[]> usersAuthenticated = new HashMap<String, String[]>();
 
-    public static void main(String[] args) throws IOException, SQLException, InvalidKeySpecException, NoSuchAlgorithmException, ClassNotFoundException {
+    public static void main(String[] args) throws IOException, SQLException, InvalidKeySpecException, NoSuchAlgorithmException, ClassNotFoundException, ParseException {
 
         // Gathers the information from server.config file
         resources.GetPropertyValues properties = new resources.GetPropertyValues();
@@ -62,8 +64,9 @@ public class Server {
                     send.flush();
                 }
                 // Create Billboard Information
-                if (request.equals( "CreateBillboards")) {
-                    CreateBillboards(receiver, send);
+                if (request.equals( "CreateBillboard")) {
+                    String[] billboardData = (String[]) receiver.readObject();
+                    CreateBillboard(billboardData);
                     send.flush();
                 }
                 // Schedule Billboards
@@ -293,30 +296,54 @@ public class Server {
         return data;
     }
 
-    // NOTE:: NOT FINISHED YET
-    private static void CreateBillboards(ObjectInputStream receiver, ObjectOutputStream send) throws IOException, ClassNotFoundException {
-        String username = receiver.readUTF();
-        String token = receiver.readUTF();
-        if (checkTokenIsValid(username, token)) {
-            System.out.println("true");
-            send.write(1);
-            send.flush();
+    static boolean CreateBillboard(String[] billboardData) throws ParseException {
 
-            String billboardName = receiver.readUTF();
-            String billboardText = receiver.readUTF();
-            String billboardTextColour = receiver.readUTF();
-            String billboardBackgroundColour = receiver.readUTF();
-            String billboardImage = receiver.readUTF();
-            System.out.println(billboardName + ", " + billboardText + ", " + billboardTextColour + ", " + billboardBackgroundColour + ", Image: " + billboardImage);
-//      CREATE XML FILE HERE CreateXMLFile(billboardName, billboardText, billboardTextColour, billboardBackgroundColour, billboardImage)
-//      INSERT SQL STATEMENT HERE
-            send.writeUTF("Finished creating Billboard");
-        } else {
-            send.writeInt(0);
-            System.out.println("false");
+        // If the billboard information was sent correctly, data will be parsed
+        if (billboardData[0] != "" && billboardData[4] != "") {
+
+            String title = billboardData[0];
+            int userId = Integer.parseInt(billboardData[1]);
+            Date currentTime = new Date();
+            Date timeModified = new Date();
+            String fileLocation = billboardData[4];
+
+            // Use this for edit billboard
+            // Date timeModified = new SimpleDateFormat("dd/MM/yyyy").parse(billboardData[3]);
+
+            // Add code to be storing the billboard information to the database
+
+            return true;
         }
-        send.flush();
 
+        // Returns false as no required data was sent
+        return false;
     }
+
+    // NOTE:: NOT FINISHED YET
+//    private static boolean CreateBillboard(ObjectInputStream receiver, ObjectOutputStream send) throws IOException, ClassNotFoundException {
+//        String username = receiver.readUTF();
+//        String token = receiver.readUTF();
+//        if (checkTokenIsValid(username, token)) {
+//            System.out.println("true");
+//            send.write(1);
+//            send.flush();
+//
+//            String billboardName = receiver.readUTF();
+//            String billboardText = receiver.readUTF();
+//            String billboardTextColour = receiver.readUTF();
+//            String billboardBackgroundColour = receiver.readUTF();
+//            String billboardImage = receiver.readUTF();
+//            System.out.println(billboardName + ", " + billboardText + ", " + billboardTextColour + ", " + billboardBackgroundColour + ", Image: " + billboardImage);
+////      CREATE XML FILE HERE CreateXMLFile(billboardName, billboardText, billboardTextColour, billboardBackgroundColour, billboardImage)
+////      INSERT SQL STATEMENT HERE
+//            send.writeUTF("Finished creating Billboard");
+//        } else {
+//            send.writeInt(0);
+//            System.out.println("false");
+//            return false;
+//        }
+//        send.flush();
+//        return true;
+//    }
 
 }
