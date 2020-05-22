@@ -63,7 +63,7 @@ public class Server {
                 }
                 // Create Billboard Information
                 if (request.equals( "CreateBillboards")) {
-                    CreateBillboards(receiver, send);
+                    CreateBillboard(receiver, send);
                     send.flush();
                 }
                 // Schedule Billboards
@@ -294,7 +294,7 @@ public class Server {
     }
 
     // NOTE:: NOT FINISHED YET
-    private static void CreateBillboards(ObjectInputStream receiver, ObjectOutputStream send) throws IOException, ClassNotFoundException {
+    private static void CreateBillboard(ObjectInputStream receiver, ObjectOutputStream send) throws IOException, ClassNotFoundException {
         String username = receiver.readUTF();
         String token = receiver.readUTF();
         if (checkTokenIsValid(username, token)) {
