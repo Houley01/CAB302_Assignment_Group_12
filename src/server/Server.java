@@ -14,7 +14,6 @@ import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 import java.sql.*;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
@@ -73,6 +72,15 @@ public class Server {
                 if (request.equals("ScheduleBillboards")) {
 
                 }
+
+                if (request.equals("RequestScheduleBillboards")) {
+                    System.out.println("Requested schedule billboards");
+                    String username = receiver.readUTF();
+                    String token = receiver.readUTF();
+                    send.writeObject(RequestScheduling(username, token));
+                    send.flush();
+                }
+
                 // List Billboards
                 if (request.equals("ListBillboards")) {
 
@@ -345,5 +353,47 @@ public class Server {
 //        send.flush();
 //        return true;
 //    }
+
+    // Gets all the current scheduled billboards
+    private static ArrayList<String[]> RequestScheduling(String username, String token) throws SQLException {
+
+        // Before request, check that the user's token is valid
+        if (checkTokenIsValid(username, token)) {
+            System.out.println("Token is valid. Begin requesting currently scheduled billboards...");
+
+            String query = "SELECT idSchedules, weekday, duration, startTime, userId FROM schedules";
+            Statement st = ServerInit.conn.createStatement();
+            st.executeQuery("USE `cab302`;");
+            ResultSet rs = st.executeQuery(query);
+
+            // checks if there is any data in the database
+            if (!rs.isBeforeFirst()) {
+                System.out.println("There is currently no scheduled billboards"); // Debug use
+//            return "No User in database";
+            } else {
+                // Contains the schedules in the database
+                ArrayList<String[]> schedules = new ArrayList<>();
+
+                System.out.println("Retrieving list of Schedules from database...");
+
+                while (rs.next()) {
+                    String id = rs.getString("idSchedules");
+                    String weekday = rs.getString("weekday");
+                    String duration = rs.getString("duration");
+                    String startTime = rs.getString("startTime");
+                    String userId = rs.getString("userId");
+
+                    String[] schedule = {id, weekday, duration, startTime, userId};
+                    schedules.add(schedule);
+                }
+                System.out.println("Successfully retrieved list of scheduled billboards");
+                System.out.println("Sending list of Schedules to controller...");
+
+                // Send the schedules to the control panel
+                return schedules;
+            }
+        }
+        return null;
+    }
 
 }

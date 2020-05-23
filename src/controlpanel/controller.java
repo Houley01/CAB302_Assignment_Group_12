@@ -11,6 +11,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
+import java.util.ArrayList;
 import java.util.Base64;
 
 public class controller {
@@ -18,6 +19,7 @@ public class controller {
     public static boolean loginSuccessful = false;
     private static String loggedInUser;
     private static String token;
+    private static ArrayList<String[]> schedules;
 
     // Attempts to make a connection to the server
     static Socket connectionToServer() throws IOException {
@@ -234,6 +236,42 @@ public class controller {
         }
     }
 
+    private static void RequestBillboardScheduling() throws IOException, ClassNotFoundException {
+        Socket client = connectionToServer();
+
+        // connects to the server with information and attempts to get the auth token for the user after successful login
+        if (client.isConnected()) {
+            OutputStream outputStream = client.getOutputStream();
+            InputStream inputStream = client.getInputStream();
+
+            ObjectOutputStream send = new ObjectOutputStream(outputStream);
+            ObjectInputStream receiver = new ObjectInputStream(inputStream);
+
+            send.writeUTF("RequestScheduleBillboards");
+            send.writeUTF(loggedInUser);
+            send.writeUTF(token);
+            send.flush();
+
+            // Store the current schedule listings
+            schedules = (ArrayList<String[]>) receiver.readObject();
+
+            int scheduleCounter = 1;
+            for(String[] schedule : schedules){
+                System.out.println("\nScheduled billboard " + scheduleCounter + ":");
+                System.out.println("Day: " + schedule[1]);
+                System.out.println("Duration: " + schedule[2]);
+                System.out.println("Start Time:  " + schedule[3]);
+
+                scheduleCounter++;
+            }
+
+//      End connections
+            send.close();
+            receiver.close();
+            client.close();
+        }
+    }
+
     public static void hideLoginScreen() {
         login.window.setVisible(false);
         ControlPanelFrameHandler.bar.setVisible(true);
@@ -255,11 +293,13 @@ public class controller {
         }
     }
 
-    public static void showSchedule() {
+    public static void showSchedule() throws IOException, ClassNotFoundException {
         if (scheduleBillboards.window.isVisible() == true) {
             scheduleBillboards.window.setVisible(false);
         } else if (scheduleBillboards.window.isVisible() == false) {
             scheduleBillboards.window.setVisible(true);
+            RequestBillboardScheduling();
+
         }
     }
 
