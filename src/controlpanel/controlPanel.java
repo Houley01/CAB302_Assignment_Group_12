@@ -8,7 +8,16 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.*;
 import java.net.*;
-
+/**
+ *  The main renderer for the Control Panel, encompasses all other windows
+ *  that relate to modifying and creation of billboards and users.
+ *  @see controller
+ *
+ *  - Todo add all members to an authors list and copy and paste in all documents
+ *
+ * @version 	%I%, %G%
+ * @since       JDK13
+ */
 public class controlPanel extends JFrame {
 
 //    private static final boolean CLOSABLE = true;
