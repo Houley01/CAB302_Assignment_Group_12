@@ -13,12 +13,37 @@ import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Base64;
 
+/**
+ * The controller class is the main abstract class that contains
+ * the main logic and rendering for the control panel. This includes
+ * methods for modifying data in the database and in server memory:
+ * <ul>
+ *     <li>Connecting to the server</li>
+ *     <li>Show / hide billboard</li>
+ *     <li>Create billboards / modify billboards</li>
+ *     <li>Editing and creating users</li>
+ *     <li>User authentication</li>
+ *     <li>Login / logout</li>
+ * </ul>
+ *
+ * @version 	%I%, %G%
+ * @since       JDK13
+ */
+
 public class controller {
 
     public static boolean loginSuccessful = false;
     private static String loggedInUser;
     private static String token;
 
+    /**
+     *  Connection to server via reading server.config file. Throws
+     *  an error if file property cannot be read or an IOException occurs.
+     *
+     *  @return Returns client socket if it's able to read server.config
+     *          or does not encounter an error
+     *  @exception throws IOexception
+     */
     // Attempts to make a connection to the server
     static Socket connectionToServer() throws IOException {
         try {
@@ -45,21 +70,31 @@ public class controller {
     }
 
 
-    /*
-     *  Connection to Server Creating and editing billboards
+    /**
+     *  Reading client socket connection and creation of billboard and window configuration.
+     *  Once the billboard has been created disconnect the user. The user can either pick a
+     *  file or enter a URL.
      *
      *
+     * @param billboardName     Name of billboard in listing.
+     * @param text              -I have no clue what this does since the billboard can't actually load.-
+     * @param textColour        Colour of text.
+     * @param backgroundColour  Background colour.
+     * @param fileChosen        File the user has selected.
+     * @param imageUrl          URL for the image to be displayed.
      */
     static void createBillboard(String billboardName, String text, String textColour, String backgroundColour, File fileChosen, String imageUrl) throws IOException {
 
-        Socket client = connectionToServer();
-        OutputStream outputStream = client.getOutputStream();
-        InputStream inputStream = client.getInputStream();
+        // Initializing connections
+        Socket client = connectionToServer();                   // User socket connection
+        OutputStream outputStream = client.getOutputStream();   // Server output to user
+        InputStream inputStream = client.getInputStream();      // User input to server
 
         ObjectOutputStream send = new ObjectOutputStream(outputStream);
         ObjectInputStream receiver = new ObjectInputStream(inputStream);
 
 
+        // Title for window
         send.writeUTF("CreateBillboards");
         send.flush();
 
@@ -100,9 +135,14 @@ public class controller {
         client.close();
     }
 
-    /*
-     *  Connection to Server Editing User
+    /**
+     *  Editing an existing user on the server.
      *
+     * @param client    Current socket to server
+     * @param username  Username of the client to edit
+     * @param password
+     * @param fName
+     * @param lName
      */
     static void editUser(Socket client, String username, String password, String fName, String lName) throws IOException {
 
@@ -122,9 +162,17 @@ public class controller {
         receiver.close();
         client.close();
     }
-
-    /*
-     *  Sends the username and password to server
+    /**
+     *  Authorization of user login based on stored user information in the database / or memory.
+     *
+     * @param username          Users username.
+     * @param password          Users password.
+     * @return loginSuccessful  Global class variable determining if the user login was successful or not.
+     * @exception               IOException                 If failure in code input or output operations.
+     * @exception               ClassNotFoundException      If unable to find defined CLass.
+     * @exception               InvalidKeySpecException
+     * @exception               NoSuchAlgorithmException    If cryptographic algorithm is not available.
+     *
      */
     static boolean authenticateUserLogin(String username, String password) throws IOException, ClassNotFoundException, InvalidKeySpecException, NoSuchAlgorithmException {
         System.out.println("user: " + username); // Debugging use
@@ -134,6 +182,7 @@ public class controller {
 
         Socket client = connectionToServer();
 
+        // Checking to see if the socket is currently connected to our server.
         if (client.isConnected()) {
             // connects to the server with information and attempts to authenticate the user
 
@@ -176,7 +225,14 @@ public class controller {
         return loginSuccessful;
     }
 
-    // Returns a hash of the entered password by the user to be sent to the server over the network
+    /**
+     * Converting plain text into a MD5 encrypted string.
+     *
+     * @param password          Password to encrypt
+     * @return                  Returns the MD5 hashed password in a string.
+     * @exception               InvalidKeySpecException
+     * @exception               NoSuchAlgorithmException    If cryptographic algorithm is not available.
+     */
     static String plaintextToHashedPassword(String password) throws InvalidKeySpecException, NoSuchAlgorithmException {
         String hashedPassword = null;
         try {
@@ -207,6 +263,12 @@ public class controller {
         return hashedPassword;
     }
 
+    /**
+     * Gets the current socket authentication token
+     *
+     * @exception IOException               If failure in code input or output operations.
+     * @exception ClassNotFoundException    If unable to find defined CLass.
+     */
     public static void getAuthToken() throws IOException, ClassNotFoundException {
         Socket client = connectionToServer();
 
@@ -234,11 +296,18 @@ public class controller {
         }
     }
 
+    /**
+     *  Modifies visibility state of login.window to false and -renables nav bar-
+     *
+     */
     public static void hideLoginScreen() {
         login.window.setVisible(false);
         ControlPanelFrameHandler.bar.setVisible(true);
     }
-
+    /**
+     *  Toggle switch to show or hide create billboard window via modifying isVisible state
+     *
+     */
     public static void showCreateBillboard() {
         if (createBillboards.window.isVisible() == true) {
             createBillboards.window.setVisible(false);
@@ -246,7 +315,10 @@ public class controller {
             createBillboards.window.setVisible(true);
         }
     }
-
+    /**
+     *  Toggle switch to show or hide list billboard window via modifying isVisible state
+     *
+     */
     public static void showListBillboard() {
         if (listBillboards.window.isVisible() == true) {
             listBillboards.window.setVisible(false);
@@ -254,7 +326,9 @@ public class controller {
             listBillboards.window.setVisible(true);
         }
     }
-
+    /**
+     *  Toggle switch to show or hide Schedule window via modifying isVisible state
+     */
     public static void showSchedule() {
         if (scheduleBillboards.window.isVisible() == true) {
             scheduleBillboards.window.setVisible(false);
@@ -262,7 +336,9 @@ public class controller {
             scheduleBillboards.window.setVisible(true);
         }
     }
-
+    /**
+     *  Toggle switch to show or hide edit user window via modifying isVisible state
+     */
     public static void showEditUser() {
         if (usersPage.window.isVisible() == true) {
             usersPage.window.setVisible(false);
@@ -271,7 +347,9 @@ public class controller {
         }
     }
 
-    //      Open Admin Preferences
+    /**
+     *  Toggle switch to show or hide admin preferences via modifying isVisible state
+     */
     public static void showAdminPreferences() {
         if(usersPage.adminWindow.isVisible() == true) {
             usersPage.adminWindow.setVisible(false);
@@ -280,7 +358,9 @@ public class controller {
         }
     }
 
-    //      Open User Preferences
+    /**
+     *  Toggle switch to show or hide user preferences via modifying isVisible state
+     */
     public static void ShowUserPreferences() {
         if(usersPage.userWindow.isVisible() == true) {
             usersPage.userWindow.setVisible(false);
@@ -289,6 +369,9 @@ public class controller {
         }
     }
 
+    /**
+     *  Toggle switch to show or hide help screen via modifying isVisible state
+     */
     public static void showHelpScreen() {
 //        System.out.println("HELP INFO");
          if (HelpPage.window.isVisible() == true) {
@@ -298,6 +381,13 @@ public class controller {
          }
     }
 
+    /**
+     * Create base64 image from users selected file
+     * @see createBillboards
+     *
+     * @param file      File to be converted to base64.
+     * @return          Converted base64 image from user selected file.
+     */
     public static String CreateMD5(File file) {
         String base64Image = "";
         try (FileInputStream imageInFile = new FileInputStream(file)) {
@@ -312,7 +402,10 @@ public class controller {
         }
         return base64Image;
     }
-
+    /**
+     * Logs the current user out of their session.
+     * Todo modify code to actually log the user out to the login page
+     */
     public static void logout() {
 //       EXIT FOR THE MOMENT WILL CHANGE to login page
         System.exit(0);
