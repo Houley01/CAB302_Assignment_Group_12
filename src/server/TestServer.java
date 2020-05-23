@@ -156,22 +156,22 @@ public class TestServer {
     }
 
     // Check that a billboard can be created
-    @Test
-    public void createBillboardTest() throws ParseException {
-        String[] billboardInfoToCreate = {"this is the title", "1", "current Time", "", "file location"};
-        // Function to add
-        boolean wasBillboardCreated = Server.CreateBillboard(billboardInfoToCreate);
-        assertEquals(true, wasBillboardCreated);
-    }
-
-    // Check that a billboard can be created with no required data
-    @Test
-    public void createBillboardNoDataTest() throws ParseException {
-        String[] billboardInfoToCreate = {"", "1", "current Time", "", ""};
-        // Function to add
-        boolean wasBillboardCreated = Server.CreateBillboard(billboardInfoToCreate);
-        assertEquals(false, wasBillboardCreated);
-    }
+//    @Test
+//    public void createBillboardTest() throws ParseException {
+//        String[] billboardInfoToCreate = {"this is the title", "1", "current Time", "", "file location"};
+//        // Function to add
+//        boolean wasBillboardCreated = Server.CreateBillboard(billboardInfoToCreate);
+//        assertEquals(true, wasBillboardCreated);
+//    }
+//
+//    // Check that a billboard can be created with no required data
+//    @Test
+//    public void createBillboardNoDataTest() throws ParseException {
+//        String[] billboardInfoToCreate = {"", "1", "current Time", "", ""};
+//        // Function to add
+//        boolean wasBillboardCreated = Server.CreateBillboard(billboardInfoToCreate);
+//        assertEquals(false, wasBillboardCreated);
+//    }
 
     // Check that a billboard can be scheduled
     @Test

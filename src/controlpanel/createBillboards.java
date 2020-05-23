@@ -1,5 +1,7 @@
 package controlpanel;
 
+import resources.Billboard;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -15,8 +17,10 @@ public class createBillboards {
     public static JInternalFrame createBillboards() {
         JPanel mainHeading = new JPanel();
         JPanel window2 = new JPanel();
-        window.setSize(600, 300);
-        window2.setSize(300, 150);
+        JPanel window3 = new JPanel();
+        JPanel window4 = new JPanel();
+        window.setSize(600, 500);
+//        window2.setSize(300, 200);
         window.setLocation((controlPanel.WINDOWWIDTH/2) - 300, (controlPanel.WINDOWHEIGHT/2) - 200);
 
 //        Heading - "Requirements"
@@ -38,6 +42,17 @@ public class createBillboards {
         text.setHorizontalTextPosition(JLabel.LEFT);
 //        Text Box
         JTextField input2 = new JTextField();
+
+//        Information Tag
+        JLabel informationTextLabel = new JLabel("Information Text");
+        text.setVerticalTextPosition(JLabel.CENTER);
+        text.setHorizontalTextPosition(JLabel.LEFT);
+        JTextField informationColourInput = new JTextField();
+
+        JButton informationColourButton = new JButton("Information Text Colour");
+        JTextField informationTextColor = new JTextField();
+        informationTextColor.setBackground(Color.BLACK);
+
 
 
 //        Heading - "Select Background Image"
@@ -68,27 +83,36 @@ public class createBillboards {
         previewBB.setBounds(100,100,140,40);
 
 //        Add items to GUI
-        window.setLayout(new GridLayout(2,1));
+        window.setLayout(new GridLayout(4,1));
         mainHeading.add(requirements);
         window.add(mainHeading);
         window.add(window2);
-        window2.setLayout(new GridLayout(7,2));
+        window.add(window3);
+        window.add(window4);
+
+        window2.setLayout(new GridLayout(3,2));
         window2.add(title);
         window2.add(input1);
         window2.add(text);
         window2.add(input2);
+        window2.add(informationTextLabel);
+        window2.add(informationColourInput);
 
-        window2.add(textColourPickerButton);
-        window2.add(textDisplayColour);
-        window2.add(backgroundColourPickerButton);
-        window2.add(backgroundDisplayColour);
-        window2.add(linkURL);
-        window2.add(imageURL);
+        window3.setLayout(new GridLayout(4,2));
+        window3.add(textColourPickerButton);
+        window3.add(textDisplayColour);
+        window3.add(informationColourButton);
+        window3.add(informationTextColor);
+        window3.add(backgroundColourPickerButton);
+        window3.add(backgroundDisplayColour);
 
-        window2.add(selectBG);
-        window2.add(imageSelect);
-        window2.add(saveBB);
-        window2.add(previewBB);
+        window4.setLayout(new GridLayout(3,2));
+        window4.add(linkURL);
+        window4.add(imageURL);
+        window4.add(selectBG);
+        window4.add(imageSelect);
+        window4.add(saveBB);
+        window4.add(previewBB);
 
 //        Preview window - viewer.java
 
@@ -96,6 +120,13 @@ public class createBillboards {
             @Override
             public void actionPerformed(ActionEvent e) {
                 ColourPicker(textDisplayColour, Color.BLACK);
+            }
+        });
+
+        informationColourButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                    ColourPicker(informationTextColor, Color.BLACK);
             }
         });
 
@@ -109,14 +140,21 @@ public class createBillboards {
         saveBB.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String billboardTitle = input1.getText();
-                String billboardText = input2.getText();
-                String textColour = RGBToHex(textDisplayColour.getBackground());
+                String title = input1.getText();
+                String messageText = input2.getText();
+                String messageColour = RGBToHex(textDisplayColour.getBackground());
+                String image = imageURL.getText();
+                String informationText = informationColourInput.getText();
+                String informationColour = RGBToHex(informationTextColor.getBackground());
                 String backgroundColour = RGBToHex(backgroundColourPickerButton.getBackground());
-                String imageUrl = imageURL.getText();
 
+                int testImageOrURL = URLOrImageFileOrNone(fileChosen, image);
+                if (testImageOrURL == 1) {
+                    image = controller.CreateMD5(fileChosen);
+                }
                 try {
-                    controller.createBillboard( billboardTitle,billboardText, textColour, backgroundColour, fileChosen, imageUrl);
+                Billboard temp = new Billboard(title, messageText, messageColour, image, testImageOrURL, informationText, informationColour, backgroundColour);
+                    controller.createBillboard(temp);
                 } catch (IOException ioException) {
                     ioException.printStackTrace();
                 }
@@ -178,6 +216,25 @@ public class createBillboards {
             blue = temp;
         }
         return red+green+blue;
+    }
+
+//    Is there an image Given or a url or no image selected
+//    Returns an int either -1 or 0 or 1
+//    -1 means no image or Url Given
+//    0 means URl Given
+//    1 means File
+    private  static int URLOrImageFileOrNone(File imageFile, String urlImage) {
+        if (imageFile != null || urlImage.equals("") == false) {
+            if (urlImage.contains("www") || urlImage.contains("http") || urlImage.contains("/")) {
+                System.out.println(urlImage);
+                return 0;
+            }
+            if (imageFile  != null) {
+                System.out.println(imageFile.getAbsolutePath());
+                return 1;
+            }
+        }
+        return -1;
     }
 
 }

@@ -1,15 +1,11 @@
 package controlpanel;
 
-import javax.crypto.SecretKey;
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.PBEKeySpec;
-import javax.swing.*;
-import java.awt.*;
+import resources.Billboard;
+
 import java.io.*;
 import java.net.*;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -78,14 +74,9 @@ public class controller {
      *  file or enter a URL.
      *
      *
-     * @param billboardName     Name of billboard in listing.
-     * @param text              -I have no clue what this does since the billboard can't actually load.-
-     * @param textColour        Colour of text.
-     * @param backgroundColour  Background colour.
-     * @param fileChosen        File the user has selected.
-     * @param imageUrl          URL for the image to be displayed.
+     * @param billboard          Object class Billboard
      */
-    static void createBillboard(String billboardName, String text, String textColour, String backgroundColour, File fileChosen, String imageUrl) throws IOException {
+    static void createBillboard(Billboard billboard) throws IOException {
 
         // Initializing connections
         Socket client = connectionToServer();                   // User socket connection
@@ -95,41 +86,20 @@ public class controller {
         ObjectOutputStream send = new ObjectOutputStream(outputStream);
         ObjectInputStream receiver = new ObjectInputStream(inputStream);
 
-
-        // Title for window
-        send.writeUTF("CreateBillboards");
+        send.writeUTF("CreateBillboard");
         send.flush();
 
         send.writeUTF(loggedInUser);
         send.writeUTF(token);
         send.flush();
 
-
-
         int val = receiver.read();
         if (val == 1) {
-            send.writeUTF(billboardName);
-            send.writeUTF(text);
-            send.writeUTF(textColour);
-            send.writeUTF(backgroundColour);
-            System.out.println("file Chosen or URL");
-
-//                If the file is picked create MD5 version then send
-            if (fileChosen != null) {
-                send.writeUTF(CreateMD5(fileChosen));
-                System.out.println("FIle picked");
-//              Else if the image Url has text send the url
-            } else if (imageUrl.compareTo("") == -1 || imageUrl.compareTo("") == 1 ) {
-                send.writeUTF(imageUrl);
-                System.out.println("URL picked");
-            } else {
-                send.writeUTF("No Image");
-            }
+            send.writeObject(billboard);
             send.flush(); // Must be done before switching to reading state
             System.out.println(receiver.readUTF());
         } else {
             DialogWindow.showErrorPane("Sorry you don't have permission to edit", "Error Can't Make Billboard");
-            send.flush();
         }
 //      End connections
         send.close();
@@ -299,6 +269,7 @@ public class controller {
     }
 
     private static void RequestBillboardScheduling() throws IOException, ClassNotFoundException {
+
         Socket client = connectionToServer();
 
         // connects to the server with information and attempts to get the auth token for the user after successful login
@@ -310,6 +281,7 @@ public class controller {
             ObjectInputStream receiver = new ObjectInputStream(inputStream);
 
             send.writeUTF("RequestScheduleBillboards");
+
             send.writeUTF(loggedInUser);
             send.writeUTF(token);
             send.flush();
@@ -373,7 +345,6 @@ public class controller {
      *  Toggle switch to show or hide Schedule window via modifying isVisible state
      */
     public static void showSchedule() throws IOException, ClassNotFoundException {
-
         if (scheduleBillboards.window.isVisible() == true) {
             scheduleBillboards.window.setVisible(false);
         } else if (scheduleBillboards.window.isVisible() == false) {

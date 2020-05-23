@@ -1,5 +1,6 @@
 package server;
 
+import resources.Billboard;
 import server.databaseCreation.databaseCreation;
 import server.initialisation.ServerInit;
 
@@ -63,10 +64,10 @@ public class Server {
                     send.flush();
                 }
                 // Create Billboard Information
-                if (request.equals( "CreateBillboard")) {
-                    String[] billboardData = (String[]) receiver.readObject();
-                    CreateBillboard(billboardData);
-                    send.flush();
+                if (request.equals("CreateBillboard")) {
+//                    String[] billboardData = (String[]) receiver.readObject();
+//                    CreateBillboard(billboardData);
+                    CreateBillboard(receiver, send);
                 }
                 // Schedule Billboards
                 if (request.equals("ScheduleBillboards")) {
@@ -85,6 +86,7 @@ public class Server {
                 if (request.equals("ListBillboards")) {
 
                 }
+
                 // List Billboards
                 if (request.equals("EditUser")) {
                     System.out.println("EDIT USER");
@@ -304,55 +306,57 @@ public class Server {
         return data;
     }
 
-    static boolean CreateBillboard(String[] billboardData) throws ParseException {
+//    static boolean CreateBillboard(String[] billboardData) throws ParseException {
+//
+//        // If the billboard information was sent correctly, data will be parsed
+//        if (billboardData[0] != "" && billboardData[4] != "") {
+//
+//            String title = billboardData[0];
+//            int userId = Integer.parseInt(billboardData[1]);
+//            Date currentTime = new Date();
+//            Date timeModified = new Date();
+//            String fileLocation = billboardData[4];
+//
+//            // Use this for edit billboard
+//            // Date timeModified = new SimpleDateFormat("dd/MM/yyyy").parse(billboardData[3]);
+//
+//            // Add code to be storing the billboard information to the database
+//
+//            return true;
+//        }
+//
+//        // Returns false as no required data was sent
+//        return false;
+//    }
 
-        // If the billboard information was sent correctly, data will be parsed
-        if (billboardData[0] != "" && billboardData[4] != "") {
+//     NOTE:: NOT FINISHED YET (NEEDS SQL AND XML FILE CREATE INSERTED)
+    private static boolean CreateBillboard(ObjectInputStream receiver, ObjectOutputStream send) throws IOException, ClassNotFoundException {
+        String username = receiver.readUTF();
+        String token = receiver.readUTF();
+        if (checkTokenIsValid(username, token)) {
+            System.out.println("true");
+            send.write(1);
+            send.flush();
 
-            String title = billboardData[0];
-            int userId = Integer.parseInt(billboardData[1]);
-            Date currentTime = new Date();
-            Date timeModified = new Date();
-            String fileLocation = billboardData[4];
+            Billboard billboard = (Billboard) receiver.readObject();
 
-            // Use this for edit billboard
-            // Date timeModified = new SimpleDateFormat("dd/MM/yyyy").parse(billboardData[3]);
+            billboard.PrintBillboardInformation();
 
-            // Add code to be storing the billboard information to the database
+//            CreateXMLFile (billboard);
+//      CREATE XML FILE HERE CreateXMLFile(billboardName, billboardText, billboardTextColour, billboardBackgroundColour, billboardImage)
+//      INSERT SQL STATEMENT HERE
 
+            send.writeUTF("Finished creating Billboard");
+            send.flush();
             return true;
+        } else {
+            send.writeInt(0);
+            send.flush();
+            System.out.println("Don't have access to create billboard");
+            return false;
         }
-
-        // Returns false as no required data was sent
-        return false;
     }
 
-    // NOTE:: NOT FINISHED YET
-//    private static boolean CreateBillboard(ObjectInputStream receiver, ObjectOutputStream send) throws IOException, ClassNotFoundException {
-//        String username = receiver.readUTF();
-//        String token = receiver.readUTF();
-//        if (checkTokenIsValid(username, token)) {
-//            System.out.println("true");
-//            send.write(1);
-//            send.flush();
-//
-//            String billboardName = receiver.readUTF();
-//            String billboardText = receiver.readUTF();
-//            String billboardTextColour = receiver.readUTF();
-//            String billboardBackgroundColour = receiver.readUTF();
-//            String billboardImage = receiver.readUTF();
-//            System.out.println(billboardName + ", " + billboardText + ", " + billboardTextColour + ", " + billboardBackgroundColour + ", Image: " + billboardImage);
-////      CREATE XML FILE HERE CreateXMLFile(billboardName, billboardText, billboardTextColour, billboardBackgroundColour, billboardImage)
-////      INSERT SQL STATEMENT HERE
-//            send.writeUTF("Finished creating Billboard");
-//        } else {
-//            send.writeInt(0);
-//            System.out.println("false");
-//            return false;
-//        }
-//        send.flush();
-//        return true;
-//    }
 
     // Gets all the current scheduled billboards
     private static ArrayList<String[]> RequestScheduling(String username, String token) throws SQLException {
