@@ -255,14 +255,18 @@ public class controller {
             // Store the current schedule listings
             schedules = (ArrayList<String[]>) receiver.readObject();
 
-            int scheduleCounter = 1;
-            for(String[] schedule : schedules){
-                System.out.println("\nScheduled billboard " + scheduleCounter + ":");
-                System.out.println("Day: " + schedule[1]);
-                System.out.println("Duration: " + schedule[2]);
-                System.out.println("Start Time:  " + schedule[3]);
+            if (schedules != null) {
+                int scheduleCounter = 1;
+                for(String[] schedule : schedules){
+                    System.out.println("\nScheduled billboard " + scheduleCounter + ":");
+                    System.out.println("Day: " + schedule[1]);
+                    System.out.println("Duration: " + schedule[2]);
+                    System.out.println("Start Time:  " + schedule[3]);
 
-                scheduleCounter++;
+                    scheduleCounter++;
+                }
+            } else {
+                System.out.println("There is currently no scheduled billboards");
             }
 
 //      End connections
