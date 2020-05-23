@@ -13,6 +13,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 import java.sql.*;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
@@ -22,7 +23,7 @@ public class Server {
     private static Boolean connectionInitiated;
     static HashMap<String, String[]> usersAuthenticated = new HashMap<String, String[]>();
 
-    public static void main(String[] args) throws IOException, SQLException, InvalidKeySpecException, NoSuchAlgorithmException, ClassNotFoundException {
+    public static void main(String[] args) throws IOException, SQLException, InvalidKeySpecException, NoSuchAlgorithmException, ClassNotFoundException, ParseException {
 
         // Gathers the information from server.config file
         resources.GetPropertyValues properties = new resources.GetPropertyValues();
@@ -62,14 +63,24 @@ public class Server {
                     send.flush();
                 }
                 // Create Billboard Information
-                if (request.equals( "CreateBillboards")) {
-                    CreateBillboard(receiver, send);
+                if (request.equals( "CreateBillboard")) {
+                    String[] billboardData = (String[]) receiver.readObject();
+                    CreateBillboard(billboardData);
                     send.flush();
                 }
                 // Schedule Billboards
                 if (request.equals("ScheduleBillboards")) {
 
                 }
+
+                if (request.equals("RequestScheduleBillboards")) {
+                    System.out.println("Requested schedule billboards");
+                    String username = receiver.readUTF();
+                    String token = receiver.readUTF();
+                    send.writeObject(RequestScheduling(username, token));
+                    send.flush();
+                }
+
                 // List Billboards
                 if (request.equals("ListBillboards")) {
 
@@ -293,30 +304,96 @@ public class Server {
         return data;
     }
 
-    // NOTE:: NOT FINISHED YET
-    private static void CreateBillboard(ObjectInputStream receiver, ObjectOutputStream send) throws IOException, ClassNotFoundException {
-        String username = receiver.readUTF();
-        String token = receiver.readUTF();
-        if (checkTokenIsValid(username, token)) {
-            System.out.println("true");
-            send.write(1);
-            send.flush();
+    static boolean CreateBillboard(String[] billboardData) throws ParseException {
 
-            String billboardName = receiver.readUTF();
-            String billboardText = receiver.readUTF();
-            String billboardTextColour = receiver.readUTF();
-            String billboardBackgroundColour = receiver.readUTF();
-            String billboardImage = receiver.readUTF();
-            System.out.println(billboardName + ", " + billboardText + ", " + billboardTextColour + ", " + billboardBackgroundColour + ", Image: " + billboardImage);
-//      CREATE XML FILE HERE CreateXMLFile(billboardName, billboardText, billboardTextColour, billboardBackgroundColour, billboardImage)
-//      INSERT SQL STATEMENT HERE
-            send.writeUTF("Finished creating Billboard");
-        } else {
-            send.writeInt(0);
-            System.out.println("false");
+        // If the billboard information was sent correctly, data will be parsed
+        if (billboardData[0] != "" && billboardData[4] != "") {
+
+            String title = billboardData[0];
+            int userId = Integer.parseInt(billboardData[1]);
+            Date currentTime = new Date();
+            Date timeModified = new Date();
+            String fileLocation = billboardData[4];
+
+            // Use this for edit billboard
+            // Date timeModified = new SimpleDateFormat("dd/MM/yyyy").parse(billboardData[3]);
+
+            // Add code to be storing the billboard information to the database
+
+            return true;
         }
-        send.flush();
 
+        // Returns false as no required data was sent
+        return false;
+    }
+
+    // NOTE:: NOT FINISHED YET
+//    private static boolean CreateBillboard(ObjectInputStream receiver, ObjectOutputStream send) throws IOException, ClassNotFoundException {
+//        String username = receiver.readUTF();
+//        String token = receiver.readUTF();
+//        if (checkTokenIsValid(username, token)) {
+//            System.out.println("true");
+//            send.write(1);
+//            send.flush();
+//
+//            String billboardName = receiver.readUTF();
+//            String billboardText = receiver.readUTF();
+//            String billboardTextColour = receiver.readUTF();
+//            String billboardBackgroundColour = receiver.readUTF();
+//            String billboardImage = receiver.readUTF();
+//            System.out.println(billboardName + ", " + billboardText + ", " + billboardTextColour + ", " + billboardBackgroundColour + ", Image: " + billboardImage);
+////      CREATE XML FILE HERE CreateXMLFile(billboardName, billboardText, billboardTextColour, billboardBackgroundColour, billboardImage)
+////      INSERT SQL STATEMENT HERE
+//            send.writeUTF("Finished creating Billboard");
+//        } else {
+//            send.writeInt(0);
+//            System.out.println("false");
+//            return false;
+//        }
+//        send.flush();
+//        return true;
+//    }
+
+    // Gets all the current scheduled billboards
+    private static ArrayList<String[]> RequestScheduling(String username, String token) throws SQLException {
+
+        // Before request, check that the user's token is valid
+        if (checkTokenIsValid(username, token)) {
+            System.out.println("Token is valid. Begin requesting currently scheduled billboards...");
+
+            String query = "SELECT idSchedules, weekday, duration, startTime, userId FROM schedules";
+            Statement st = ServerInit.conn.createStatement();
+            st.executeQuery("USE `cab302`;");
+            ResultSet rs = st.executeQuery(query);
+
+            // checks if there is any data in the database
+            if (!rs.isBeforeFirst()) {
+                System.out.println("There is currently no scheduled billboards"); // Debug use
+//            return "No User in database";
+            } else {
+                // Contains the schedules in the database
+                ArrayList<String[]> schedules = new ArrayList<>();
+
+                System.out.println("Retrieving list of Schedules from database...");
+
+                while (rs.next()) {
+                    String id = rs.getString("idSchedules");
+                    String weekday = rs.getString("weekday");
+                    String duration = rs.getString("duration");
+                    String startTime = rs.getString("startTime");
+                    String userId = rs.getString("userId");
+
+                    String[] schedule = {id, weekday, duration, startTime, userId};
+                    schedules.add(schedule);
+                }
+                System.out.println("Successfully retrieved list of scheduled billboards");
+                System.out.println("Sending list of Schedules to controller...");
+
+                // Send the schedules to the control panel
+                return schedules;
+            }
+        }
+        return null;
     }
 
 }

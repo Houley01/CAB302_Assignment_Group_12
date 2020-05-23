@@ -34,7 +34,6 @@ public class usersPage {
             }
         });
 
-
 //      Button - Regular User
         JButton userRegular = new JButton("Regular User", new ImageIcon("src\\controlpanel\\resources\\user.png"));
         userRegular.setBounds(100,100,140,40);
@@ -97,14 +96,32 @@ public class usersPage {
 //        Heading - "Edit User Details"
         JButton editUserDetails = new JButton("Edit User Details");
         editUserDetails.setBounds(100,100,140,40);
+        editUserDetails.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                DialogWindow.showUserDetails();
+            }
+        });
 
 //        Heading - "Create User"
         JButton createUser = new JButton("Create New User");
         createUser.setBounds(100,100,140,40);
+        createUser.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                DialogWindow.showCreateUser();
+            }
+        });
 
 //        Heading - "Delete User"
         JButton deleteUser = new JButton("Delete a User");
         deleteUser.setBounds(100,100,140,40);
+        deleteUser.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                DialogWindow.showRemoveUser();
+            }
+        });
 
         adminWindow.setLayout(new GridLayout(2,1));
         adminWindow.add(editAdmin);
@@ -150,6 +167,7 @@ public class usersPage {
         userSettings.add(userPassword);
         userSettings.add(newPassword);
         userSettings.add(saveChanges);
+        userSettings.add(cancelChanges);
 
         return userWindow;
     }
