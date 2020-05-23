@@ -112,7 +112,11 @@ public class ControlPanelFrameHandler extends JFrame {
 
     private class menuScheduleButton implements ActionListener {
         public void actionPerformed(ActionEvent e) {
-            controller.showSchedule();
+            try {
+                controller.showSchedule();
+            } catch (IOException | ClassNotFoundException ex) {
+                ex.printStackTrace();
+            }
         }
     }
 
