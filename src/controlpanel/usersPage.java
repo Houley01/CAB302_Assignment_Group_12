@@ -10,6 +10,18 @@ import java.awt.event.ActionListener;
 
 public class usersPage {
     static JInternalFrame window = new JInternalFrame( "Edit User Information", false, false, true);
+
+    /**
+     * Popup window for when the user clicks on <i>Edit User Settings</i>.
+     * This includes the handlers for when a user clicks on the buttons as well as
+     * containing 2 buttons and icons accompanying the following options:
+     * <ul>
+     *     <li>Administrative User</li>
+     *     <li>Regular User</li>
+     * </ul>
+     *
+     * @return window       JFrame window object with configuration settings
+     */
     public static JInternalFrame userPage() {
         JPanel mainHeading = new JPanel();
         JPanel window2 = new JPanel();
@@ -58,6 +70,17 @@ public class usersPage {
     }
 
     static JInternalFrame adminWindow = new JInternalFrame( "Admin Preferences", false, false, true);
+
+    /**
+     * Admin user settings.
+     * Allows the admin user to modify a large amount of data that's not
+     * limited to: Password settings, user permissions, user details,
+     * creating a new user and deleting a user.
+     * The following settings have buttons correlating to handlers which open
+     * windows for user input.
+     *
+     * @return window       JFrame window object with configuration settings
+     */
     public static JInternalFrame AdminEditUserWindow() {
         adminWindow.setSize(300,400);
         // INSERT CONTENT HERE
@@ -137,6 +160,14 @@ public class usersPage {
     }
 
     static JInternalFrame userWindow = new JInternalFrame( "User Preferences", false, false, true);
+
+    /**
+     * User settings.
+     * Boils down to a change password page. Lets the user save their new password
+     * or cancel and retain their <i>old</i> password
+     *
+     * @return window       JFrame window object with configuration settings
+     */
     public static JInternalFrame UserEditUserWindow() {
         userWindow.setSize(400,125);
         // INSERT CONTENT HERE

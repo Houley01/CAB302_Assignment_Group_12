@@ -19,7 +19,15 @@ class login extends JFrame
 
     static JInternalFrame window = new JInternalFrame( "Login Screen");
 
-
+    /**
+     * Login window. First window you see when you open the application for the control panel.
+     * Authentication for users, username and password is done in the controller.
+     * @see controller
+     *
+     * @deprecated          .getText()
+     * @since               JDK13
+     * @return window       JFrame object containing configurations and elements created.
+     */
     public static JInternalFrame loginScreen() {
         window.setSize(250, 100);
         window.setLocation((controlPanel.WINDOWWIDTH/2) - 125, (controlPanel.WINDOWHEIGHT/2) - 100);

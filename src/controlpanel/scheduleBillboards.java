@@ -3,8 +3,40 @@ package controlpanel;
 import javax.swing.*;
 import java.awt.*;
 
+/**
+ * Scheduling billboards. Logic is similar to listing billboards as the billboard data
+ * is contained in a 3D array as well.
+ */
 public class scheduleBillboards {
     static JInternalFrame window = new JInternalFrame( "Schedule Billboards", false, false, true);
+
+    /**
+     * Lists currently schedule billboards into a table and displays that to the user. The timing is listed top to bottom like so:
+     * <table>
+     *     <tr>
+     *         <th>Time</th>
+     *         <th>Monday</th>
+     *         <th>Tuesday</th>
+     *         <th>Wednesday</th>
+     *         <th>Thursday</th>
+     *         <th>Friday</th>
+     *     </tr>
+     *     <tr>
+     *         <td>8:30am</td>
+     *         <td>Some billboard data</td>
+     *     </tr>
+     *     <tr>
+     *         <td> ... </td>
+     *         <td> ... </td>
+     *     </tr>
+     *     <tr>
+     *         <td>5:00pm</td>
+     *     </tr>
+     * </table>
+     * <i>This also includes the creation of a new schedule, editing existing schedules and deletion</i>
+     *
+     * @return window       JFrame window object with configuration settings
+     */
     public static JInternalFrame scheduleBillboards() {
         window.setSize(600, 400);
         window.setLocation((controlPanel.WINDOWWIDTH/2) - 400, (controlPanel.WINDOWHEIGHT/2) - 200);

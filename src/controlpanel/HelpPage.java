@@ -7,8 +7,22 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 
+/**
+ * <h1>Help page window</h1>
+ * Small window that queries the user if they need help.
+ * They have the option of either viewing the <i>Java Doc</i> or <i>System Overview</i>.
+ *
+ * Todo update buttons to target Java doc and system overview document
+ */
 public class HelpPage {
     static JInternalFrame window = new JInternalFrame("Help Page", false, false,true);
+
+    /**
+     * Help page JFrame configuration and setup. Includes <code>action listeners</code>.
+     *
+     * todo current implementation only targets 16.png via override
+     * @return window       Window help page contained in this variable.
+     */
     public static JInternalFrame HelpPage() {
         JPanel mainHeading = new JPanel();
         JPanel window2 = new JPanel();

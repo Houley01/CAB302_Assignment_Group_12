@@ -5,8 +5,27 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.IOException;
 
+/**
+ * Lists active billboards to the viewer via the listBillboards method.
+ * @see listBillboards
+ * @version 	%I%, %G%
+ * @since       JDK13
+ */
 public class listBillboards extends JFrame {
     static JInternalFrame window = new JInternalFrame( "List Billboards", false, false, true);
+
+    /**
+     * Lists all the currently active billboards. The billboard data is contained
+     * inside a 3D multidimensional array and <i>currently</i> holds a default of <b>6</b>
+     * billboards at a given time. This array is then added to a JFrame table to display
+     * the data.
+     *
+     * todo ADD Listen Function for when a row is clicked (If Clicked change 'selectedBillboard' text
+     * todo ADD ARE YOU SURE YOU WANT TO EDIT DIALOG BOX
+     * todo ADD ARE YOU SURE YOU WANT TO REMOVE DIALOG BOX
+     *
+     * @return window   JFrame window object with configuration settings
+     */
     public static JInternalFrame listBillboards() {
         window.setSize(600, 300);
         window.setLocation((controlPanel.WINDOWWIDTH/2) - 300, (controlPanel.WINDOWHEIGHT/2) - 200);
@@ -23,6 +42,7 @@ public class listBillboards extends JFrame {
         //      Calendar setup
         String[] columnHeading = {"ID", "Billboard Name", "Creator", "Date Made", "Date Modified", "File Location"};
 
+        // 3D array containing billboard information
         String[][] rowData = {
                 {"", "", "", "", "", ""},
                 {"", "", "", "", "", ""},

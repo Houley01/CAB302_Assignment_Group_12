@@ -9,9 +9,26 @@ import java.io.File;
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileSystemView;
 
+/**
+ *  Window and button handling for creation of billboards.
+ *  Contains the folllowing:
+ *  <ul>
+ *      <li>JFrame configuration for create billboard menu</li>
+ *      <li>Colour Picker</li>
+ *      <li>RGB to Hex converter</li>
+ *  </ul>
+ */
+
 public class createBillboards {
     static JInternalFrame window = new JInternalFrame("Create Billboard", false, false, true);
     static File fileChosen;
+
+    /**
+     * JFrame configuration for create billboard window.
+     *
+     * @return window
+     * @see window variable above this comment.
+     */
     public static JInternalFrame createBillboards() {
         JPanel mainHeading = new JPanel();
         JPanel window2 = new JPanel();
@@ -92,6 +109,7 @@ public class createBillboards {
 
 //        Preview window - viewer.java
 
+
         textColourPickerButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -142,6 +160,12 @@ public class createBillboards {
         return window;
     }
 
+    /**
+     * Colour picker window and modifies input field to chosen colour
+     *
+     * @param component         Button that needs color picker functionality
+     * @param initialColour     Default color
+     */
     private static void ColourPicker(JComponent component, Color initialColour) {
         // Colour chooser Pop up window
         Color color = JColorChooser.showDialog(component,
@@ -152,6 +176,12 @@ public class createBillboards {
 //        System.out.println(component.getBackground()); // Used for getting colour code TEMP CODE
     }
 
+    /**
+     *  Converts an RGB color value to Hex.
+     *
+     * @param RGB   Value to be converted to hex
+     * @return      hex color value
+     */
     private static String RGBToHex(Color RGB) {
         String temp, red, green, blue;
 //        Red
