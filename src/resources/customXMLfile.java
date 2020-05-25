@@ -1,21 +1,57 @@
 package resources;
 
+import java.io.IOException;
 import java.util.LinkedHashSet;
 
 public class customXMLfile{
     public String fileOutput;
 
-    public customXMLfile(String messageText, String messageColour,
-                         String informationText, String informationColour,
-                         String billboardImage, String billboardBackgroundColour){
-        fileOutput = CreateFileContents(messageText, messageColour,
-                informationText, informationColour,
-                billboardImage, billboardBackgroundColour);
+    /**
+     *
+     * todo find a more unique way of naming the file, current implementation is limited
+     * @author              https://stackoverflow.com/questions/17853541/java-how-to-convert-a-xml-string-into-an-xml-file
+     * @param xml           string in XML format to be written to an XML file
+     * @throws IOException
+     */
+    public static void stringToDom(String xml) throws IOException {
+        java.io.FileWriter fw = new java.io.FileWriter("temp.xml");
+        fw.write(xml);
+        fw.close();
     }
 
-    public static String CreateFileContents(String messageText, String messageColour,
+    /**
+     *
+     * @param messageText
+     * @param messageColour
+     * @param informationText
+     * @param informationColour
+     * @param billboardImage
+     * @param billboardBackgroundColour
+     * @throws IOException
+     */
+    public customXMLfile(String messageText, String messageColour,
+                         String informationText, String informationColour,
+                         String billboardImage, String billboardBackgroundColour)
+            throws IOException
+    {
+        CreateFileContents(messageText, messageColour, informationText, informationColour, billboardImage, billboardBackgroundColour);
+    }
+
+    /**
+     *
+     * @param messageText
+     * @param messageColour
+     * @param informationText
+     * @param informationColour
+     * @param billboardImage
+     * @param billboardBackgroundColour
+     * @return
+     * @throws IOException
+     */
+    public static void CreateFileContents(String messageText, String messageColour,
                                             String informationText, String informationColour,
                                             String billboardImage, String billboardBackgroundColour)
+            throws IOException
     {
         String xmlFile = "";
         LinkedHashSet<String> xmlLines = new LinkedHashSet<>(); // make linkedhashset to store all the lines
@@ -74,6 +110,7 @@ public class customXMLfile{
             xmlFile = xmlFile + line + "\n";
         }
 
-        return xmlFile;
+        stringToDom(xmlFile);
     }
 }
+
