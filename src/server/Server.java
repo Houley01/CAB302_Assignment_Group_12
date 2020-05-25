@@ -1,6 +1,7 @@
 package server;
 
 import resources.Billboard;
+import resources.CustomXMFile;
 import server.databaseCreation.databaseCreation;
 import server.initialisation.ServerInit;
 
@@ -306,6 +307,25 @@ public class Server {
         return data;
     }
 
+    private static int GetUserID(String username) throws SQLException {
+
+        String query = "select idUsers FROM users where user = '" + username +"';";
+
+        Statement st = ServerInit.conn.createStatement();
+        st.executeQuery("USE `cab302`;");
+        ResultSet rs = st.executeQuery(query);
+        // If no user are found in database
+        if (!rs.isBeforeFirst()) {
+            System.out.println("No user in database"); // Debug use
+//            return "No User in database";
+        } else {
+            int i = 1;
+            while (rs.next())
+                return rs.getInt(i);
+        }
+        return -1;
+    }
+
 //    static boolean CreateBillboard(String[] billboardData) throws ParseException {
 //
 //        // If the billboard information was sent correctly, data will be parsed
@@ -329,11 +349,12 @@ public class Server {
 //        return false;
 //    }
 
-//     NOTE:: NOT FINISHED YET (NEEDS SQL AND XML FILE CREATE INSERTED)
-    private static boolean CreateBillboard(ObjectInputStream receiver, ObjectOutputStream send) throws IOException, ClassNotFoundException {
+
+    private static boolean CreateBillboard(ObjectInputStream receiver, ObjectOutputStream send) throws IOException, ClassNotFoundException, SQLException {
         String username = receiver.readUTF();
         String token = receiver.readUTF();
-        if (checkTokenIsValid(username, token)) {
+        int userId = GetUserID(username);
+        if (checkTokenIsValid(username, token) && userId != -1) {
             System.out.println("true");
             send.write(1);
             send.flush();
@@ -341,12 +362,27 @@ public class Server {
             Billboard billboard = (Billboard) receiver.readObject();
 
             billboard.PrintBillboardInformation();
+            String fileLocation = CustomXMFile.CreateFileContents(billboard);
+            System.out.println(fileLocation);
 
-//            CreateXMLFile (billboard);
-//      CREATE XML FILE HERE CreateXMLFile(billboardName, billboardText, billboardTextColour, billboardBackgroundColour, billboardImage)
-//      INSERT SQL STATEMENT HERE
+//            Check if the file already exists in database
+            String query = "SELECT idBillboards FROM billboards WHERE billboardName = '"+ billboard.getTitle() +"';";
+            Statement st = ServerInit.conn.createStatement();
+            st.executeQuery("USE `cab302`;");
+            ResultSet rs = st.executeQuery(query);
+//            If the billboard name is not found in the database then insert into database, else UPDATE data in database
+            if (!rs.isBeforeFirst()) {
+                query = "INSERT INTO `billboards` (`idBillboards`, `billboardName`, `userId`, `dateMade`, `dateModify`, `fileLocation`)" +
+                        "VALUES (NULL, '" + billboard.getTitle()+  "', "+ userId + ", NULL, NULL, '" + fileLocation +"')";
+                st.executeQuery(query);
 
-            send.writeUTF("Finished creating Billboard");
+            } else {
+                rs.next();
+                System.out.println(rs.getInt("idBillboards"));
+                query = "UPDATE `billboards` SET `userId` = " + userId + ", `dateModify` = current_timestamp() WHERE `idBillboards` = "+ rs.getInt("idBillboards") + "";
+                st.execute(query);
+            }
+            send.write(1);
             send.flush();
             return true;
         } else {

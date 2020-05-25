@@ -87,4 +87,8 @@ public class Billboard implements Serializable {
     public void setInformationColour(String informationColour) {
         this.informationColour = informationColour;
     }
+
+    public String getBackgroundColour() {
+        return backgroundColour;
+    }
 }

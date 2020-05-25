@@ -3,56 +3,39 @@ package resources;
 import java.io.IOException;
 import java.util.LinkedHashSet;
 
-public class customXMLfile{
-    public String fileOutput;
+public class CustomXMFile {
 
     /**
      *
      * todo find a more unique way of naming the file, current implementation is limited
      * @author              https://stackoverflow.com/questions/17853541/java-how-to-convert-a-xml-string-into-an-xml-file
      * @param xml           string in XML format to be written to an XML file
+     * @param title          Use the billboard title as the file name
+     * @return String       Returns File Location
      * @throws IOException
      */
-    public static void stringToDom(String xml) throws IOException {
-        java.io.FileWriter fw = new java.io.FileWriter("temp.xml");
+    public static String StringToDom(String xml, String title) throws IOException {
+        String fileLocation = "BillboardDesign/" + title + ".xml";
+        java.io.FileWriter fw = new java.io.FileWriter(fileLocation);
         fw.write(xml);
         fw.close();
+        return fileLocation;
     }
 
     /**
      *
-     * @param messageText
-     * @param messageColour
-     * @param informationText
-     * @param informationColour
-     * @param billboardImage
-     * @param billboardBackgroundColour
+     * @param billboard         Is a class object of Billboard
+     * @return String           Return the File location
      * @throws IOException
      */
-    public customXMLfile(String messageText, String messageColour,
-                         String informationText, String informationColour,
-                         String billboardImage, String billboardBackgroundColour)
-            throws IOException
-    {
-        CreateFileContents(messageText, messageColour, informationText, informationColour, billboardImage, billboardBackgroundColour);
-    }
-
-    /**
-     *
-     * @param messageText
-     * @param messageColour
-     * @param informationText
-     * @param informationColour
-     * @param billboardImage
-     * @param billboardBackgroundColour
-     * @return
-     * @throws IOException
-     */
-    public static void CreateFileContents(String messageText, String messageColour,
-                                            String informationText, String informationColour,
-                                            String billboardImage, String billboardBackgroundColour)
-            throws IOException
-    {
+    public static String CreateFileContents(Billboard billboard) throws IOException {
+        String billboardTitle = billboard.getTitle();
+        String messageText = billboard.getMessageText();
+        String messageColour = billboard.getMessageColour();
+        String informationText = billboard.getInformationText();
+        String informationColour = billboard.getInformationColour();
+        String billboardImage = billboard.getImage();
+        String billboardBackgroundColour = billboard.getBackgroundColour();
         String xmlFile = "";
         LinkedHashSet<String> xmlLines = new LinkedHashSet<>(); // make linkedhashset to store all the lines
 
@@ -110,7 +93,7 @@ public class customXMLfile{
             xmlFile = xmlFile + line + "\n";
         }
 
-        stringToDom(xmlFile);
+        return StringToDom(xmlFile, billboardTitle);
     }
 }
 

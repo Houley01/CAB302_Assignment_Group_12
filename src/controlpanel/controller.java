@@ -97,7 +97,10 @@ public class controller {
         if (val == 1) {
             send.writeObject(billboard);
             send.flush(); // Must be done before switching to reading state
-            System.out.println(receiver.readUTF());
+//            System.out.println(receiver.readUTF());
+            if (receiver.read() ==  1) {
+                DialogWindow.showInformationPane("Billboard finished creating.", "Completion of Billboard");
+            }
         } else {
             DialogWindow.showErrorPane("Sorry you don't have permission to edit", "Error Can't Make Billboard");
         }
@@ -419,6 +422,7 @@ public class controller {
         }
         return base64Image;
     }
+
     /**
      * Logs the current user out of their session.
      * Todo modify code to actually log the user out to the login page
