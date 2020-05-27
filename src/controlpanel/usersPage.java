@@ -7,6 +7,9 @@ import javax.xml.stream.FactoryConfigurationError;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 
 public class usersPage {
     static JInternalFrame window = new JInternalFrame( "Edit User Information", false, false, true);
@@ -102,7 +105,15 @@ public class usersPage {
         adminPassword.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                DialogWindow.showPasswordSettings();
+                try {
+                    DialogWindow.showPasswordSettings();
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                } catch (InvalidKeySpecException ex) {
+                    ex.printStackTrace();
+                } catch (NoSuchAlgorithmException ex) {
+                    ex.printStackTrace();
+                }
             }
         });
 

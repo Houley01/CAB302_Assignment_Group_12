@@ -240,6 +240,46 @@ public class controller {
         return hashedPassword;
     }
 
+    static String hashNewPassword(String newPassword) throws InvalidKeySpecException, NoSuchAlgorithmException {
+
+        String newPasswordHashed = plaintextToHashedPassword(newPassword);
+
+        System.out.println("hashing new password...");
+        System.out.println(newPasswordHashed);
+
+        return newPasswordHashed;
+    }
+
+    static void changePassword(String password) throws IOException, InvalidKeySpecException, NoSuchAlgorithmException {
+
+        Socket client = connectionToServer();
+
+        // connects to the server with information and attempts to get the auth token for the user after successful login
+        if (client.isConnected()) {
+
+            OutputStream outputStream = client.getOutputStream();
+            InputStream inputStream = client.getInputStream();
+
+            ObjectOutputStream send = new ObjectOutputStream(outputStream);
+            ObjectInputStream receiver = new ObjectInputStream(inputStream);
+
+            String newPassword = hashNewPassword(password);
+
+            send.writeUTF("changePassword");
+            send.writeUTF(newPassword);
+            send.writeUTF(loggedInUser);
+            send.writeUTF(token);
+            send.flush(); // Must be done before switching to reading state
+
+
+//      End connections
+            send.close();
+            receiver.close();
+            client.close();
+
+        }
+    }
+
     /**
      * Gets the current socket authentication token
      *

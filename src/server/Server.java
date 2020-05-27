@@ -140,6 +140,20 @@ public class Server {
 //                        send.flush();
                     }
                 }
+
+                // Changes user's password
+                if (request.equals("changePassword")) {
+                    String password = receiver.readUTF();
+                    String username = receiver.readUTF();
+                    String token = receiver.readUTF();
+                    if (checkTokenIsValid(username, token)) {
+                        System.out.println("Changing Password...");
+                        changeUserPassword(username, password);
+                        System.out.println("Changed Password...");
+                    }
+                    send.flush();
+                }
+
                 // Viewer Request Billboards
                 if (request.equals("ViewerRequest")) {
 
@@ -259,7 +273,6 @@ public class Server {
      */
     public static String addSaltToHashedPassword(String password) throws InvalidKeySpecException, NoSuchAlgorithmException, IOException {
         String hashedPasswordSalted = getSaltedHash(password);
-
         return hashedPasswordSalted;
     }
 
@@ -661,6 +674,15 @@ public class Server {
             send.writeObject(billboard);
         }
         send.flush();
+    }
+
+    private static void changeUserPassword(String username, String password) throws InvalidKeySpecException, NoSuchAlgorithmException, IOException, SQLException {
+        String saltHashedPassword = addSaltToHashedPassword(password);
+
+        String query = "UPDATE users SET pass = '" + saltHashedPassword + "' WHERE user = '" + username + "'";
+        Statement st = ServerInit.conn.createStatement();
+        st.executeQuery("USE `cab302`;");
+        st.executeQuery(query);
     }
 }
 

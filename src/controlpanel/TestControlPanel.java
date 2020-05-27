@@ -101,4 +101,15 @@ public class TestControlPanel {
         assertEquals(true, !password.equals(hashedPassword));
 
     }
+
+    // New password is hashed before sent to server
+    @Test
+    public void testPasswordChange() throws InvalidKeySpecException, NoSuchAlgorithmException {
+        String password = "password";
+
+        String hashedPassword = controller.hashNewPassword(password);
+
+        assertEquals(true, !password.equals(hashedPassword));
+
+    }
 }

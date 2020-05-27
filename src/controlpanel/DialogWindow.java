@@ -3,6 +3,9 @@ package controlpanel;
 import javax.naming.spi.ObjectFactoryBuilder;
 import javax.swing.*;
 import java.awt.*;
+import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 
 /**
  *  Window to create dialog windows without causing bugs that cause non-readable text fields
@@ -54,10 +57,20 @@ public class DialogWindow {
      *  Edit password window. Changes the users current password
      *  to the newly entered password.
      */
-    static void showPasswordSettings() {
+    static void showPasswordSettings() throws IOException, InvalidKeySpecException, NoSuchAlgorithmException {
         JFrame editPassword = new JFrame();
-        Object changePassword = JOptionPane.showInputDialog(editPassword, "Change your password:");
+        Object changePassword = JOptionPane.showInputDialog(editPassword, "Enter new password:");
+        Object changePasswordConfirm = JOptionPane.showInputDialog(editPassword, "Confirm new password:");
+
         System.out.println(changePassword);
+        System.out.println(changePasswordConfirm);
+
+        if (changePassword.equals(changePasswordConfirm)) {
+            controller.changePassword((String) changePasswordConfirm);
+        } else {
+            DialogWindow.showErrorPane("Passwords don't match. Please try again.", "Error");
+            System.out.println("Passwords didn't match");
+        }
     }
 
     // User Permissions
