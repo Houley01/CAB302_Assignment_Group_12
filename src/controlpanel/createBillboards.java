@@ -248,11 +248,17 @@ public class createBillboards {
         return red+green+blue;
     }
 
-//    Is there an image Given or a url or no image selected
-//    Returns an int either -1 or 0 or 1
-//    -1 means no image or Url Given
-//    0 means URl Given
-//    1 means File
+    /**
+     *  URL / Image selector. Detects if either a URL, File or no
+     *  input was used for the image section of the create billboard
+     *  form.
+     *
+     * @param imageFile File to be used for billboard image
+     * @param urlImage  URL to be used for billboard image
+     * @return int      -1 No url or image is given
+     *                   0 URl was given
+     *                   1 File was given
+     */
     private  static int URLOrImageFileOrNone(File imageFile, String urlImage) {
         if (imageFile != null || urlImage.equals("") == false) {
             if (urlImage.contains("www") || urlImage.contains("http") || urlImage.contains("/")) {

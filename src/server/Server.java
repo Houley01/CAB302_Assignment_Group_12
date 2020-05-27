@@ -22,9 +22,44 @@ import java.util.HashMap;
 import java.util.Date;
 
 public class Server {
+    /**
+     * Reads database connection properties and connects to database as a root user.
+     * The method returns a bool. True if connected, false if it cannot connect.
+     */
     private static Boolean connectionInitiated;
+    /**
+     * Used for authentication tokens. Example of a token would be
+     * <code>{username, {token, expiry}}</code>
+     */
     static HashMap<String, String[]> usersAuthenticated = new HashMap<String, String[]>();
 
+    /**
+     *  Initiates logic for connecting to database and server properties.
+     *  If the server can connect to the database it will open a socket
+     *  on the port from server.properties <code>default: 8888</code>
+     *  and run through a while loop. This while loop is an if tree
+     *  for most user interactions with the billboard system and calls
+     *  methods / classes accordingly.
+     *  <ul>
+     *      <li>User login</li>
+     *      <li>User authentication</li>
+     *      <li><h3>Billboard controller</h3></li>
+     *      <li>Billboard creation</li>
+     *      <li>Billboard Schedule</li>
+     *      <li>Billboard Listing</li>
+     *      <li>User modification</li>
+     *      <li><h3>Billboard viewer</h3></li>
+     *      <li>Viewer request billboard</li>
+     *  </ul>
+     *
+     * @param args                      arguments supplied via cmdlet
+     * @throws IOException
+     * @throws SQLException
+     * @throws InvalidKeySpecException
+     * @throws NoSuchAlgorithmException
+     * @throws ClassNotFoundException
+     * @throws ParseException
+     */
     public static void main(String[] args) throws IOException, SQLException, InvalidKeySpecException, NoSuchAlgorithmException, ClassNotFoundException, ParseException {
 
         // Gathers the information from server.config file
@@ -83,12 +118,13 @@ public class Server {
                     send.flush();
                 }
 
+
                 // List Billboards
                 if (request.equals("ListBillboards")) {
 
                 }
 
-                // List Billboards
+                // Edit user
                 if (request.equals("EditUser")) {
                     System.out.println("EDIT USER");
 //                    for admin use
@@ -114,6 +150,21 @@ public class Server {
         }
     }
 
+    /**
+     *  Checks the database to see if a user matches the username given and
+     *  if the password in the database matches one the user has given.
+     *  The method returns a bool if the user exits in the database or not.
+     *
+     * @param uName                     User name to get details for.
+     * @param pass                      Password to check against other passwords in the system.
+     * @return bool                     True: User is found
+     * @return bool                     False: User not found
+     *
+     * @throws SQLException
+     * @throws InvalidKeySpecException
+     * @throws NoSuchAlgorithmException
+     * @throws IOException
+     */
     static boolean checkUserDetails(String uName, String pass) throws SQLException, InvalidKeySpecException, NoSuchAlgorithmException, IOException {
         String query = "SELECT * FROM `users` WHERE `user` = \""+ uName + "\";";
 
@@ -153,6 +204,18 @@ public class Server {
     }
 
     // Returns a hash of the entered password for a new user
+
+    /**
+     * Hashes the password via MD5 encryption and using MessageDigest
+     * algorithm
+     *
+     *
+     * @param password                  Password to be hashed
+     * @return hashed password
+     * @throws InvalidKeySpecException
+     * @throws NoSuchAlgorithmException
+     * @throws IOException
+     */
     static String plaintextToHashedPassword(String password) throws InvalidKeySpecException, NoSuchAlgorithmException, IOException {
         String hashedPassword = null;
         try {
@@ -184,6 +247,16 @@ public class Server {
     }
 
     // After a password has been hashed, a salt can be added to it before being stored to the server
+
+    /**
+     * Adds salt to a hashed password for storage in database.
+     *
+     * @param password                  Password to be salted
+     * @return salted and hashed password
+     * @throws InvalidKeySpecException
+     * @throws NoSuchAlgorithmException
+     * @throws IOException
+     */
     public static String addSaltToHashedPassword(String password) throws InvalidKeySpecException, NoSuchAlgorithmException, IOException {
         String hashedPasswordSalted = getSaltedHash(password);
 
@@ -191,6 +264,17 @@ public class Server {
     }
 
     // Creates a salted hash of the hashed password entered from the user that can then be used to store in the database for the user
+
+    /**
+     * Creates a salted hashed of the password entered that can be stored in the DB.
+     * Salted part of the hash is encoded in base64.
+     *
+     * @param password                      Password to be salted and hashed.
+     * @return salted and hashed password
+     * @throws IOException
+     * @throws InvalidKeySpecException
+     * @throws NoSuchAlgorithmException
+     */
     public static String getSaltedHash(String password) throws IOException, InvalidKeySpecException, NoSuchAlgorithmException {
         byte[] salt = SecureRandom.getInstance("SHA1PRNG").generateSeed(32);
         // store the salt with the password
@@ -200,6 +284,22 @@ public class Server {
     }
 
     //Checks the hashed password entered by the user corresponds to a stored salted hash of the password
+
+    /**
+     * Checks toi see if the password and stored password match. Firstly checks if the stored
+     * password has a valid salt and hash. (It does this by splitting the stored password into
+     * an array via the $ separating the salt and the hash). Then encodes the supplied password
+     * from the user to see if it matches the hash of the stored password.
+     *
+     * @see hash
+     * @param password      Password entered by user.
+     * @param stored        Stored password from database.
+     * @return hashed password
+     * @throws IOException
+     * @throws InvalidKeySpecException
+     * @throws NoSuchAlgorithmException
+     * @throws IllegalStateException        Incorrect format for hashed and salted passwords.
+     */
     public static boolean check(String password, String stored) throws IOException, InvalidKeySpecException, NoSuchAlgorithmException {
         String[] saltAndHash = stored.split("\\$");
         if (saltAndHash.length != 2) {
@@ -211,6 +311,19 @@ public class Server {
     }
 
     // Returns a hash to check for hash comparison of the users entered password and the one stored in the database
+
+    /**
+     * Hashes the user entered password with SecretKeyFactory (Bi-directional cryptographic opaque key
+     * (encryption and decryption method)) and salts the user defined password with the salted password
+     * from the server.
+     *
+     * @param password      Password user entered
+     * @param salt          Salt from stored password
+     * @return hashed password
+     * @throws InvalidKeySpecException
+     * @throws NoSuchAlgorithmException
+     * @throws IllegalArgumentException     Password input was empty or null.
+     */
     private static String hash(String password, byte[] salt) throws InvalidKeySpecException, NoSuchAlgorithmException {
         if (password == null || password.length() == 0)
             throw new IllegalArgumentException("Empty passwords are not supported.");
@@ -220,6 +333,15 @@ public class Server {
         return Base64.getEncoder().encodeToString(key.getEncoded());
     }
 
+    /**
+     * Generates a token using a random number generator and shifting through a byte array
+     * X amount of times and encoding the byte array into base64 as the user token. Then
+     * we get the servers current Unix timestamp and set the expiry for authToken to be
+     * 24 hours from time of generation.
+     *
+     * @param username      User to generate a token for
+     * @return token
+     */
     static String generateAuthToken(String username) {
         // Below creates the auth token for the user
         SecureRandom secureRandom = new SecureRandom();
@@ -248,8 +370,15 @@ public class Server {
         return token;
     }
 
-    // Check if the authentication token is still valid and hasn't expired or doesn't match up with what the server has stored for the user
-    // This check is to be done when the user does an action that involves the server
+    /**
+     * Authentication checker. Checks to see if a token is still valid, hasn't expired or doesn't match the stored
+     * token from the server. This check is to be done when a user does any action that involves the server.
+     *
+     * @param username      Username (Used as an ID).
+     * @param token         Token user is currently using.
+     * @return true         If the token is still valid.
+     * @return false        If the token is not valid.
+     */
     static boolean checkTokenIsValid(String username, String token) {
         // Check that a user has been given an auth token
         if(usersAuthenticated.containsKey(username)) {
@@ -284,7 +413,14 @@ public class Server {
         }
     }
 
-    //    NOTE:: STILL WORKING ON THIS
+    /**
+     * Queries the database for all users from the users table.
+     *
+     * Note: Still working on this
+     *
+     * @return All users in object
+     * @throws SQLException
+     */
     private static Object getAllUsernames() throws SQLException {
         Object data = new Object();
         String query = "SELECT `user` FROM `users`";
@@ -307,6 +443,14 @@ public class Server {
         return data;
     }
 
+    /**
+     * Queries for the user ID from the database via their username.
+     *
+     * @param username      Username
+     * @return int          UserID.
+     * @return int          -1 if no userID was found.
+     * @throws SQLException
+     */
     private static int GetUserID(String username) throws SQLException {
 
         String query = "select idUsers FROM users where user = '" + username +"';";
@@ -349,7 +493,21 @@ public class Server {
 //        return false;
 //    }
 
-
+    /**
+     * Calls createBillboard class from the control panel and creates a XML file with all the
+     * current billboards. If the billboard name is found in the database it updates the information
+     * related to that entry to the new information entered from the user. Otherwise it creates a new
+     * billboard entry.
+     *
+     * @see main            For more context on stremable receiver and sender
+     * @param receiver      Stream receiver
+     * @param send          Stream sender
+     * @return true         Billboard was created and database was updated successfully.
+     * @return false        If user does not have permissions or userID does not exist.
+     * @throws IOException
+     * @throws ClassNotFoundException
+     * @throws SQLException
+     */
     private static boolean CreateBillboard(ObjectInputStream receiver, ObjectOutputStream send) throws IOException, ClassNotFoundException, SQLException {
         String username = receiver.readUTF();
         String token = receiver.readUTF();
@@ -395,6 +553,17 @@ public class Server {
 
 
     // Gets all the current scheduled billboards
+
+    /**
+     * Scheduling listed from the database. Code checks to see if the current token
+     * is valid and retrieves the data from the database then forms it into an array list.
+     *
+     * @param username      Username of the person requesting the scheduling.
+     * @param token         Authentication token of the user.
+     * @return schedules
+     * @return null         if token is not valid
+     * @throws SQLException
+     */
     private static ArrayList<String[]> RequestScheduling(String username, String token) throws SQLException {
 
         // Before request, check that the user's token is valid

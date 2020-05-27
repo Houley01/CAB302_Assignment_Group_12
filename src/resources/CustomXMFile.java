@@ -6,8 +6,11 @@ import java.util.LinkedHashSet;
 public class CustomXMFile {
 
     /**
+     *  Creates an XML file from a string format.
+     *  Input has to be in a valid XML format for this conversation to work because
+     *  there's no check to see if the XML input is valid XML.
+     *  This is a huge security flaw. Too bad!
      *
-     * todo find a more unique way of naming the file, current implementation is limited
      * @author              https://stackoverflow.com/questions/17853541/java-how-to-convert-a-xml-string-into-an-xml-file
      * @param xml           string in XML format to be written to an XML file
      * @param title          Use the billboard title as the file name
@@ -23,6 +26,9 @@ public class CustomXMFile {
     }
 
     /**
+     * Formats billboard content into readable XML string.
+     * @see StringToDom
+     *
      *
      * @param billboard         Is a class object of Billboard
      * @return String           Return the File location

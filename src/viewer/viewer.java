@@ -14,9 +14,19 @@ import java.net.URL;
 import java.util.*;
 
 // this class stores all attributes of component on the billboard
+
+/**
+ * Class stores all attributes of component on the billboard
+ */
 class billboardDecor{
     public String type, colour, content; // the class has three attributes stored
 
+    /**
+     * Scrubs an XML file for tags relating to colour.
+     *
+     * @param tags  XML file tags.
+     * @return      Value from XML.
+     */
     String colourFinder(String tags){ // this function is used to find if there is a colour in the xml object
         if (tags.contains("background=")) // if there is a "background" tag
         {
@@ -32,6 +42,21 @@ class billboardDecor{
         return null;
     }
 
+    /**
+     * Detects the type of tag used out of 4 possible types.
+     * then returns the type detected.
+     * <ul>
+     *     <li>information</li>
+     *     <li>message</li>
+     *     <li>picture</li>
+     *     <li>billboard</li>
+     * </ul>
+     *
+     *
+     * @param tags  XML file tags.
+     * @return type Value from XML.
+     * @return null If no type was found.
+     */
     String typeFinder(String tags){
         String[] objectTypes = {"information", "message", "picture", "billboard"}; // there are 4 possible types
 
@@ -45,6 +70,11 @@ class billboardDecor{
         return null; // return null if none of these are found
     }
 
+    /**
+     *
+     * @param tags  XML file tags.
+     * @return
+     */
     String contentFinder(String tags){
         if (tags.contains("<information") || tags.contains("<message")) // if it is information or a message
         {
@@ -59,6 +89,10 @@ class billboardDecor{
         return null; // return null if no content is found
     }
 
+    /**
+     * Set objects as variables.
+     * @param tags  XML tags.
+     */
     public billboardDecor(String tags) // set the objects varaibles
     {
         type = typeFinder(tags); // generate the type
@@ -67,7 +101,23 @@ class billboardDecor{
     }
 }
 
-public class viewer{ 
+/**
+ *
+ */
+public class viewer{
+    /**
+     * Reads from the XML file to create a billboard object.
+     * Billboard xml file looks like the following:
+     * <code>
+     *     <?xml version="1.0" encoding="UTF-8"?>
+     *      <billboard background="#8996FF">
+     *          <picture url="https://cloudstor.aarnet.edu.au/plus/s/5fhToroJL0nMKvB/download" />
+     *      </billboard>
+     * </code>
+     * @param filePath          File path for XML file.
+     * @return BillboardObjects
+     * @throws IOException
+     */
     public static LinkedHashSet<billboardDecor> xmlReader(String filePath) throws IOException {
         BufferedReader reader; // buffered reader to read the xml file line by line
         LinkedHashSet<String> RawBillboardObjects = new LinkedHashSet<>(); // make linkedhashset to store all the tags
@@ -99,6 +149,14 @@ public class viewer{
         return BillboardObjects; // return the set including all billboard objects
     }
 
+    /**
+     * JFrame setup for viewer. Adds <i>widgets</i> grabbed via the XML data for a specific
+     * billboard and creates JFrame widgets accordingly.
+     *
+     * @param widgets       XML tags.
+     * @see LinkedHashSet
+     * @throws IOException
+     */
     public static void SetupScreen(LinkedHashSet<billboardDecor> widgets) throws IOException {
         GridBagConstraints c = new GridBagConstraints(); // set up constraints 
 
@@ -191,7 +249,7 @@ public class viewer{
         f.setVisible(true); // show gui
     }
 
-        public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException {
         SetupScreen(xmlReader("billboardsExamples/15.xml")); // call the xml reader and give return to setupscreen
     }
 }

@@ -16,6 +16,15 @@ public class ServerInit {
     private static String username;
     private static String password;
 
+    /**
+     * Sets the database connection via props file.
+     * Reads url and places itself as a root user.
+     * Note: No connection is made in this method,
+     * it's just initialization.
+     *
+     * @see initaliseConnection
+     * @throws IOException
+     */
     public static void setupDatabaseConnectionInfo() throws IOException {
         // Attempt to open file 'db.props' and retrieve DB connection information
         try {
@@ -32,6 +41,14 @@ public class ServerInit {
         }
     }
 
+
+    /**
+     * Uses the information from setupDatabaseConnectionInfo
+     * and connects to the database.
+     *
+     * @return bool         Return true if connection was successful.
+     * @throws SQLException
+     */
     public static Boolean initaliseConnection() throws SQLException {
         // Attempt to make the connection to the DB
         try {
