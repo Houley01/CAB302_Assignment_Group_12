@@ -125,7 +125,17 @@ public class Server {
 
                 // List Billboards
                 if (request.equals("ListBillboards")) {
-
+                    RequestBillboardList(receiver, send);
+                }
+//                Find the selected billboard
+                if (request.equals("GetBillboard")) {
+                    try {
+                        GetBillboardInfo(receiver, send);
+                    } catch (ParserConfigurationException e) {
+                        e.printStackTrace();
+                    } catch (SAXException e) {
+                        e.printStackTrace();
+                    }
                 }
 
                 // Edit user
