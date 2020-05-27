@@ -271,6 +271,13 @@ public class controller {
         }
     }
 
+    /**
+     * Connects to server and stores the current listings.
+     * - Todo database connectivity?
+     *
+     * @throws IOException
+     * @throws ClassNotFoundException
+     */
     private static void RequestBillboardScheduling() throws IOException, ClassNotFoundException {
 
         Socket client = connectionToServer();
@@ -321,84 +328,72 @@ public class controller {
         login.window.setVisible(false);
         ControlPanelFrameHandler.bar.setVisible(true);
     }
+
     /**
-     *  Toggle switch to show or hide create billboard window via modifying isVisible state
+     * Helper function to toggle visibility of windows.
      *
+     * @param component     Component needing toggle show / hide functionality.
      */
-    public static void showCreateBillboard() {
-        if (createBillboards.window.isVisible() == true) {
-            createBillboards.window.setVisible(false);
-        } else if (createBillboards.window.isVisible() == false) {
-            createBillboards.window.setVisible(true);
+    public static void toggleVisibility(JComponent component)
+    {
+        // isVisible() returns a bool
+        // true = is currently opened
+        // false = is currently closed
+        if(component.isVisible())
+        {
+            component.setVisible(false);
+        }
+        else if(!component.isVisible())
+        {
+            component.setVisible(true);
         }
     }
-    /**
-     *  Toggle switch to show or hide list billboard window via modifying isVisible state
-     *
-     */
-    public static void showListBillboard() {
-        if (listBillboards.window.isVisible() == true) {
-            listBillboards.window.setVisible(false);
-        } else if (listBillboards.window.isVisible() == false) {
-            listBillboards.window.setVisible(true);
-        }
+
+
+    public static void showCreateBillboard(){
+        toggleVisibility(createBillboards.window);
+    }
+    public static void showListBillboard(){
+        toggleVisibility(listBillboards.window);
     }
 
     /**
      *  Toggle switch to show or hide Schedule window via modifying isVisible state
      */
     public static void showSchedule() throws IOException, ClassNotFoundException {
-        if (scheduleBillboards.window.isVisible() == true) {
-            scheduleBillboards.window.setVisible(false);
-        } else if (scheduleBillboards.window.isVisible() == false) {
-            scheduleBillboards.window.setVisible(true);
-            RequestBillboardScheduling();
 
+        toggleVisibility(scheduleBillboards.window);
+        if(!scheduleBillboards.window.isVisible())
+        {
+            RequestBillboardScheduling();
         }
     }
     /**
      *  Toggle switch to show or hide edit user window via modifying isVisible state
      */
     public static void showEditUser() {
-        if (usersPage.window.isVisible() == true) {
-            usersPage.window.setVisible(false);
-        } else if (usersPage.window.isVisible() == false) {
-            usersPage.window.setVisible(true);
-        }
+        toggleVisibility(usersPage.window);
     }
 
     /**
      *  Toggle switch to show or hide admin preferences via modifying isVisible state
      */
     public static void showAdminPreferences() {
-        if(usersPage.adminWindow.isVisible() == true) {
-            usersPage.adminWindow.setVisible(false);
-        } else if (usersPage.adminWindow.isVisible() == false) {
-            usersPage.adminWindow.setVisible(true);
-        }
+        toggleVisibility(usersPage.adminWindow);
     }
 
     /**
      *  Toggle switch to show or hide user preferences via modifying isVisible state
      */
     public static void ShowUserPreferences() {
-        if(usersPage.userWindow.isVisible() == true) {
-            usersPage.userWindow.setVisible(false);
-        } else if (usersPage.userWindow.isVisible() == false) {
-            usersPage.userWindow.setVisible(true);
-        }
+        toggleVisibility(usersPage.userWindow);
     }
 
     /**
      *  Toggle switch to show or hide help screen via modifying isVisible state
      */
     public static void showHelpScreen() {
-//        System.out.println("HELP INFO");
-         if (HelpPage.window.isVisible() == true) {
-             HelpPage.window.setVisible(false);
-         } else if (HelpPage.window.isVisible() == false) {
-             HelpPage.window.setVisible(true);
-         }
+        toggleVisibility(HelpPage.window);
     }
 
     /**

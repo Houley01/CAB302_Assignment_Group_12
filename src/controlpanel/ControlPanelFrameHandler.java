@@ -7,6 +7,26 @@ import java.awt.event.*;
 import java.io.*;
 import java.net.*;
 
+/**
+ *  Configuration for JFrame and main window settings.
+ *  This includes buttons for other windows and handlers for
+ *  the following items:
+ *  <ul>
+ *      <li>Navbar</li>
+ *      <li>Login screen</li>
+ *      <li>Billboard listing</li>
+ *      <li>Billboard creation</li>
+ *      <li>Billboard schedules</li>
+ *      <li>Users window <i>modal containing buttons containing:</i></li>
+ *      <ul>
+ *          <li>Modify admin user</li>
+ *          <li>Modify normal user (change password)</li>
+ *      </ul>
+ *      <li>Help window</li>
+ *  </ul>
+ *
+ */
+
 public class ControlPanelFrameHandler extends JFrame {
     public static final int WINDOWWIDTH = 900;
     public static final int WINDOWHEIGHT = 800;
@@ -22,6 +42,12 @@ public class ControlPanelFrameHandler extends JFrame {
     private JInternalFrame userEditUser = usersPage.UserEditUserWindow();
     private JInternalFrame helpWindow = HelpPage.HelpPage();
 
+    /**
+     * Master configuration file for control panel. Contains action events
+     * and main objects for rendering.
+     *
+     * @throws IOException
+     */
     public ControlPanelFrameHandler() throws IOException {
         super("Control Panel");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -97,6 +123,10 @@ public class ControlPanelFrameHandler extends JFrame {
         setVisible(true);
     }
 
+    /**
+     *  Create billboard action listener. Listener for when the user
+     *  clicks on create billboard button.
+     */
 //    Action Listeners
     private class menuCreateButton implements ActionListener {
         public void actionPerformed(ActionEvent e) {
@@ -104,12 +134,20 @@ public class ControlPanelFrameHandler extends JFrame {
         }
     }
 
+    /**
+     *  List billboard action listener. Listener for when the user
+     *  clicks on list billboard button.
+     */
     private class menuItemListBillboard implements ActionListener {
-        public void actionPerformed(ActionEvent e) {
+        public void actionPerformed(ActionEvent e)  {
             controller.showListBillboard();
         }
     }
 
+    /**
+     *  Schedule billboard action listener. Listener for when the user
+     *  clicks on schedule billboard button.
+     */
     private class menuScheduleButton implements ActionListener {
         public void actionPerformed(ActionEvent e) {
             try {
@@ -120,18 +158,30 @@ public class ControlPanelFrameHandler extends JFrame {
         }
     }
 
+    /**
+     *  Edit user action listener. Listener for when the user
+     *  clicks on edit user button.
+     */
     public static class menuEditUserButton implements ActionListener {
         public void actionPerformed(ActionEvent e) {
             controller.showEditUser();
         }
     }
 
+    /**
+     *  Help button action listener. Listener for when the user
+     *  clicks on help button button.
+     */
     private class menuHelpButton implements ActionListener {
         public void actionPerformed(ActionEvent e) {
             controller.showHelpScreen();
         }
     }
 
+    /**
+     *  Logout button action listener. Listener for when the user
+     *  clicks on logout button button.
+     */
     private class menuLogoutButton implements ActionListener {
         public void actionPerformed(ActionEvent e) {
             controller.logout();

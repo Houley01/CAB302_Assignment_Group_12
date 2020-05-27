@@ -11,7 +11,8 @@ import java.net.*;
 /**
  *  The main renderer for the Control Panel, encompasses all other windows
  *  that relate to modifying and creation of billboards and users.
- *  @see controller
+ *  @see controller for majority of logic
+ *  @see controlPanel for JFrame rendering configuration and intialization
  *
  *  - Todo add all members to an authors list and copy and paste in all documents
  *
