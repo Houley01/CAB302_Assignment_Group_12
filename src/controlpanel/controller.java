@@ -250,7 +250,7 @@ public class controller {
         return newPasswordHashed;
     }
 
-    static void changePassword(String password) throws IOException, InvalidKeySpecException, NoSuchAlgorithmException {
+    static void changePassword(String username, String password) throws IOException, InvalidKeySpecException, NoSuchAlgorithmException {
 
         Socket client = connectionToServer();
 
@@ -267,7 +267,7 @@ public class controller {
 
             send.writeUTF("changePassword");
             send.writeUTF(newPassword);
-            send.writeUTF(loggedInUser);
+            send.writeUTF(username);
             send.writeUTF(token);
             send.flush(); // Must be done before switching to reading state
 

@@ -59,17 +59,31 @@ public class DialogWindow {
      */
     static void showPasswordSettings() throws IOException, InvalidKeySpecException, NoSuchAlgorithmException {
         JFrame editPassword = new JFrame();
+        Object user = JOptionPane.showInputDialog(editPassword, "Enter the username that you wish to change the password for:");
         Object changePassword = JOptionPane.showInputDialog(editPassword, "Enter new password:");
         Object changePasswordConfirm = JOptionPane.showInputDialog(editPassword, "Confirm new password:");
 
         System.out.println(changePassword);
         System.out.println(changePasswordConfirm);
 
-        if (changePassword.equals(changePasswordConfirm)) {
-            controller.changePassword((String) changePasswordConfirm);
+        String username = (String) user;
+        String newPassword = (String) changePassword;
+        String newPasswordConfirm = (String) changePasswordConfirm;
+
+        System.out.println(username);
+        System.out.println(newPassword);
+        System.out.println(newPasswordConfirm);
+
+        // Checking that the new password and it's confirmed entry match, and ensuring that the entered username was entered
+        if ((changePassword.equals(changePasswordConfirm)) && username != null && username.length() > 0 && newPassword != null && newPassword.length() > 0 && newPasswordConfirm != null && newPasswordConfirm.length() > 0) {
+            controller.changePassword((String) user, (String) changePasswordConfirm);
         } else {
-            DialogWindow.showErrorPane("Passwords don't match. Please try again.", "Error");
-            System.out.println("Passwords didn't match");
+            if (username == null || username.length() == 0) {
+                DialogWindow.showErrorPane("No user entered. Please try again.", "Error");
+            } else {
+                DialogWindow.showErrorPane("Passwords don't match. Please try again.", "Error");
+            }
+            System.out.println("No user entered or passwords didn't match");
         }
     }
 
