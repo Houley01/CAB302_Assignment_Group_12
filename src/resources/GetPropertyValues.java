@@ -1,5 +1,4 @@
 package resources;// Read information from server properties
-import server.initialisation.ServerInit;
 
 import java.io.*;
 import java.util.*;

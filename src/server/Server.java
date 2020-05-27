@@ -1,5 +1,6 @@
 package server;
 
+import org.xml.sax.SAXException;
 import resources.Billboard;
 import resources.CustomXMFile;
 import server.databaseCreation.databaseCreation;
@@ -8,6 +9,7 @@ import server.initialisation.ServerInit;
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
+import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
 import java.net.*;
 import java.security.MessageDigest;
@@ -20,6 +22,8 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Date;
+
+import static resources.CustomXMFile.ReadXMLFile;
 
 public class Server {
     private static Boolean connectionInitiated;
@@ -37,9 +41,9 @@ public class Server {
             databaseCreation.checkDatabaseExistence();
 
             // Reads the port number from the server.properties file
-            ServerSocket serverSocket =  new ServerSocket(properties.port);
+            ServerSocket serverSocket = new ServerSocket(properties.port);
 
-            while(true) {
+            while (true) {
                 Socket server = serverSocket.accept();
                 System.out.println("Connected to " + server.getInetAddress());
 
@@ -115,7 +119,7 @@ public class Server {
     }
 
     static boolean checkUserDetails(String uName, String pass) throws SQLException, InvalidKeySpecException, NoSuchAlgorithmException, IOException {
-        String query = "SELECT * FROM `users` WHERE `user` = \""+ uName + "\";";
+        String query = "SELECT * FROM `users` WHERE `user` = \"" + uName + "\";";
 
         Statement st = ServerInit.conn.createStatement();
         st.executeQuery("USE `cab302`;");
@@ -128,13 +132,12 @@ public class Server {
             rs.next();
 
             // Get the salt+hash for the user from the database
-           String storedPass = rs.getString("pass");
+            String storedPass = rs.getString("pass");
 
-           // Compare the entered password by the user with the salt+hash for the user and check if it matches
+            // Compare the entered password by the user with the salt+hash for the user and check if it matches
             if (check(pass, storedPass)) {
                 return true;
-            }
-            else return false;
+            } else return false;
         }
 //          DEBUGGING USE \/
 //            while (rs.next()) {
@@ -168,15 +171,12 @@ public class Server {
             //This bytes[] has bytes in decimal format;
             //Convert it to hexadecimal format
             StringBuilder sb = new StringBuilder();
-            for(int i=0; i< bytes.length ;i++)
-            {
+            for (int i = 0; i < bytes.length; i++) {
                 sb.append(Integer.toString((bytes[i] & 0xff) + 0x100, 16).substring(1));
             }
             //Get complete hashed password in hex format
             hashedPassword = sb.toString();
-        }
-        catch (NoSuchAlgorithmException e)
-        {
+        } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
 
@@ -216,7 +216,7 @@ public class Server {
             throw new IllegalArgumentException("Empty passwords are not supported.");
         SecretKeyFactory f = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
         SecretKey key = f.generateSecret(new PBEKeySpec(
-                password.toCharArray(), salt, 20*1000, 256));
+                password.toCharArray(), salt, 20 * 1000, 256));
         return Base64.getEncoder().encodeToString(key.getEncoded());
     }
 
@@ -243,7 +243,7 @@ public class Server {
         System.out.println("AuthToken: " + token);
         System.out.println("Expiry: " + dateOfExpiry);
 
-        usersAuthenticated.put(username,new String[] {token, expiry});
+        usersAuthenticated.put(username, new String[]{token, expiry});
 
         return token;
     }
@@ -252,12 +252,12 @@ public class Server {
     // This check is to be done when the user does an action that involves the server
     static boolean checkTokenIsValid(String username, String token) {
         // Check that a user has been given an auth token
-        if(usersAuthenticated.containsKey(username)) {
+        if (usersAuthenticated.containsKey(username)) {
 
             // Contains the auth token and expiry date for the user
             ArrayList<String> userValues = new ArrayList<String>();
             // Store the auth token and expiry date for the user
-            for(String s:usersAuthenticated.get(username)){
+            for (String s : usersAuthenticated.get(username)) {
                 userValues.add(s);
             }
 
@@ -272,8 +272,7 @@ public class Server {
                 if (expiry > currentTime) {
                     System.out.println("Not yet expired");
                     return true;
-                }
-                else {
+                } else {
                     return false;
                 }
             } else {
@@ -309,7 +308,7 @@ public class Server {
 
     private static int GetUserID(String username) throws SQLException {
 
-        String query = "select idUsers FROM users where user = '" + username +"';";
+        String query = "select idUsers FROM users where user = '" + username + "';";
 
         Statement st = ServerInit.conn.createStatement();
         st.executeQuery("USE `cab302`;");
@@ -366,20 +365,20 @@ public class Server {
             System.out.println(fileLocation);
 
 //            Check if the file already exists in database
-            String query = "SELECT idBillboards FROM billboards WHERE billboardName = '"+ billboard.getTitle() +"';";
+            String query = "SELECT idBillboards FROM billboards WHERE billboardName = '" + billboard.getTitle() + "';";
             Statement st = ServerInit.conn.createStatement();
             st.executeQuery("USE `cab302`;");
             ResultSet rs = st.executeQuery(query);
 //            If the billboard name is not found in the database then insert into database, else UPDATE data in database
             if (!rs.isBeforeFirst()) {
                 query = "INSERT INTO `billboards` (`idBillboards`, `billboardName`, `userId`, `dateMade`, `dateModify`, `fileLocation`)" +
-                        "VALUES (NULL, '" + billboard.getTitle()+  "', "+ userId + ", NULL, NULL, '" + fileLocation +"')";
+                        "VALUES (NULL, '" + billboard.getTitle() + "', " + userId + ", NULL, NULL, '" + fileLocation + "')";
                 st.executeQuery(query);
 
             } else {
                 rs.next();
                 System.out.println(rs.getInt("idBillboards"));
-                query = "UPDATE `billboards` SET `userId` = " + userId + ", `dateModify` = current_timestamp() WHERE `idBillboards` = "+ rs.getInt("idBillboards") + "";
+                query = "UPDATE `billboards` SET `userId` = " + userId + ", `dateModify` = current_timestamp() WHERE `idBillboards` = " + rs.getInt("idBillboards") + "";
                 st.execute(query);
             }
             send.write(1);
@@ -436,4 +435,139 @@ public class Server {
         return null;
     }
 
+    private static void RequestBillboardList(ObjectInputStream receiver, ObjectOutputStream send) throws IOException, ClassNotFoundException, SQLException {
+        String query = "SELECT idBillboards, billboardName, users.fName, users.lName, dateMade, " +
+                "dateModify, fileLocation FROM billboards LEFT JOIN users ON billboards.userId = users.idUsers " +
+                "order by billboards.idBillboards;";
+        Statement st = ServerInit.conn.createStatement();
+        st.executeQuery("USE `cab302`;");
+        ResultSet rs = st.executeQuery(query);
+
+        // checks if there is any data in the database
+        if (!rs.isBeforeFirst()) {
+            send.write(-1);
+            send.flush();
+            System.out.println("There is no billboards to be displayed"); // Debug use
+//            return "No User in database";
+        } else {
+            send.write(1);
+            send.flush();
+            // Contains the schedules in the database
+            ArrayList<String[]> billboardList = new ArrayList<>();
+
+            System.out.println("Retrieving list of Schedules from database...");
+
+            while (rs.next()) {
+                String id = rs.getString("idBillboards");
+                String name = rs.getString("billboardName");
+                String creator = rs.getString("users.fName") + " " + rs.getString("users.lName");
+                String dateMade = rs.getString("dateMade");
+                String dateModify = rs.getString("dateModify");
+                String fileLocation = rs.getString("fileLocation");
+
+                String[] billboard = {id, name, creator, dateMade, dateModify, fileLocation};
+                billboardList.add(billboard);
+            }
+            send.writeObject(billboardList);
+            send.flush();
+        }
+    }
+
+    private static void GetBillboardInfo(ObjectInputStream receiver, ObjectOutputStream send) throws IOException, SQLException, ParserConfigurationException, SAXException, ParserConfigurationException, SAXException {
+        int billboardID = receiver.read();
+        String query = "SELECT billboardName, fileLocation FROM billboards WHERE idBillboards = " + billboardID + ";";
+        Statement st = ServerInit.conn.createStatement();
+        st.executeQuery("USE `cab302`;");
+        ResultSet rs = st.executeQuery(query);
+        if (!rs.isBeforeFirst()) {
+            System.out.println("There is no billboards to be displayed");
+            send.write(-1);
+        } else {
+            send.write(1);
+            rs.next();
+            String name = rs.getString("billboardName");
+            String fileLocation = rs.getString("fileLocation");
+            Billboard billboard = ReadXMLFile(new File(fileLocation), name);
+
+            send.writeObject(billboard);
+        }
+        send.flush();
+    }
 }
+
+
+
+// // List Billboards
+//                if (request.equals("ListBillboards")) {
+//                    RequestBillboardList(receiver, send);
+//                }
+
+//private static void RequestBillboardList(ObjectInputStream receiver, ObjectOutputStream send) throws IOException, ClassNotFoundException, SQLException {
+//        String query = "SELECT idBillboards, billboardName, users.fName, users.lName, dateMade, " +
+//                "dateModify, fileLocation FROM billboards LEFT JOIN users ON billboards.userId = users.idUsers " +
+//                "order by billboards.idBillboards;";
+//        Statement st = ServerInit.conn.createStatement();
+//        st.executeQuery("USE `cab302`;");
+//        ResultSet rs = st.executeQuery(query);
+//
+//        // checks if there is any data in the database
+//        if (!rs.isBeforeFirst()) {
+//            send.write(-1);
+//            send.flush();
+//            System.out.println("There is no billboards to be displayed"); // Debug use
+////            return "No User in database";
+//        } else {
+//            send.write(1);
+//            send.flush();
+//            // Contains the schedules in the database
+//            ArrayList<String[]> billboardList = new ArrayList<>();
+//
+//            System.out.println("Retrieving list of Schedules from database...");
+//
+//            while (rs.next()) {
+//                String id = rs.getString("idBillboards");
+//                String name = rs.getString("billboardName");
+//                String creator = rs.getString("users.fName") + " " + rs.getString("users.lName");
+//                String dateMade = rs.getString("dateMade");
+//                String dateModify = rs.getString("dateModify");
+//                String fileLocation = rs.getString("fileLocation");
+//
+//                String[] billboard = {id, name, creator, dateMade, dateModify, fileLocation};
+//                billboardList.add(billboard);
+//            }
+//            send.writeObject(billboardList);
+//            send.flush();
+//        }
+//    }
+//
+//    private static void GetBillboardInfo(ObjectInputStream receiver, ObjectOutputStream send) throws IOException, SQLException, ParserConfigurationException, SAXException {
+//        int billboardID = receiver.read();
+//        String query = "SELECT billboardName, fileLocation FROM billboards WHERE idBillboards = " + billboardID + ";";
+//        Statement st = ServerInit.conn.createStatement();
+//        st.executeQuery("USE `cab302`;");
+//        ResultSet rs = st.executeQuery(query);
+//        if (!rs.isBeforeFirst()) {
+//            System.out.println("There is no billboards to be displayed");
+//            send.write(-1);
+//        } else {
+//            send.write(1);
+//            rs.next();
+//            String name = rs.getString("billboardName");
+//            String fileLocation = rs.getString("fileLocation");
+//            Billboard billboard = ReadXMLFile(new File(fileLocation), name);
+//
+//            send.writeObject(billboard);
+//        }
+//        send.flush();
+//
+////
+//    }
+
+
+
+
+
+
+
+
+

@@ -2,6 +2,8 @@ package controlpanel;
 
 import resources.Billboard;
 
+import java.awt.*;
+import javax.swing.*;
 import java.io.*;
 import java.net.*;
 import java.security.MessageDigest;
@@ -320,7 +322,7 @@ public class controller {
         }
     }
 
-      /**
+    /**
      *  Modifies visibility state of login.window to false and -renables nav bar-
      *
      */
@@ -427,4 +429,183 @@ public class controller {
         System.exit(0);
     }
 
+    public static String[][] ListBillboards() throws IOException, ClassNotFoundException {
+        Socket client = connectionToServer();
+        ArrayList<String[]> billboardArrayList;
+        String[][] billboardList = new String[][]{
+                {"", "", "", "", "", ""},
+                {"", "", "", "", "", ""},
+                {"", "", "", "", "", ""},
+                {"", "", "", "", "", ""},
+                {"", "", "", "", "", ""},
+                {"", "", "", "", "", ""}
+        };
+
+        //  Checks if the sever is online
+        if (client.isConnected()) {
+            OutputStream outputStream = client.getOutputStream();
+            InputStream inputStream = client.getInputStream();
+
+            ObjectOutputStream send = new ObjectOutputStream(outputStream);
+            ObjectInputStream receiver = new ObjectInputStream(inputStream);
+
+            send.writeUTF("ListBillboards");
+            send.flush();
+
+                // Store the current schedule listings
+            int val = receiver.read();
+            if (val == 1) {
+                billboardArrayList = (ArrayList<String[]>) receiver.readObject();
+
+                if (billboardArrayList != null) {
+                    billboardList = new String[billboardArrayList.size()][6];
+                    int counter = 0;
+                    for (String[] billboard : billboardArrayList) {
+                        billboardList[counter][0] = billboard[0];
+                        billboardList[counter][1] = billboard[1];
+                        billboardList[counter][2] = billboard[2];
+                        billboardList[counter][3] = billboard[3];
+                        billboardList[counter][4] = billboard[4];
+                        billboardList[counter][5] = billboard[5];
+                        counter++;
+                    }
+                }
+            }else {
+                System.out.println("No data");
+            }
+//      End connections
+            send.close();
+            receiver.close();
+            client.close();
+        }
+        return billboardList;
+    }
+
+    public static void EditSelectedBillboard(String billboardId) throws IOException, ClassNotFoundException {
+        int id = Integer.parseInt(billboardId);
+        Socket client = connectionToServer();
+        if (client.isConnected()) {
+            OutputStream outputStream = client.getOutputStream();
+            InputStream inputStream = client.getInputStream();
+
+            ObjectOutputStream send = new ObjectOutputStream(outputStream);
+            ObjectInputStream receiver = new ObjectInputStream(inputStream);
+
+            send.writeUTF("GetBillboard");
+            send.write(id);
+            send.flush();
+
+            int val = receiver.read();
+            if (val == 1) {
+                Billboard billboard = (Billboard) receiver.readObject();
+                createBillboards.input1.setText(billboard.getTitle());
+                createBillboards.input2.setText(billboard.getMessageText());
+                createBillboards.informationColourInput.setText(billboard.getInformationText());
+                createBillboards.textDisplayColour.setBackground(Color.decode(billboard.getMessageColour()));
+                createBillboards.informationTextColor.setBackground(Color.decode(billboard.getInformationColour()));
+                createBillboards.backgroundDisplayColour.setBackground(Color.decode(billboard.getBackgroundColour()));
+                createBillboards.window.toFront();
+                showCreateBillboard();
+
+            } else {
+//                Display POP ERROR MESSAGE
+                DialogWindow.showErrorPane("Please refresh the billboard list", "Error: Could NOT find billboard");
+            }
+
+            send.close();
+            receiver.close();
+            client.close();
+        }
+    }
+
+
 }
+
+//public static String[][] ListBillboards() throws IOException, ClassNotFoundException {
+//        Socket client = connectionToServer();
+//        ArrayList<String[]> billboardArrayList;
+//        String[][] billboardList = new String[][]{
+//                {"", "", "", "", "", ""},
+//                {"", "", "", "", "", ""},
+//                {"", "", "", "", "", ""},
+//                {"", "", "", "", "", ""},
+//                {"", "", "", "", "", ""},
+//                {"", "", "", "", "", ""}
+//        };
+//
+//        //  Checks if the sever is online
+//        if (client.isConnected()) {
+//            OutputStream outputStream = client.getOutputStream();
+//            InputStream inputStream = client.getInputStream();
+//
+//            ObjectOutputStream send = new ObjectOutputStream(outputStream);
+//            ObjectInputStream receiver = new ObjectInputStream(inputStream);
+//
+//            send.writeUTF("ListBillboards");
+//            send.flush();
+//
+//                // Store the current schedule listings
+//            int val = receiver.read();
+//            if (val == 1) {
+//                billboardArrayList = (ArrayList<String[]>) receiver.readObject();
+//
+//                if (billboardArrayList != null) {
+//                    billboardList = new String[billboardArrayList.size()][6];
+//                    int counter = 0;
+//                    for (String[] billboard : billboardArrayList) {
+//                        billboardList[counter][0] = billboard[0];
+//                        billboardList[counter][1] = billboard[1];
+//                        billboardList[counter][2] = billboard[2];
+//                        billboardList[counter][3] = billboard[3];
+//                        billboardList[counter][4] = billboard[4];
+//                        billboardList[counter][5] = billboard[5];
+//                        counter++;
+//                    }
+//                }
+//            }else {
+//                System.out.println("No data");
+//            }
+////      End connections
+//            send.close();
+//            receiver.close();
+//            client.close();
+//        }
+//        return billboardList;
+//    }
+//
+//    public static void EditSelectedBillboard(String billboardId) throws IOException, ClassNotFoundException {
+//        int id = Integer.parseInt(billboardId);
+//        Socket client = connectionToServer();
+//        if (client.isConnected()) {
+//            OutputStream outputStream = client.getOutputStream();
+//            InputStream inputStream = client.getInputStream();
+//
+//            ObjectOutputStream send = new ObjectOutputStream(outputStream);
+//            ObjectInputStream receiver = new ObjectInputStream(inputStream);
+//
+//            send.writeUTF("GetBillboard");
+//            send.write(id);
+//            send.flush();
+//
+//            int val = receiver.read();
+//            if (val == 1) {
+//                Billboard billboard = (Billboard) receiver.readObject();
+//                createBillboards.input1.setText(billboard.getTitle());
+//                createBillboards.input2.setText(billboard.getMessageText());
+//                createBillboards.informationColourInput.setText(billboard.getInformationText());
+//                createBillboards.textDisplayColour.setBackground(Color.decode(billboard.getMessageColour()));
+//                createBillboards.informationTextColor.setBackground(Color.decode(billboard.getInformationColour()));
+//                createBillboards.backgroundDisplayColour.setBackground(Color.decode(billboard.getBackgroundColour()));
+//                createBillboards.window.toFront();
+//                showCreateBillboard();
+//
+//            } else {
+////                Display POP ERROR MESSAGE
+//                DialogWindow.showErrorPane("Please refresh the billboard list", "Error: Could NOT find billboard");
+//            }
+//
+//            send.close();
+//            receiver.close();
+//            client.close();
+//        }
+//    }

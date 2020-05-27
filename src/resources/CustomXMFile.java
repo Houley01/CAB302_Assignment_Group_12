@@ -1,7 +1,14 @@
 package resources;
 
+import org.w3c.dom.*;
+import org.xml.sax.SAXException;
+
+import java.io.*;
 import java.io.IOException;
 import java.util.LinkedHashSet;
+
+import javax.xml.parsers.*;
+
 
 public class CustomXMFile {
 
@@ -42,7 +49,7 @@ public class CustomXMFile {
         xmlLines.add("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
 
         if (billboardBackgroundColour != null){
-            xmlLines.add("<billboard background = \""+ billboardBackgroundColour +"\">");
+            xmlLines.add("<billboard background = \"#"+ billboardBackgroundColour +"\">");
         }
 
         else{
@@ -52,7 +59,7 @@ public class CustomXMFile {
         if (messageText!=null){
             if (messageColour!=null)
             {
-                xmlLines.add("<message colour =\"" + messageColour +"\">"+ messageText + "</message>");
+                xmlLines.add("<message colour = \"#" + messageColour +"\">"+ messageText + "</message>");
             }
 
             else
@@ -63,14 +70,14 @@ public class CustomXMFile {
 
         if (billboardImage!=null)
         {
-            if (billboardImage.contains("http"))
+            if (billboardImage.contains("http") || billboardImage.contains("www"))
             {
-                xmlLines.add("<picture url \"" + billboardImage + "\"/>");
+                xmlLines.add("<picture url = \"" + billboardImage + "\"/>");
             }
 
             else
             {
-                xmlLines.add("<picture data \"" + billboardImage + "\"/>");
+                xmlLines.add("<picture data = \"" + billboardImage + "\"/>");
             }
         }
 
@@ -78,7 +85,7 @@ public class CustomXMFile {
         {
             if (informationColour!=null)
             {
-                xmlLines.add("<information colour =\"" + informationColour +"\">"+ informationText + "</information>");
+                xmlLines.add("<information colour = \"#" + informationColour +"\">"+ informationText + "</information>");
             }
 
             else
@@ -94,6 +101,94 @@ public class CustomXMFile {
         }
 
         return StringToDom(xmlFile, billboardTitle);
+    }
+
+//    NOTES:: Returns a billboard object
+//    NOTES:: takes Object File
+//    NOTES:: Takes String Title - Title of the billboard
+    public static Billboard ReadXMLFile(File file, String title) throws IOException, ParserConfigurationException, SAXException {
+        String messageText = "";
+        String messageColour = "";
+        String image = "";
+        int imageOrUrlOrNone = -1;
+        String informationText = "";
+        String informationColour = "";
+        String backgroundColour = "";
+
+
+        DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder documentBuilder = dbFactory.newDocumentBuilder();
+        Document document = documentBuilder.parse(file);
+        document.normalize();
+
+//        Billboard Tag
+//        Check to see if the tag is in the XML File
+        if (document.getElementsByTagName("billboard").getLength() > 0) {
+            NodeList nodeList = document.getElementsByTagName("billboard");
+            Node node = nodeList.item(0);
+
+            if (node.getNodeType() == Node.ELEMENT_NODE) {
+                Element element = (Element) node;
+//                System.out.println(element.getAttribute("background"));
+                backgroundColour = element.getAttribute("background");
+            }
+        }
+
+//        Message Tag
+//        Check to see if the tag is in the XML File
+
+        if (document.getElementsByTagName("message").getLength() > 0) {
+            NodeList nodeList = document.getElementsByTagName("message");
+            Node node = nodeList.item(0);
+
+            if (node.getNodeType() == Node.ELEMENT_NODE) {
+                Element element = (Element) node;
+//                System.out.println(element.getTextContent());
+                messageText = element.getTextContent();
+//                System.out.println(element.getAttributes().getNamedItem("colour").getNodeValue());
+                messageColour = element.getAttributes().getNamedItem("colour").getNodeValue();
+            }
+        }
+
+//        Picture Tag
+//        Check to see if the tag is in the XML File
+        if (document.getElementsByTagName("picture").getLength() > 0) {
+            NodeList nodeList = document.getElementsByTagName("picture");
+            Node node = nodeList.item(0);
+            if (node.getNodeType() == Node.ELEMENT_NODE) {
+                Element element = (Element) node;
+//                System.out.println(element.getAttributes().getNamedItem("data").getNodeValue());
+
+                if (element.hasAttribute("data")) {
+//                    System.out.println("has data");
+                    image = element.getAttributes().getNamedItem("data").getNodeValue();
+                    imageOrUrlOrNone = 0;
+                }
+
+                if (element.hasAttribute("url")) {
+                    image = element.getAttributes().getNamedItem("url").getNodeValue();
+                    imageOrUrlOrNone = 0;
+//                    System.out.println("has url");
+                }
+            }
+        }
+
+//        Information Tag
+//        Check to see if the tag is in the XML File
+        if (document.getElementsByTagName("information").getLength() > 0) {
+            NodeList nodeList = document.getElementsByTagName("information");
+            Node node = nodeList.item(0);
+
+            if (node.getNodeType() == Node.ELEMENT_NODE) {
+                Element element = (Element) node;
+//                System.out.println(element.getTextContent());
+                informationText = element.getTextContent();
+//                System.out.println(element.getAttributes().getNamedItem("colour").getNodeValue());
+                informationColour = element.getAttributes().getNamedItem("colour").getNodeValue();
+            }
+        }
+
+        return new Billboard(title, messageText, messageColour, image, imageOrUrlOrNone, informationText, informationColour, backgroundColour);
     }
 }
 

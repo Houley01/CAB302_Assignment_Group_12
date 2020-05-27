@@ -21,7 +21,7 @@ import java.net.*;
  */
 public class controlPanel extends JFrame {
 
-//    private static final boolean CLOSABLE = true;
+    //    private static final boolean CLOSABLE = true;
 //    private static final boolean ICONIFIABLE = true;
 //    private static final boolean MAXIMIZABLE = true;
 //    private static final boolean RESIZABLE = true;
@@ -32,7 +32,7 @@ public class controlPanel extends JFrame {
 //    private static JPasswordField passwordText;
 //    private static JTextField  usernameText;
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, ClassNotFoundException {
         new ControlPanelFrameHandler();
     }
 }

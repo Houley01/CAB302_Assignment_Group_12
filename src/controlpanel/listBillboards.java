@@ -4,29 +4,12 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.IOException;
+import java.util.ArrayList;
 
-/**
- * Lists active billboards to the viewer via the listBillboards method.
- * @see listBillboards
- * @version 	%I%, %G%
- * @since       JDK13
- */
 public class listBillboards extends JFrame {
     static JInternalFrame window = new JInternalFrame( "List Billboards", false, false, true);
-
-    /**
-     * Lists all the currently active billboards. The billboard data is contained
-     * inside a 3D multidimensional array and <i>currently</i> holds a default of <b>6</b>
-     * billboards at a given time. This array is then added to a JFrame table to display
-     * the data.
-     *
-     * todo ADD Listen Function for when a row is clicked (If Clicked change 'selectedBillboard' text
-     * todo ADD ARE YOU SURE YOU WANT TO EDIT DIALOG BOX
-     * todo ADD ARE YOU SURE YOU WANT TO REMOVE DIALOG BOX
-     *
-     * @return window   JFrame window object with configuration settings
-     */
-    public static JInternalFrame listBillboards() {
+    public static String[][] rowData;
+    public static JInternalFrame listBillboards() throws IOException, ClassNotFoundException {
         window.setSize(600, 300);
         window.setLocation((controlPanel.WINDOWWIDTH/2) - 300, (controlPanel.WINDOWHEIGHT/2) - 200);
         window.setLayout(new GridLayout(4,1));
@@ -42,15 +25,8 @@ public class listBillboards extends JFrame {
         //      Calendar setup
         String[] columnHeading = {"ID", "Billboard Name", "Creator", "Date Made", "Date Modified", "File Location"};
 
-        // 3D array containing billboard information
-        String[][] rowData = {
-                {"", "", "", "", "", ""},
-                {"", "", "", "", "", ""},
-                {"", "", "", "", "", ""},
-                {"", "", "", "", "", ""},
-                {"", "", "", "", "", ""},
-                {"", "", "", "", "", ""}
-        };
+//        Get all billboards from database.
+        rowData = controller.ListBillboards();
 
 //        JPanel tableCalendarPanel = new JPanel();
         JTable tableBillboard = new JTable(rowData, columnHeading);
@@ -72,9 +48,11 @@ public class listBillboards extends JFrame {
         JButton addButton = new JButton("Create Billboard");
         JButton editButton = new JButton("Edit Billboard");
         JButton deleteButton = new JButton("Delete Billboard");
+        JButton refreshButton = new JButton("Update list");
         buttonsPanel.add(addButton);
         buttonsPanel.add(editButton);
         buttonsPanel.add(deleteButton);
+        buttonsPanel.add(refreshButton);
 
         addButton.addActionListener(new ActionListener() {
             @Override
@@ -85,9 +63,44 @@ public class listBillboards extends JFrame {
             }
         });
 
+
 //      NOTE:: ADD Listen Function for when a row is clicked (If Clicked change 'selectedBillboard' text
 //      NOTE:: ADD ARE YOU SURE YOU WANT TO EDIT DIALOG BOX
+        editButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.out.println();
+//                Check to see if a row is selected
+//                if table returns back -1 means no row has been selected
+                if (tableBillboard.getSelectedRow() != -1 ) {
+                    String billboardSelected = (String) tableBillboard.getValueAt(tableBillboard.getSelectedRow(), 0);
+//                    if the data in the column is equal to empty string "" then don't do the function
+                    if (billboardSelected.equals("") == false) {
+                        try {
+                            controller.EditSelectedBillboard(billboardSelected);
+                        } catch (IOException | ClassNotFoundException ioException) {
+                            ioException.printStackTrace();
+                        }
+                    }
+                }
+            }
+        });
 //      NOTE:: ADD ARE YOU SURE YOU WANT TO REMOVE DIALOG BOX
+
+        refreshButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+//                    tableBillboard.fireT();
+                    controller.ListBillboards();
+//                    tableBillboard.tableChanged();
+                } catch (IOException ioException) {
+                    ioException.printStackTrace();
+                } catch (ClassNotFoundException classNotFoundException) {
+                    classNotFoundException.printStackTrace();
+                }
+            }
+        });
 
         window.add(titlePanel);
         window.add(billboardPane);
@@ -97,5 +110,4 @@ public class listBillboards extends JFrame {
 
         return window;
     }
-
 }

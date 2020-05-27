@@ -24,13 +24,10 @@ import javax.swing.filechooser.FileSystemView;
 public class createBillboards {
     static JInternalFrame window = new JInternalFrame("Create Billboard", false, false, true);
     static File fileChosen;
-
-    /**
-     * JFrame configuration for create billboard window.
-     *
-     * @return window
-     * @see window variable above this comment.
-     */
+    public static JTextField input1 = new JTextField(), input2 = new JTextField(),
+            informationColourInput = new JTextField(), textDisplayColour = new JTextField(),
+            informationTextColor = new JTextField(), backgroundDisplayColour = new JTextField(),
+            imageURL = new JTextField();
     public static JInternalFrame createBillboards() {
         JPanel mainHeading = new JPanel();
         JPanel window2 = new JPanel();
@@ -50,53 +47,42 @@ public class createBillboards {
         JLabel title = new JLabel("Billboard Title");
         title.setVerticalTextPosition(JLabel.CENTER);
         title.setHorizontalTextPosition(JLabel.LEFT);
-//        Text Box
-        JTextField input1 = new JTextField();
 
         //        Heading - "Text"
         JLabel text = new JLabel("Billboard Text");
         text.setVerticalTextPosition(JLabel.CENTER);
         text.setHorizontalTextPosition(JLabel.LEFT);
-//        Text Box
-        JTextField input2 = new JTextField();
 
 //        Information Tag
         JLabel informationTextLabel = new JLabel("Information Text");
         text.setVerticalTextPosition(JLabel.CENTER);
         text.setHorizontalTextPosition(JLabel.LEFT);
-        JTextField informationColourInput = new JTextField();
-
         JButton informationColourButton = new JButton("Information Text Colour");
-        JTextField informationTextColor = new JTextField();
         informationTextColor.setBackground(Color.BLACK);
-
-
 
 //        Heading - "Select Background Image"
         JLabel selectBG = new JLabel("Select Background Image");
         selectBG.setVerticalTextPosition(JLabel.BOTTOM);
         selectBG.setHorizontalTextPosition(JLabel.LEFT);
 //        Button - Browse
-        JButton imageSelect = new JButton("Browse", new ImageIcon("src\\controlpanel\\resources\\browseicon.png"));
+        JButton imageSelect = new JButton("Browse", new ImageIcon("src/controlpanel/resources/browseicon.png"));
         imageSelect.setBounds(100,100,140,40);
 
         //  Buttons/Label - Colour Picker text and background
         JButton textColourPickerButton = new JButton("Text Colour");
-        JTextField textDisplayColour = new JTextField();
         textDisplayColour.setBackground(Color.BLACK);
+
         JButton backgroundColourPickerButton = new JButton("Background Colour");
-        JTextField backgroundDisplayColour = new JTextField();
         backgroundDisplayColour.setBackground(Color.WHITE);
 
         // URL/Text Box
         JLabel linkURL = new JLabel("Image URL");
-        JTextField imageURL = new JTextField();
 
 //        Buttons - Save and Preview
-        JButton saveBB = new JButton("Save", new ImageIcon("src\\controlpanel\\resources\\save.png"));
+        JButton saveBB = new JButton("Save", new ImageIcon("src/controlpanel/resources/save.png"));
         saveBB.setBounds(100,100,140,40);
 
-        JButton previewBB = new JButton("Preview", new ImageIcon("src\\controlpanel\\resources\\preview.png"));
+        JButton previewBB = new JButton("Preview", new ImageIcon("src/controlpanel/resources/preview.png"));
         previewBB.setBounds(100,100,140,40);
 
 //        Add items to GUI
@@ -132,7 +118,6 @@ public class createBillboards {
         window4.add(previewBB);
 
 //        Preview window - viewer.java
-
 
         textColourPickerButton.addActionListener(new ActionListener() {
             @Override
@@ -198,12 +183,6 @@ public class createBillboards {
         return window;
     }
 
-    /**
-     * Colour picker window and modifies input field to chosen colour
-     *
-     * @param component         Button that needs color picker functionality
-     * @param initialColour     Default color
-     */
     private static void ColourPicker(JComponent component, Color initialColour) {
         // Colour chooser Pop up window
         Color color = JColorChooser.showDialog(component,
@@ -214,12 +193,6 @@ public class createBillboards {
 //        System.out.println(component.getBackground()); // Used for getting colour code TEMP CODE
     }
 
-    /**
-     *  Converts an RGB color value to Hex.
-     *
-     * @param RGB   Value to be converted to hex
-     * @return      hex color value
-     */
     private static String RGBToHex(Color RGB) {
         String temp, red, green, blue;
 //        Red
@@ -266,5 +239,4 @@ public class createBillboards {
         }
         return -1;
     }
-
 }
