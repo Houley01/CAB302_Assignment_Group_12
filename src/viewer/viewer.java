@@ -1,255 +1,224 @@
 package viewer;
+
+import controlpanel.DialogWindow;
+import controlpanel.controller;
+import org.xml.sax.SAXException;
+import resources.Billboard;
+
 import javax.imageio.ImageIO;
 import javax.swing.*;
+import javax.xml.parsers.ParserConfigurationException;
 import java.awt.*;
-import java.awt.event.KeyListener;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseAdapter;
+import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
-import java.net.MalformedURLException;
+import java.net.Socket;
 import java.net.URL;
-import java.util.*;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
+import java.sql.Array;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Base64;
+import java.util.List;
+
+
+import static com.sun.java.accessibility.util.AWTEventMonitor.addKeyListener;
+import static controlpanel.controller.connectionToServer;
+import static resources.CustomXMFile.ReadXMLFile;
+import static server.Server.RequestBillboardList;
+
 
 // this class stores all attributes of component on the billboard
 
 /**
- * Class stores all attributes of component on the billboard
- */
-class billboardDecor{
-    public String type, colour, content; // the class has three attributes stored
-
-    /**
-     * Scrubs an XML file for tags relating to colour.
-     *
-     * @param tags  XML file tags.
-     * @return      Value from XML.
-     */
-    String colourFinder(String tags){ // this function is used to find if there is a colour in the xml object
-        if (tags.contains("background=")) // if there is a "background" tag
-        {
-            return tags.substring((tags.indexOf("background=") + 12), (tags.indexOf("background=") + 19)); // there will be a colour to find
-        }
-
-        if (tags.contains("colour=")) // if there is a "colour" tag
-        {
-            return tags.substring((tags.indexOf("colour=") + 8), (tags.indexOf("colour=") + 15)); // then there will be a colour to find
-        }
-
-        // otherwise return null
-        return null;
-    }
-
-    /**
-     * Detects the type of tag used out of 4 possible types.
-     * then returns the type detected.
-     * <ul>
-     *     <li>information</li>
-     *     <li>message</li>
-     *     <li>picture</li>
-     *     <li>billboard</li>
-     * </ul>
-     *
-     *
-     * @param tags  XML file tags.
-     * @return type Value from XML.
-     * @return null If no type was found.
-     */
-    String typeFinder(String tags){
-        String[] objectTypes = {"information", "message", "picture", "billboard"}; // there are 4 possible types
-
-        for (String type: objectTypes){ // check in the tags for each object type
-            if (tags.contains("<" + type )) // if the tags include a tag with one of the types in it
-            {
-                return type; // return the object type it is
-            }
-        }
-
-        return null; // return null if none of these are found
-    }
-
-    /**
-     *
-     * @param tags  XML file tags.
-     * @return
-     */
-    String contentFinder(String tags){
-        if (tags.contains("<information") || tags.contains("<message")) // if it is information or a message
-        {
-            return tags.substring(tags.indexOf(">") + 1, tags.indexOf("</")); // retrieve the content
-        }
-
-        else if (tags.contains("<picture")) // if it a picture
-        {
-            return tags.substring(tags.indexOf('"')+1, tags.indexOf('"', tags.indexOf('"') + 1)); // retrieve the url or base64 stored in the quotation marks
-        }
-
-        return null; // return null if no content is found
-    }
-
-    /**
-     * Set objects as variables.
-     * @param tags  XML tags.
-     */
-    public billboardDecor(String tags) // set the objects varaibles
-    {
-        type = typeFinder(tags); // generate the type
-        colour = colourFinder(tags); // generate the colour
-        content = contentFinder(tags); // generate the content
-    }
-}
-
-/**
  *
  */
-public class viewer{
+public class viewer extends JPanel{
+
+    public static final Font titleFont = new Font("Ariel", Font.BOLD, 20);
+    public static Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize(); // Getting screen resolution (Main monitor / primary monitor)
+    public static int w = (int) Math.round(screenSize.getWidth());                    // Res Width
+    public static int h = (int) Math.round(screenSize.getHeight());                   // Res Height
+
+
     /**
-     * Reads from the XML file to create a billboard object.
-     * Billboard xml file looks like the following:
-     * <code>
-     *     <?xml version="1.0" encoding="UTF-8"?>
-     *      <billboard background="#8996FF">
-     *          <picture url="https://cloudstor.aarnet.edu.au/plus/s/5fhToroJL0nMKvB/download" />
-     *      </billboard>
-     * </code>
-     * @param filePath          File path for XML file.
-     * @return BillboardObjects
+     * Connects to the server and retrieves the appropriate billboard via XML reader.
+     * Todo: Update billboard viewer to the currently 'scheduled' billboard (Change query on Server side).
+     *
      * @throws IOException
+     * @throws SQLException
+     * @throws ClassNotFoundException
+     * @throws ParserConfigurationException
+     * @throws SAXException
+     * @throws NoSuchFieldException
      */
-    public static LinkedHashSet<billboardDecor> xmlReader(String filePath) throws IOException {
-        BufferedReader reader; // buffered reader to read the xml file line by line
-        LinkedHashSet<String> RawBillboardObjects = new LinkedHashSet<>(); // make linkedhashset to store all the tags
-        LinkedHashSet<billboardDecor> BillboardObjects = new LinkedHashSet<>(); // make linkedhashset to store all objects
+    public static Billboard getBillboardInfo(Socket client) throws IOException, SQLException, ClassNotFoundException, ParserConfigurationException, SAXException, NoSuchFieldException {
+        try
+        {
+            // Initializing connection
+            OutputStream outputStream = client.getOutputStream();   // Server output to user
+            InputStream inputStream = client.getInputStream();      // User input to server
 
-        try { // try reading the xml file
-            reader = new BufferedReader(new FileReader(filePath)); 
-            String line = reader.readLine(); // store the individual line in a string 
+            ObjectOutputStream send = new ObjectOutputStream(outputStream);
+            ObjectInputStream receiver = new ObjectInputStream(inputStream);
 
-            while (line != null) { // when there are more lines of the xml file
-                if (!line.equals("</billboard>") && !line.contains("?xml version")) // check if the line stores object
-                {
-                    RawBillboardObjects.add(line); // if line important add it to linked hashset
-                }
+            send.writeUTF("ViewerRequest");
+            send.flush();                                                         // Have to flush to be able to read data
+            receiver.read();                                                      // Start reading? Java throws an error if this isn't here.
+            List<String> output = (List<String>) receiver.readObject();           // Putting server data into list.
 
-                line = reader.readLine(); // set the string to the next line
-            }
+            // We need this information of the XML reader.
+            // It requires:
+            // A: Location to file
+            // B: A title (filename)
 
-            reader.close(); // close the reader when no more lines left
+            String fileLocation = output.get(0);                                  // Reading server response.
+            String file = fileLocation.split("/")[1];                      // Grab XML file.
+            String fileName = file.replace(".xml", "");        // Java didn't like split here.
 
-        } catch (IOException e) { // throw an exception if the xml can't be read
+            Billboard billboard = ReadXMLFile(new File(fileLocation), fileName);  // ReadXML returns a Billboard class
+
+            System.out.println(billboard);
+
+            // Closing streams and socket
+            send.close();
+            receiver.close();
+            client.close();
+            return billboard;
+        }
+        catch(Exception e)
+        {
             e.printStackTrace();
         }
-
-        for (String tags: RawBillboardObjects) { // for each valid line in the xml
-            BillboardObjects.add(new billboardDecor(tags)); // convert it to an object for the billboard to display
-        }
-        
-        return BillboardObjects; // return the set including all billboard objects
+        return null; // If it some how escapes the try catch.
     }
 
+    public static void errorMessage()
+    {
+//        Some JFrame shit for error message
+    }
+
+    private static <Int> String formatText(String colour, Int size, String text)
+    {
+        return "<html><h2 font=\""+ size + "px\" color="+colour+">"+text+"</h2></html>";
+    }
+
+
     /**
-     * JFrame setup for viewer. Adds <i>widgets</i> grabbed via the XML data for a specific
-     * billboard and creates JFrame widgets accordingly.
-     *
-     * @param widgets       XML tags.
-     * @see LinkedHashSet
-     * @throws IOException
+     * Java Swing renderer (just renders out all the info supplied)
+     * @see //getBillboardInfo
      */
-    public static void SetupScreen(LinkedHashSet<billboardDecor> widgets) throws IOException {
-        GridBagConstraints c = new GridBagConstraints(); // set up constraints 
+    private static void renderer(Billboard currBill) throws IOException // Private because no point having it public
+    {
 
-        KeyListener kl=new KeyAdapter()
+        GridBagConstraints c = new GridBagConstraints();
+        Color bgColour = Color.decode(currBill.getBackgroundColour());                      // AWT readable colour
+        JFrame frame = new JFrame("Billboard viewer");                                 // Frame title
+        JPanel panel = new JPanel();                                                        // Pane (supply with content later)
+
+        listeners(frame);
+        panel.setLayout(new GridBagLayout());
+
+        ArrayList<JComponent> cps = new ArrayList<>();                                                                   // List to add JFrame components
+
+        cps.add(new JLabel(formatText(currBill.getMessageColour(), w / 50, currBill.getMessageText())));            // Message
+        cps.add(new JLabel(formatText(currBill.getInformationColour(), w / 80, currBill.getInformationText())));    // Info
+
+
+        /**
+         * Adding image
+         * Todo make it scale and fit the center
+         */
+        if(currBill.getImageOrUrl() >= 0)
         {
-            public void keyPressed(KeyEvent evt)
+            /**
+             * If user supplied an Image file.
+             */
+            ImageIcon imageIcon = null;
+            if(currBill.getImageOrUrl() == 0)
             {
-
-                //If someone click Esc key, this program will exit
-                if(evt.getKeyCode()==KeyEvent.VK_ESCAPE)
-                {
-                    System.exit(0);
-                }
-
+                byte[] imgBytes = Base64.getDecoder().decode(currBill.getImage());
+                BufferedImage image = ImageIO.read(new ByteArrayInputStream(imgBytes));
+                imageIcon = new ImageIcon(image);
             }
-
-        };
-
-        JFrame f=new JFrame();//creating instance of JFrame
-        JPanel p = new JPanel();//creating instance of jpanel
-        f.addKeyListener(kl);//include esc listener
-        p.setLayout(new GridBagLayout());//set panel layout to place objects above eachother in the centre 
-        ArrayList<JComponent> cps = new ArrayList<>();//components to add to the billboard 
-
-        f.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mousePressed(MouseEvent e) {
-                System.exit(0);
-            }
-
-
-        }); // if the screen is clicked exit 
-
-        for (billboardDecor decoration: widgets) { // instantiate all of the objects
-            if (decoration.type == "message") 
-            { // add large font label for a message
-                cps.add(new JLabel("<html><h1><font size=\"45\" color = " + decoration.colour +">"+ decoration.content +"</font></h1></html>"));
-            }
-
-            else if (decoration.type == "information")
-            { // add small font label for information
-                cps.add(new JLabel("<html><h1><font color = " + decoration.colour +">"+ decoration.content +"</font></h1></html>"));
-            }
-
-            else if (decoration.type == "picture")
+            else if (currBill.getImageOrUrl() == 1)
             {
-
-                if (decoration.content.contains("http")) // if the picture is a url
-                {
-                    URL url; 
-                    Image image = null;
-                    try {
-                        url = new URL(decoration.content); // convert string to url
-                        image = ImageIO.read(url); // read the url to image
-                    } catch (MalformedURLException ex) {
-                        System.out.println("Malformed URL");
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    cps.add(new JLabel((new ImageIcon(image)))); // create image stored in label
-                }
-
-                else{
-                    byte[] imgBytes = Base64.getDecoder().decode(decoration.content); //convert the string to base64
-                    BufferedImage image = ImageIO.read(new ByteArrayInputStream(imgBytes)); // decode the base64 bytes into image
-                    cps.add(new JLabel((new ImageIcon(image)))); // create image stored in label
-                }
+                URL url = new URL(currBill.getImage());
+                Image image = ImageIO.read(url);
+                imageIcon = new ImageIcon(image);
             }
-
-            else if (decoration.type == "billboard") // if its a billboard
-            {
-                if (decoration.colour != null) // change the 
-                {
-                    p.setBackground(Color.decode(decoration.colour));
-                }
-            }
+            JLabel imageRender = new JLabel(imageIcon);
+            imageRender.setSize(w, h);
+            frame.getContentPane().add(imageRender, "Center");
         }
+
+        panel.setBackground(bgColour);                                      // Background colour
 
         for (JComponent wid: cps)
         {
-            c.gridy++; // place each component on its own line
-            p.add(wid, c); // add all the widgets 
+            c.gridy++;          // place each component on its own line
+            panel.add(wid, c);  // add all the widgets
         }
 
-        f.getContentPane().add(p, "Center"); // place the panel centred
+        System.out.println(cps);
 
-        f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); // exit the app when closed
-        f.setExtendedState(JFrame.MAXIMIZED_BOTH); // true fullscreen it 
-        f.setUndecorated(true);
-        f.setVisible(true); // show gui
+        frame.setSize(w, h);                                                 // Update frame to match screen size.
+        frame.getContentPane().add(panel, "Center");              // place the panel centred
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);                // exit the app when closed
+        frame.setExtendedState(JFrame.MAXIMIZED_BOTH);                       // true fullscreen it
+        frame.setUndecorated(true);
+        frame.setVisible(true);                                              // show gui
+
+
+//        frame.pack();
+
     }
 
-    public static void main(String[] args) throws IOException {
-        SetupScreen(xmlReader("billboardsExamples/15.xml")); // call the xml reader and give return to setupscreen
+    /**
+     * Listeners for the viewer including the escape event and mouse events.
+     *
+     * @param frame     JFrame window of the viewer
+     */
+    private static void listeners(JFrame frame)
+    {
+        frame.addKeyListener(new KeyAdapter() {
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+                    System.out.println("Escape key pressed");
+                    System.exit(0);
+                }
+            }
+        });
+        frame.addMouseListener(new MouseListener() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if(e.getModifiersEx() == InputEvent.BUTTON1_DOWN_MASK || e.getModifiersEx() == InputEvent.BUTTON2_DOWN_MASK || e.getModifiersEx() == InputEvent.BUTTON3_DOWN_MASK)
+                {
+                    System.exit(0);
+                }
+            }
+            @Override
+            public void mousePressed(MouseEvent e) {
+                if(e.getModifiersEx() == InputEvent.BUTTON1_DOWN_MASK || e.getModifiersEx() == InputEvent.BUTTON2_DOWN_MASK || e.getModifiersEx() == InputEvent.BUTTON3_DOWN_MASK)
+                {
+                    System.exit(0);
+                }
+            }
+            // Rest of this code is redundant but is required to run the listener.
+            @Override public void mouseReleased(MouseEvent e) {}
+            @Override public void mouseEntered(MouseEvent e) {}
+            @Override public void mouseExited(MouseEvent e) {}
+        });
+
+    }
+
+    public static void main(String[] args) throws IOException, SQLException, ClassNotFoundException, InvalidKeySpecException, NoSuchAlgorithmException, ParserConfigurationException, SAXException, NoSuchFieldException {
+        Socket client = connectionToServer();                   // Socket connection to the server
+
+        // This goes into a loop for every 15 seconds
+        Billboard currBill = getBillboardInfo(client);          // Get billboard information
+        renderer(currBill);                                     // JFrame renderer\
     }
 }

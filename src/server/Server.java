@@ -85,7 +85,6 @@ public class Server {
                 ObjectInputStream receiver = new ObjectInputStream(server.getInputStream());
                 ObjectOutputStream send = new ObjectOutputStream(server.getOutputStream());
 
-
                 String request = receiver.readUTF();
 
                 // Username and password
@@ -142,7 +141,7 @@ public class Server {
                 }
                 // Viewer Request Billboards
                 if (request.equals("ViewerRequest")) {
-
+                    viewerRequest(send);
                 }
 
 
@@ -638,6 +637,37 @@ public class Server {
                 billboardList.add(billboard);
             }
             send.writeObject(billboardList);
+            send.flush();
+        }
+    }
+
+    public static void viewerRequest(ObjectOutputStream send) throws IOException, ClassNotFoundException, SQLException
+    {
+        String query = "SELECT idBillboards, billboardName, users.fName, users.lName, dateMade, " +
+                "dateModify, fileLocation FROM billboards LEFT JOIN users ON billboards.userId = users.idUsers " +
+                "order by billboards.idBillboards;";
+        Statement st = ServerInit.conn.createStatement();
+        st.executeQuery("USE `cab302`;");
+        ResultSet rs = st.executeQuery(query);
+
+        // checks if there is any data in the database
+        if (!rs.isBeforeFirst()) {
+            send.write(-1);
+            send.flush();
+            System.out.println("There is no billboards to be displayed"); // Debug use
+        } else {
+            send.write(1);
+            send.flush();
+            // Contains the schedules in the database
+            List<String> billboardImages = new ArrayList<>();
+
+            System.out.println("Retrieving list of Schedules from database...");
+
+            while (rs.next()) {
+                String fileLocation = rs.getString("fileLocation");
+                billboardImages.add(fileLocation);
+            }
+            send.writeObject(billboardImages);
             send.flush();
         }
     }
