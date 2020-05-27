@@ -108,7 +108,18 @@ public class DialogWindow {
         System.out.println(changeFirstName);
         System.out.println(changeLastName);
     }
+    /**
+     * Developer defined errors (e.g. inability to connect to server).
+     *
+     * @param accessing   For letting the user know what task they can not access
+     */
 
+    static protected void NoAccessTo(String accessing) {
+        JOptionPane pane = new JOptionPane("You do not have access to the " + accessing + ".\nPlease contact your IT Service Team", JOptionPane.ERROR_MESSAGE);
+        JDialog dialog = pane.createDialog("Permission Error");
+        dialog.setAlwaysOnTop(true);
+        dialog.setVisible(true);
+    }
     // Create User
 
     /**

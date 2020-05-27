@@ -1,6 +1,7 @@
 package controlpanel;
 
 import resources.Billboard;
+import resources.UserPermission;
 
 import java.awt.*;
 import javax.swing.*;
@@ -35,6 +36,7 @@ public class controller {
     private static String loggedInUser;
     private static String token;
     private static ArrayList<String[]> schedules;
+    public static UserPermission permission = new UserPermission();
 
     /**
      *  Connection to server via reading server.config file. Throws
@@ -181,6 +183,8 @@ public class controller {
                 System.out.println("correct username and password"); // DEBUG CODE
                 loginSuccessful = true;
                 loggedInUser = username;
+                boolean[] temp = (boolean[]) receiver.readObject();
+                permission.SetUserPermission(temp);
                 getAuthToken();
             } else {
                 // Alert the user that they have incorrectly entered they username or password with
@@ -381,7 +385,11 @@ public class controller {
      *  Toggle switch to show or hide admin preferences via modifying isVisible state
      */
     public static void showAdminPreferences() {
-        toggleVisibility(usersPage.adminWindow);
+        if (controller.permission.GetUserPermission("EditUser") == true) {
+            toggleVisibility(usersPage.adminWindow);
+        } else {
+            DialogWindow.NoAccessTo("Admin options");
+        }
     }
 
     /**
@@ -517,95 +525,4 @@ public class controller {
             client.close();
         }
     }
-
-
 }
-
-//public static String[][] ListBillboards() throws IOException, ClassNotFoundException {
-//        Socket client = connectionToServer();
-//        ArrayList<String[]> billboardArrayList;
-//        String[][] billboardList = new String[][]{
-//                {"", "", "", "", "", ""},
-//                {"", "", "", "", "", ""},
-//                {"", "", "", "", "", ""},
-//                {"", "", "", "", "", ""},
-//                {"", "", "", "", "", ""},
-//                {"", "", "", "", "", ""}
-//        };
-//
-//        //  Checks if the sever is online
-//        if (client.isConnected()) {
-//            OutputStream outputStream = client.getOutputStream();
-//            InputStream inputStream = client.getInputStream();
-//
-//            ObjectOutputStream send = new ObjectOutputStream(outputStream);
-//            ObjectInputStream receiver = new ObjectInputStream(inputStream);
-//
-//            send.writeUTF("ListBillboards");
-//            send.flush();
-//
-//                // Store the current schedule listings
-//            int val = receiver.read();
-//            if (val == 1) {
-//                billboardArrayList = (ArrayList<String[]>) receiver.readObject();
-//
-//                if (billboardArrayList != null) {
-//                    billboardList = new String[billboardArrayList.size()][6];
-//                    int counter = 0;
-//                    for (String[] billboard : billboardArrayList) {
-//                        billboardList[counter][0] = billboard[0];
-//                        billboardList[counter][1] = billboard[1];
-//                        billboardList[counter][2] = billboard[2];
-//                        billboardList[counter][3] = billboard[3];
-//                        billboardList[counter][4] = billboard[4];
-//                        billboardList[counter][5] = billboard[5];
-//                        counter++;
-//                    }
-//                }
-//            }else {
-//                System.out.println("No data");
-//            }
-////      End connections
-//            send.close();
-//            receiver.close();
-//            client.close();
-//        }
-//        return billboardList;
-//    }
-//
-//    public static void EditSelectedBillboard(String billboardId) throws IOException, ClassNotFoundException {
-//        int id = Integer.parseInt(billboardId);
-//        Socket client = connectionToServer();
-//        if (client.isConnected()) {
-//            OutputStream outputStream = client.getOutputStream();
-//            InputStream inputStream = client.getInputStream();
-//
-//            ObjectOutputStream send = new ObjectOutputStream(outputStream);
-//            ObjectInputStream receiver = new ObjectInputStream(inputStream);
-//
-//            send.writeUTF("GetBillboard");
-//            send.write(id);
-//            send.flush();
-//
-//            int val = receiver.read();
-//            if (val == 1) {
-//                Billboard billboard = (Billboard) receiver.readObject();
-//                createBillboards.input1.setText(billboard.getTitle());
-//                createBillboards.input2.setText(billboard.getMessageText());
-//                createBillboards.informationColourInput.setText(billboard.getInformationText());
-//                createBillboards.textDisplayColour.setBackground(Color.decode(billboard.getMessageColour()));
-//                createBillboards.informationTextColor.setBackground(Color.decode(billboard.getInformationColour()));
-//                createBillboards.backgroundDisplayColour.setBackground(Color.decode(billboard.getBackgroundColour()));
-//                createBillboards.window.toFront();
-//                showCreateBillboard();
-//
-//            } else {
-////                Display POP ERROR MESSAGE
-//                DialogWindow.showErrorPane("Please refresh the billboard list", "Error: Could NOT find billboard");
-//            }
-//
-//            send.close();
-//            receiver.close();
-//            client.close();
-//        }
-//    }

@@ -1,32 +1,42 @@
 package resources;
 
 public class UserPermission {
-    public boolean GetUserPermission(String username, String permission) {
+    private static boolean createBillboard;
+    private static boolean editAllBillboard;
+    private static boolean scheduleBillboard;
+    private static boolean editUser;
+    
+    public boolean GetUserPermission(String permission) {
 
         switch (permission) {
             case "CreateBillboard":
-                return CreateBillboard(username);
+                return CreateBillboard();
             case "EditAllBillboard":
-                return EditAllBillboard(username);
+                return EditAllBillboard();
             case "ScheduleBillboard":
-                return ScheduleBillboard(username);
+                return ScheduleBillboard();
             case "EditUser":
-                return EditUser(username);
+                return EditUser();
             default:
                 return false;
         }
     }
-    private boolean CreateBillboard(String username) {
-        return false;
+    public void SetUserPermission(boolean[] permission) {
+        createBillboard = permission[0];
+        editAllBillboard = permission[1];
+        scheduleBillboard = permission[2];
+        editUser = permission[3];
     }
-    private boolean EditAllBillboard(String username) {
-        return false;
+    private boolean CreateBillboard() {
+        return createBillboard;
     }
-    private boolean ScheduleBillboard(String username) {
-        return false;
+    private boolean EditAllBillboard() {
+        return editAllBillboard;
     }
-
-    private boolean EditUser(String username) {
-        return false;
+    private boolean ScheduleBillboard() {
+        return scheduleBillboard;
+    }
+    private boolean EditUser() {
+        return editUser;
     }
 }

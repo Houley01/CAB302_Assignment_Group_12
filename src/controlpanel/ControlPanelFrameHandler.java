@@ -100,7 +100,11 @@ public class ControlPanelFrameHandler extends JFrame {
 //    Action Listeners
     private class menuCreateButton implements ActionListener {
         public void actionPerformed(ActionEvent e) {
-            controller.showCreateBillboard();
+            if (controller.permission.GetUserPermission("CreateBillboard") == true ) {
+                controller.showCreateBillboard();
+            } else {
+                DialogWindow.NoAccessTo("Creating Billboard");
+            }
         }
     }
 
