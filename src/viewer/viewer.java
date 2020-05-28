@@ -52,7 +52,7 @@ public class viewer extends TimerTask {
      * and if it succeeds it modifies the online variable to be true and if it fails a debugger
      * message is sent to the console. (Default online value is false so it will just print
      * the offline screen)
-     * @return
+     * @return Socket connection.
      * @throws IOException
      */
     public static Socket connectionToServer() throws IOException {
@@ -221,7 +221,7 @@ public class viewer extends TimerTask {
              URL url = new URL(currBill.getImage());                             // Grabbing the url.
              image = ImageIO.read(url);                                          // Reading the image from url.
         }
-        else                                                                    // File
+        else                                                                     // File
         {
             byte[] imgBytes = Base64.getDecoder().decode(currBill.getImage());  // Decode base64 into readable bytes
             image = ImageIO.read(new ByteArrayInputStream(imgBytes));           // then send that to the image reader.
@@ -296,14 +296,17 @@ public class viewer extends TimerTask {
             jcomp.add(info);
 
             Image image = imageCalc(currBill);
-            image = image.getScaledInstance(w, -1, Image.SCALE_SMOOTH);                                          // By far the easiest solution to
+            if(image != null)
+            {
+                image = image.getScaledInstance(-1, h, Image.SCALE_SMOOTH);                                      // By far the easiest solution to
                                                                                                                         // stretch an image to the screen while maintaining
                                                                                                                         // aspect ratio.
 
-            JLabel scaled = new JLabel(new ImageIcon(image));
-            scaled.setAlignmentX(.5f);
-            scaled.setAlignmentY(.5f);
-            jcomp.add(scaled);
+                JLabel scaled = new JLabel(new ImageIcon(image));
+                scaled.setAlignmentX(.5f);
+                scaled.setAlignmentY(.5f);
+                jcomp.add(scaled);
+            }
         }
 
         /**
