@@ -156,9 +156,87 @@ public class Server {
 //                        send.flush();
                     }
                 }
+
+                // Changes user's password
+                if (request.equals("changePassword")) {
+                    System.out.println("request: Password...");
+                    String username = receiver.readUTF();
+                    String password = receiver.readUTF();
+                    String loggedInUser = receiver.readUTF();
+                    String token = receiver.readUTF();
+
+                    if (checkTokenIsValid(loggedInUser, token)) {
+                        System.out.println("Changing Password...");
+                        changeUserPassword(username, password);
+                        System.out.println("Changed Password...");
+                    } else {
+                        System.out.println("Token wasn't valid");
+                    }
+                    send.flush();
+                }
+
                 // Viewer Request Billboards
                 if (request.equals("ViewerRequest")) {
                     viewerRequest(send);
+                }
+
+                // Get a list of users in the database
+                if (request.equals("getUsers")) {
+                    send.writeObject(getAllUsernames());
+                    send.flush();
+                }
+
+                // Retrieve information on a user for editing their details
+                if (request.equals("getUserInfo")) {
+                    System.out.println("request: user details...");
+                    String username = receiver.readUTF();
+                    String loggedInUser = receiver.readUTF();
+                    String token = receiver.readUTF();
+
+                    if (checkTokenIsValid(loggedInUser, token)) {
+                        System.out.println("Retrieving user info...");
+                        send.writeObject(getUserInfo(username));
+                        System.out.println("Retrieved user info");
+                    } else {
+                        System.out.println("Token wasn't valid");
+                    }
+                    send.flush();
+                }
+
+                // Update information on a user for editing their details
+                if (request.equals("updateUserInfo")) {
+                    System.out.println("request: update user details...");
+                    String username = receiver.readUTF();
+                    String firstName = receiver.readUTF();
+                    String lastName = receiver.readUTF();
+                    String loggedInUser = receiver.readUTF();
+                    String token = receiver.readUTF();
+
+                    if (checkTokenIsValid(loggedInUser, token)) {
+                        System.out.println("Updating user info...");
+                        updateUserInfo(username, firstName, lastName);
+                        System.out.println("Updated user info");
+                    } else {
+                        System.out.println("Token wasn't valid");
+                    }
+                    send.flush();
+                }
+
+                // Delete a user
+                if (request.equals("deleteUser")) {
+                    System.out.println("request: delete user details...");
+                    String username = receiver.readUTF();
+                    String loggedInUser = receiver.readUTF();
+                    String token = receiver.readUTF();
+
+                    if (checkTokenIsValid(loggedInUser, token)) {
+                        System.out.println("Deleting user'" + username + "'...");
+                        deleteUser(username);
+                        System.out.println("Deleted user");
+                    } else {
+                        System.out.println("Token wasn't valid");
+                    }
+                    send.flush();
                 }
 
 
@@ -275,7 +353,6 @@ public class Server {
      */
     public static String addSaltToHashedPassword(String password) throws InvalidKeySpecException, NoSuchAlgorithmException, IOException {
         String hashedPasswordSalted = getSaltedHash(password);
-
         return hashedPasswordSalted;
     }
 
@@ -436,26 +513,85 @@ public class Server {
      * @return All users in object
      * @throws SQLException
      */
-    private static Object getAllUsernames() throws SQLException {
-        Object data = new Object();
-        String query = "SELECT `user` FROM `users`";
+    private static ArrayList<String> getAllUsernames() throws SQLException {
+        System.out.println("Getting usernames...");
+        ArrayList<String> listOfUsers = new ArrayList<>();
+        String query = "SELECT user FROM users";
 
         Statement st = ServerInit.conn.createStatement();
-        st.executeQuery("USE `cab302`;");
+        st.executeQuery("USE cab302;");
         ResultSet rs = st.executeQuery(query);
         // If no user are found in database
         if (!rs.isBeforeFirst()) {
             System.out.println("No user in database"); // Debug use
 //            return "No User in database";
         } else {
-            int i = 1;
-            while (rs.next())
-                System.out.println(rs.getString(i));
-            data += rs.getString(i) + ",";
-            i++;
-
+            while (rs.next()) {
+                String user = rs.getString("user");
+                listOfUsers.add(user);
+            }
         }
-        return data;
+
+        System.out.println(listOfUsers);
+
+        return listOfUsers;
+    }
+
+    private static String[] getUserInfo(String username) throws SQLException {
+        System.out.println("Getting user info...");
+        String[] userInfo = new String[2];
+        String query = "SELECT fName, lName FROM users WHERE user = '" + username + "'";
+
+        Statement st = ServerInit.conn.createStatement();
+        st.executeQuery("USE cab302;");
+        ResultSet rs = st.executeQuery(query);
+        // If no user are found in database
+        if (!rs.isBeforeFirst()) {
+            System.out.println("No user in database"); // Debug use
+//            return "No User in database";
+        } else {
+            while (rs.next()) {
+                String firstName = rs.getString("fName");
+                String lastName = rs.getString("lName");
+                userInfo[0] = firstName;
+                userInfo[1] = lastName;
+            }
+        }
+
+        System.out.println(userInfo[0]);
+        System.out.println(userInfo[1]);
+
+        return userInfo;
+    }
+
+    private static void updateUserInfo(String username, String firstName, String lastName) throws SQLException {
+        System.out.println("Updating user info...");
+
+        String query = "UPDATE users SET fName = '" + firstName + "', lName = '" + lastName + "' WHERE user = '" + username + "'";
+        System.out.println(query);
+        Statement st = ServerInit.conn.createStatement();
+        st.executeQuery("USE `cab302`;");
+        st.executeQuery(query);
+    }
+
+    private static void deleteUser(String username) throws SQLException {
+
+        String query = "DELETE FROM users WHERE user = '" + username + "'";
+        System.out.println(query);
+        Statement st = ServerInit.conn.createStatement();
+        st.executeQuery("USE `cab302`;");
+        st.executeQuery(query);
+    }
+
+    private static void changeUserPassword(String username, String password)
+            throws InvalidKeySpecException, NoSuchAlgorithmException, IOException, SQLException {
+        String saltHashedPassword = addSaltToHashedPassword(password);
+
+        String query = "UPDATE users SET pass = '" + saltHashedPassword + "' WHERE user = '" + username + "'";
+        System.out.println(query);
+        Statement st = ServerInit.conn.createStatement();
+        st.executeQuery("USE `cab302`;");
+        st.executeQuery(query);
     }
 
     /**
@@ -849,4 +985,5 @@ public class Server {
         }
         return permission;
     }
+
 }

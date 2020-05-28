@@ -11,6 +11,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
 
 /**
@@ -33,7 +34,7 @@ import java.util.Base64;
 public class controller {
 
     public static boolean loginSuccessful = false;
-    private static String loggedInUser;
+    static String loggedInUser;
     private static String token;
     private static ArrayList<String[]> schedules;
     public static UserPermission permission = new UserPermission();
@@ -244,6 +245,50 @@ public class controller {
         return hashedPassword;
     }
 
+    static String hashNewPassword(String newPassword) throws InvalidKeySpecException, NoSuchAlgorithmException {
+
+        String newPasswordHashed = plaintextToHashedPassword(newPassword);
+
+        System.out.println("hashing new password...");
+        System.out.println(newPasswordHashed);
+
+        return newPasswordHashed;
+    }
+
+    static void changePassword(String username, String password) throws IOException, InvalidKeySpecException, NoSuchAlgorithmException {
+
+        Socket client = connectionToServer();
+
+        // connects to the server with information and attempts to get the auth token for the user after successful login
+        if (client.isConnected()) {
+
+            OutputStream outputStream = client.getOutputStream();
+            InputStream inputStream = client.getInputStream();
+
+            ObjectOutputStream send = new ObjectOutputStream(outputStream);
+            ObjectInputStream receiver = new ObjectInputStream(inputStream);
+
+            String newPassword = hashNewPassword(password);
+
+            System.out.println("Sending new password to server");
+            System.out.println(username);
+
+            send.writeUTF("changePassword");
+            send.writeUTF(username);
+            send.writeUTF(newPassword);
+            send.writeUTF(loggedInUser);
+            send.writeUTF(token);
+            send.flush(); // Must be done before switching to reading state
+
+
+//      End connections
+            send.close();
+            receiver.close();
+            client.close();
+
+        }
+    }
+
     /**
      * Gets the current socket authentication token
      *
@@ -396,7 +441,7 @@ public class controller {
      *  Toggle switch to show or hide user preferences via modifying isVisible state
      */
     public static void ShowUserPreferences() {
-        toggleVisibility(usersPage.userWindow);
+        //toggleVisibility(usersPage.userWindow);
     }
 
     /**
@@ -532,6 +577,7 @@ public class controller {
         }
     }
 
+
     public static void DeleteBillboard(String billboardId) throws IOException {
         int id = Integer.parseInt(billboardId);
         Socket client = connectionToServer();
@@ -564,10 +610,159 @@ public class controller {
                 }
             }
 
+//      End connections
+                send.close();
+                receiver.close();
+                client.close();
+        }
+    }
 
+
+    static ArrayList<String> getListOfUsers() throws IOException, ClassNotFoundException {
+
+        ArrayList<String> listOfUsers = new ArrayList<>();
+
+        Socket client = connectionToServer();
+
+        // connects to the server with information and attempts to get the auth token
+        // for the user after successful login
+        if (client.isConnected()) {
+            OutputStream outputStream = client.getOutputStream();
+            InputStream inputStream = client.getInputStream();
+
+            ObjectOutputStream send = new ObjectOutputStream(outputStream);
+            ObjectInputStream receiver = new ObjectInputStream(inputStream);
+
+            send.writeUTF("getUsers");
+            send.flush();
+
+            // Store the current schedule listings
+            listOfUsers = (ArrayList<String>) receiver.readObject();
+
+            // End connections
             send.close();
             receiver.close();
             client.close();
+        }
+        return listOfUsers;
+    }
+
+    static String[] getUserInfo(String username) throws IOException, ClassNotFoundException {
+
+        String[] userInfo = new String[2];
+
+        Socket client = connectionToServer();
+
+        // connects to the server with information and attempts to get the auth token
+        // for the user after successful login
+        if (client.isConnected()) {
+            OutputStream outputStream = client.getOutputStream();
+            InputStream inputStream = client.getInputStream();
+
+            ObjectOutputStream send = new ObjectOutputStream(outputStream);
+            ObjectInputStream receiver = new ObjectInputStream(inputStream);
+
+            send.writeUTF("getUserInfo");
+            send.writeUTF(username);
+            send.writeUTF(loggedInUser);
+            send.writeUTF(token);
+            send.flush();
+
+            // Store the current schedule listings
+            userInfo = (String[]) receiver.readObject();
+
+            // End connections
+            send.close();
+            receiver.close();
+            client.close();
+        }
+        return userInfo;
+    }
+
+    static String[] updateUserInfo(String firstName, String lastName) {
+        String[] updatedUserInfo = { firstName, lastName };
+        return updatedUserInfo;
+    }
+
+    static void updateUserDetails(String username, String firstName, String lastName) throws IOException {
+
+        Socket client = connectionToServer();
+
+        // connects to the server with information and attempts to get the auth token
+        // for the user after successful login
+        if (client.isConnected()) {
+            OutputStream outputStream = client.getOutputStream();
+            InputStream inputStream = client.getInputStream();
+
+            ObjectOutputStream send = new ObjectOutputStream(outputStream);
+            ObjectInputStream receiver = new ObjectInputStream(inputStream);
+
+            String[] updatedUserInfo = updateUserInfo(firstName, lastName);
+
+            send.writeUTF("updateUserInfo");
+            send.writeUTF(username);
+            send.writeUTF(updatedUserInfo[0]);
+            send.writeUTF(updatedUserInfo[1]);
+            send.writeUTF(loggedInUser);
+            send.writeUTF(token);
+            send.flush();
+
+            // End connections
+            send.close();
+            receiver.close();
+            client.close();
+        }
+    }
+
+    static boolean deleteUser(ArrayList<String> userList, String username) {
+        boolean wasUserInList = false;
+
+        ArrayList<String> currentUserList = userList;
+
+        if (!username.equals(loggedInUser)) {
+            if (currentUserList.contains(username)) {
+                currentUserList.remove(username);
+                wasUserInList = true;
+            }
+        } else {
+            // Ensure that the dialog doesn't attempt to show up for the unit test
+            if (!loggedInUser.equals("ThisIsATestUser")) {
+                // Display POP ERROR MESSAGE
+                DialogWindow.showErrorPane("Cannot delete yourself. Please select a user that isn't yourself.",
+                        "Error: Attempted to delete self");
+            }
+        }
+
+        return wasUserInList;
+    }
+
+    static void deleteUserFromDB(ArrayList<String> userList, String username) throws IOException {
+
+        // If the user does exist in the list of users pulled from the database, send
+        // delete request to the server
+        if (deleteUser(userList, username)) {
+            Socket client = connectionToServer();
+            System.out.println("Sending request to server to delete user");
+            // connects to the server with information and attempts to get the auth token
+            // for the user after successful login
+            if (client.isConnected()) {
+                OutputStream outputStream = client.getOutputStream();
+                InputStream inputStream = client.getInputStream();
+
+                ObjectOutputStream send = new ObjectOutputStream(outputStream);
+                ObjectInputStream receiver = new ObjectInputStream(inputStream);
+
+                send.writeUTF("deleteUser");
+                send.writeUTF(username);
+                send.writeUTF(loggedInUser);
+                send.writeUTF(token);
+                send.flush();
+
+                // End connections
+                send.close();
+                receiver.close();
+                client.close();
+            }
         }
     }
 }
