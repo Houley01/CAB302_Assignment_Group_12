@@ -149,7 +149,7 @@ public class createBillboards {
                 String image = imageURL.getText();
                 String informationText = informationColourInput.getText();
                 String informationColour = RGBToHex(informationTextColor.getBackground());
-                String backgroundColour = RGBToHex(backgroundColourPickerButton.getBackground());
+                String backgroundColour = RGBToHex(backgroundDisplayColour.getBackground());
 
                 int testImageOrURL = URLOrImageFileOrNone(fileChosen, image);
                 if (testImageOrURL == 1) {
