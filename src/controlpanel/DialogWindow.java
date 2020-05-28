@@ -51,6 +51,24 @@ public class DialogWindow {
         dialog.setVisible(true);
     }
 
+    static void showPasswordSettingsRegularUser() throws IOException, InvalidKeySpecException, NoSuchAlgorithmException, ClassNotFoundException {
+        JFrame editPassword = new JFrame();
+        String selectedUser = controller.loggedInUser;
+        Object changePassword = JOptionPane.showInputDialog(editPassword, "Enter new password:");
+        Object changePasswordConfirm = JOptionPane.showInputDialog(editPassword, "Confirm new password:");
+
+        String newPassword = (String) changePassword;
+        String newPasswordConfirm = (String) changePasswordConfirm;
+
+        // Checking that the new password and it's confirmed entry match
+        if (changePassword.equals(changePasswordConfirm) && newPassword != null && !newPassword.isEmpty() && newPasswordConfirm != null && !newPasswordConfirm.isEmpty()) {
+            controller.changePassword(selectedUser, (String) changePasswordConfirm);
+        } else {
+            DialogWindow.showErrorPane("Passwords don't match or field(s) were empty. Please try again.", "Error");
+            System.out.println("Passwords didn't match or were empty");
+        }
+    }
+
     // Edit Admin Settings
     // Admin Password
 

@@ -56,7 +56,17 @@ public class usersPage {
         userRegular.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                controller.ShowUserPreferences();
+                try {
+                    DialogWindow.showPasswordSettingsRegularUser();
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                } catch (InvalidKeySpecException ex) {
+                    ex.printStackTrace();
+                } catch (NoSuchAlgorithmException ex) {
+                    ex.printStackTrace();
+                } catch (ClassNotFoundException ex) {
+                    ex.printStackTrace();
+                }
             }
         });
 
@@ -183,50 +193,4 @@ public class usersPage {
 
         return adminWindow;
     }
-
-    static JInternalFrame userWindow = new JInternalFrame( "User Preferences", false, false, true);
-
-    /**
-     * User settings.
-     * Boils down to a change password page. Lets the user save their new password
-     * or cancel and retain their <i>old</i> password
-     *
-     * @return window       JFrame window object with configuration settings
-     */
-    public static JInternalFrame UserEditUserWindow() {
-        userWindow.setSize(400,125);
-        // INSERT CONTENT HERE
-
-        //        Heading - "User Settings"
-        JPanel mainHeading = new JPanel();
-        JLabel editUser = new JLabel("User Settings");
-        editUser.setVerticalTextPosition(JLabel.TOP);
-        editUser.setHorizontalTextPosition(JLabel.LEFT);
-        editUser.setFont(controlPanel.titleFont);
-
-        mainHeading.add(editUser);
-
-        JPanel userSettings = new JPanel();
-
-        //        Heading - "Change Password"
-        JLabel userPassword = new JLabel("Change Password");
-        userPassword.setVerticalTextPosition(JLabel.TOP);
-        userPassword.setHorizontalTextPosition(JLabel.LEFT);
-        JTextField newPassword = new JTextField();
-        JButton saveChanges = new JButton("Save");
-        JButton cancelChanges = new JButton("Cancel");
-
-        userWindow.setLayout(new GridLayout(2, 2));
-        userWindow.add(editUser);
-        userWindow.add(userSettings);
-        userSettings.setLayout(new GridLayout(2,2));
-        userSettings.add(userPassword);
-        userSettings.add(newPassword);
-        userSettings.add(saveChanges);
-        userSettings.add(cancelChanges);
-
-        return userWindow;
-    }
-
-
 }

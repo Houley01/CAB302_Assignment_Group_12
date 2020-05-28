@@ -433,7 +433,7 @@ public class controller {
      *  Toggle switch to show or hide user preferences via modifying isVisible state
      */
     public static void ShowUserPreferences() {
-        toggleVisibility(usersPage.userWindow);
+        //toggleVisibility(usersPage.userWindow);
     }
 
     /**

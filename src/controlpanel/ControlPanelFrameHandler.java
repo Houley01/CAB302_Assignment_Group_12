@@ -19,7 +19,7 @@ public class ControlPanelFrameHandler extends JFrame {
     private JInternalFrame scheduleBillboardWindow = scheduleBillboards.scheduleBillboards();
     private JInternalFrame userWindow = usersPage.userPage();
     private JInternalFrame adminEditUser = usersPage.AdminEditUserWindow();
-    private JInternalFrame userEditUser = usersPage.UserEditUserWindow();
+    //private JInternalFrame userEditUser = usersPage.UserEditUserWindow();
     private JInternalFrame helpWindow = HelpPage.HelpPage();
 
     public ControlPanelFrameHandler() throws IOException, ClassNotFoundException {
@@ -72,7 +72,7 @@ public class ControlPanelFrameHandler extends JFrame {
 //        EDIT USER \/
         userWindow.setVisible(false);
         adminEditUser.setVisible(false);
-        userEditUser.setVisible(false);
+        //userEditUser.setVisible(false);
 //        EDIT USER /\
 
 //        MASTER DISPLAY
@@ -84,7 +84,7 @@ public class ControlPanelFrameHandler extends JFrame {
         pane.add(scheduleBillboardWindow);
         pane.add(userWindow);
         pane.add(adminEditUser);
-        pane.add(userEditUser);
+        //pane.add(userEditUser);
         pane.add(helpWindow);
 
 
