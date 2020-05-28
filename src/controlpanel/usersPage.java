@@ -161,7 +161,13 @@ public class usersPage {
         deleteUser.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                DialogWindow.showRemoveUser();
+                try {
+                    DialogWindow.showRemoveUser();
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                } catch (ClassNotFoundException ex) {
+                    ex.printStackTrace();
+                }
             }
         });
 

@@ -10,6 +10,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
 
 /**
@@ -32,7 +33,7 @@ import java.util.Base64;
 public class controller {
 
     public static boolean loginSuccessful = false;
-    private static String loggedInUser;
+    static String loggedInUser;
     private static String token;
     private static ArrayList<String[]> schedules;
 
@@ -652,6 +653,56 @@ public class controller {
             send.close();
             receiver.close();
             client.close();
+        }
+    }
+
+    static boolean deleteUser(ArrayList<String> userList, String username) {
+        boolean wasUserInList = false;
+
+        ArrayList<String> currentUserList = userList;
+
+        if (!username.equals(loggedInUser)) {
+            if (currentUserList.contains(username)) {
+                currentUserList.remove(username);
+                wasUserInList = true;
+            }
+        } else {
+            // Ensure that the dialog doesn't attempt to show up for the unit test
+            if (!loggedInUser.equals("ThisIsATestUser")) {
+                //                Display POP ERROR MESSAGE
+                DialogWindow.showErrorPane("Cannot delete yourself. Please select a user that isn't yourself.", "Error: Attempted to delete self");
+            }
+        }
+
+        return wasUserInList;
+    }
+
+    static void deleteUserFromDB(ArrayList<String> userList, String username) throws IOException {
+
+        // If the user does exist in the list of users pulled from the database, send delete request to the server
+        if (deleteUser(userList, username)) {
+            Socket client = connectionToServer();
+            System.out.println("Sending request to server to delete user");
+            // connects to the server with information and attempts to get the auth token for the user after successful login
+            if (client.isConnected()) {
+                OutputStream outputStream = client.getOutputStream();
+                InputStream inputStream = client.getInputStream();
+
+                ObjectOutputStream send = new ObjectOutputStream(outputStream);
+                ObjectInputStream receiver = new ObjectInputStream(inputStream);
+
+
+                send.writeUTF("deleteUser");
+                send.writeUTF(username);
+                send.writeUTF(loggedInUser);
+                send.writeUTF(token);
+                send.flush();
+
+//      End connections
+                send.close();
+                receiver.close();
+                client.close();
+            }
         }
     }
 

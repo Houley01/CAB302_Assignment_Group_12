@@ -184,7 +184,7 @@ public class Server {
                     send.flush();
                 }
 
-                // Retrieve information on a user for editing their details
+                // Update information on a user for editing their details
                 if (request.equals("updateUserInfo")) {
                     System.out.println("request: update user details...");
                     String username = receiver.readUTF();
@@ -197,6 +197,23 @@ public class Server {
                         System.out.println("Updating user info...");
                         updateUserInfo(username, firstName, lastName);
                         System.out.println("Updated user info");
+                    } else {
+                        System.out.println("Token wasn't valid");
+                    }
+                    send.flush();
+                }
+
+                // Delete a user
+                if (request.equals("deleteUser")) {
+                    System.out.println("request: delete user details...");
+                    String username = receiver.readUTF();
+                    String loggedInUser = receiver.readUTF();
+                    String token = receiver.readUTF();
+
+                    if (checkTokenIsValid(loggedInUser, token)) {
+                        System.out.println("Deleting user'" + username + "'...");
+                        deleteUser(username);
+                        System.out.println("Deleted user");
                     } else {
                         System.out.println("Token wasn't valid");
                     }
@@ -532,6 +549,15 @@ public class Server {
         System.out.println("Updating user info...");
 
         String query = "UPDATE users SET fName = '" + firstName + "', lName = '" + lastName + "' WHERE user = '" + username + "'";
+        System.out.println(query);
+        Statement st = ServerInit.conn.createStatement();
+        st.executeQuery("USE `cab302`;");
+        st.executeQuery(query);
+    }
+
+    private static void deleteUser(String username) throws SQLException {
+
+        String query = "DELETE FROM users WHERE user = '" + username + "'";
         System.out.println(query);
         Statement st = ServerInit.conn.createStatement();
         st.executeQuery("USE `cab302`;");

@@ -184,10 +184,10 @@ public class DialogWindow {
      * <h1>Delete user from system.</h1>
      * User inputs a <i>username</i> to remove from the billboard system.
      */
-    static void showRemoveUser() {
+    static void showRemoveUser() throws IOException, ClassNotFoundException {
+        String selectedUser = getListOfUsers();
         JFrame deleteUser = new JFrame();
-        String removeUser = JOptionPane.showInputDialog(deleteUser, "Delete a User:");
-        System.out.println(removeUser);
+        controller.deleteUserFromDB(controller.getListOfUsers(), selectedUser);
     }
 
     static String getListOfUsers() throws IOException, ClassNotFoundException {
