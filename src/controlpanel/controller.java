@@ -45,7 +45,7 @@ public class controller {
      *  @exception throws IOexception
      */
     // Attempts to make a connection to the server
-    static Socket connectionToServer() throws IOException {
+    public static Socket connectionToServer() throws IOException {
         try {
             // Gathers the information from server.config file
             resources.GetPropertyValues properties = new resources.GetPropertyValues();
