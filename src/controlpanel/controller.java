@@ -501,9 +501,10 @@ public class controller {
 
             send.writeUTF("GetBillboard");
             send.write(id);
+            send.writeUTF(loggedInUser);
             send.flush();
 
-            int val = receiver.read();
+            int val = receiver.readInt();
             if (val == 1) {
                 Billboard billboard = (Billboard) receiver.readObject();
                 createBillboards.input1.setText(billboard.getTitle());
@@ -515,7 +516,12 @@ public class controller {
                 createBillboards.window.toFront();
                 showCreateBillboard();
 
-            } else {
+            }
+            if (val == -1) {
+                DialogWindow.NoAccessTo("to edit this billboard");
+            }
+
+            else {
 //                Display POP ERROR MESSAGE
                 DialogWindow.showErrorPane("Please refresh the billboard list", "Error: Could NOT find billboard");
             }
@@ -526,7 +532,7 @@ public class controller {
         }
     }
 
-    public static void DeleteBillboard(String billboardId) throws IOException, ClassNotFoundException {
+    public static void DeleteBillboard(String billboardId) throws IOException {
         int id = Integer.parseInt(billboardId);
         Socket client = connectionToServer();
         if (client.isConnected()) {
@@ -540,7 +546,7 @@ public class controller {
             send.write(id);
             send.flush();
 
-            int val = receiver.read();
+            int val = receiver.readInt();
             if (val == 1) {
                 String billboardName = receiver.readUTF();
                 int yesOrNo = DialogWindow.showYesNoPane("Are you sure you want to delete billboard: " +

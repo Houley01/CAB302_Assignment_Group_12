@@ -661,23 +661,67 @@ public class Server {
         }
     }
 
+    private static String CheckIfBillboardIsScheduled(int billboardID, boolean scheduled) {
+        if (scheduled == false) {
+            return  "SELECT * FROM billboards " +
+                    "LEFT JOIN schedules ON schedules.idBillboard = billboards.idBillboards " +
+                    "LEFT JOIN users ON billboards.userId = users.idUsers " +
+                    "WHERE (schedules.idBillboard IS NULL) AND (billboards.idBillboards = " + billboardID + ")";
+        } else {
+            return  "SELECT * FROM billboards " +
+                    "LEFT JOIN schedules ON schedules.idBillboard = billboards.idBillboards " +
+                    "LEFT JOIN users ON billboards.userId = users.idUsers " +
+                    "WHERE (schedules.idBillboard IS NOT NULL) AND (billboards.idBillboards = " + billboardID + ");";
+        }
+    }
+
     private static void GetBillboardInfo(ObjectInputStream receiver, ObjectOutputStream send) throws IOException, SQLException, ParserConfigurationException, SAXException, ParserConfigurationException, SAXException {
         int billboardID = receiver.read();
-        String query = "SELECT billboardName, fileLocation FROM billboards WHERE idBillboards = " + billboardID + ";";
+        String username = receiver.readUTF();
+
+        //        Returns if the billboard is not scheduled
+        String query = CheckIfBillboardIsScheduled(billboardID, false);
+        //        Returns if the billboard is currently scheduled
         Statement st = ServerInit.conn.createStatement();
         st.executeQuery("USE `cab302`;");
         ResultSet rs = st.executeQuery(query);
-        if (!rs.isBeforeFirst()) {
-            System.out.println("There is no billboards to be displayed");
-            send.write(-1);
-        } else {
-            send.write(1);
+//        If Data is found
+        if (rs.isBeforeFirst()) {
             rs.next();
-            String name = rs.getString("billboardName");
-            String fileLocation = rs.getString("fileLocation");
-            Billboard billboard = ReadXMLFile(new File(fileLocation), name);
+            if (rs.getInt("createBillboard") == 1
+                            || rs.getInt("editAllBillboard") == 1) {
+                send.writeInt(1);
+                String name = rs.getString("billboardName");
+                String fileLocation = rs.getString("fileLocation");
+                Billboard billboard = ReadXMLFile(new File(fileLocation), name);
+                send.writeObject(billboard);
+                send.flush();
+            }
+            else {
+                send.writeInt(-1);
+            }
 
-            send.writeObject(billboard);
+//            IF the billboard is scheduled in the database
+        } else {
+            query = CheckIfBillboardIsScheduled(billboardID, true);
+            st = ServerInit.conn.createStatement();
+            st.executeQuery("USE `cab302`;");
+            rs = st.executeQuery(query);
+
+            if (rs.isBeforeFirst()) {
+                rs.next();
+                if (rs.getInt("editAllBillboard") == 1) {
+                    send.writeInt(1);
+                    String name = rs.getString("billboardName");
+                    String fileLocation = rs.getString("fileLocation");
+                    Billboard billboard = ReadXMLFile(new File(fileLocation), name);
+                    send.writeObject(billboard);
+                } else {
+                    System.out.println("There is no billboards to be displayed");
+                    send.writeInt(-1);
+                }
+                send.flush();
+            }
         }
         send.flush();
     }
@@ -686,13 +730,8 @@ public class Server {
         int billboardID = receiver.read();
 
 //        Returns if the billboard is not scheduled
-        String query = "SELECT `billboardName`, `user`, users.createBillboard, `users`.editAllBillboard FROM billboards " +
-                "LEFT JOIN schedules ON schedules.idBillboard = billboards.idBillboards " +
-                "LEFT JOIN users ON billboards.userId = users.idUsers " +
-                "WHERE (schedules.idBillboard IS NULL) AND (billboards.idBillboards = " + billboardID + ")";
+        String query = CheckIfBillboardIsScheduled(billboardID, false);
         //        Returns if the billboard is currently scheduled
-
-
         Statement st = ServerInit.conn.createStatement();
         st.executeQuery("USE `cab302`;");
         ResultSet rs = st.executeQuery(query);
@@ -700,7 +739,7 @@ public class Server {
         if (rs.isBeforeFirst()) {
             rs.next();
             if (rs.getInt("createBillboard") == 1 || rs.getInt("editAllBillboard") == 1) {
-                send.write(1);
+                send.writeInt(1);
                 send.writeUTF(rs.getString("billboardName"));
                 send.flush();
                 if (receiver.read() == 0) {
@@ -710,15 +749,12 @@ public class Server {
                     rs = st.executeQuery(query);
                 }
             } else {
-                send.write(0);
+                send.writeInt(0);
             }
 
 //            IF the billboard is scheduled in the database
         } else {
-            query = "SELECT `billboardName`, `user`, users.createBillboard, users.editAllBillboard FROM billboards " +
-                    "LEFT JOIN schedules ON schedules.idBillboard = billboards.idBillboards " +
-                    "LEFT JOIN users ON billboards.userId = users.idUsers " +
-                    "WHERE (schedules.idBillboard IS NOT NULL) AND (billboards.idBillboards = " + billboardID + ");";
+            query = CheckIfBillboardIsScheduled(billboardID, true);
             st = ServerInit.conn.createStatement();
             st.executeQuery("USE `cab302`;");
             rs = st.executeQuery(query);
@@ -726,7 +762,7 @@ public class Server {
             if (rs.isBeforeFirst()) {
                 rs.next();
                 if (rs.getInt("editAllBillboard") == 1) {
-                    send.write(1);
+                    send.writeInt(1);
                     send.writeUTF(rs.getString("billboardName"));
                     send.flush();
                     if (receiver.read() == 0) {
@@ -738,7 +774,7 @@ public class Server {
                         rs = st.executeQuery(query);
                     }
                 } else {
-                    send.write(0);
+                    send.writeInt(0);
                 }
             }
             send.flush();
