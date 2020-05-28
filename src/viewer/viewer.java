@@ -44,7 +44,9 @@ public class viewer extends TimerTask {
     public static int w = (int) Math.round(screenSize.getWidth());                    // Res Width
     public static int h = (int) Math.round(screenSize.getHeight());                   // Res Height
     public static boolean online = false;                                             // Online / offline detector (server)
-    private static long timerRefresh = 15000;                                         // Refresh rate
+    public static JFrame frame = new JFrame("Billboard viewer");
+    private static long timerRefresh = 15*1000;                                       // Refresh rate
+
 
     /**
      * Code mostly originated from the controller though is slightly modified to fit the viewer.
@@ -145,7 +147,6 @@ public class viewer extends TimerTask {
             String fileName = file.replace(".xml", "");        // Java didn't like split here so we just
                                                                                   // delete the extension.
             Billboard billboard = ReadXMLFile(new File(fileLocation), fileName);  // ReadXML returns a Billboard class
-            System.out.println(billboard);
 
             // Closing streams and socket
             send.close();
@@ -230,6 +231,23 @@ public class viewer extends TimerTask {
         return image;                                                               // Return the image.
     }
 
+    /**
+     * Removes the previous panel stored by JFrame.
+     * Code checks to see how many instances of JPanel exist inside of the frame. If equals two or more it will
+     * delete the original / root panel / index 0.
+     */
+    private static void removeFrameData()
+    {
+        int compCount = frame.getContentPane().getComponentCount();             // Count of panels in the frame
+        if(compCount > 1)                                                       // Check to see if we have more 1
+        {
+                Component comp = frame.getContentPane().getComponent(0);    // Get the panel that was rendered first
+                frame.getContentPane().remove(comp);                            // Delete that panel
+        }
+        frame.revalidate();                                                     // Re-validating the frame
+        frame.repaint();                                                        // Repainting the frame
+    }
+
 
     /**
      * Java Swing renderer. Renders all the information given to it from the server
@@ -253,7 +271,8 @@ public class viewer extends TimerTask {
     private static void renderer(Billboard currBill) throws IOException
     {
         Color bgColour = Color.decode("#333333");                                                                       // Default color
-        JFrame frame = new JFrame("Billboard viewer");                                                             // Frame init
+        removeFrameData();
+
         JPanel panel = new JPanel();                                                                                    // Panel init
         listeners(frame);                                                                                               // Init the listeners
 
@@ -284,7 +303,7 @@ public class viewer extends TimerTask {
          */
         else // Online
         {
-            bgColour = Color.decode(currBill.getBackgroundColour());                                              // AWT readable colour
+            bgColour = Color.decode(currBill.getBackgroundColour());                                                    // AWT readable colour
             JLabel message = formatText(currBill.getMessageColour(), w / 30, currBill.getMessageText());           // Creating text for the message
             JLabel info = formatText(currBill.getInformationColour(), w / 50, currBill.getInformationText());      // Creating the info text
 
@@ -322,10 +341,7 @@ public class viewer extends TimerTask {
         frame.getContentPane().add(panel);                                   // place the panel centred
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);                // exit the app when closed
         frame.setExtendedState(JFrame.MAXIMIZED_BOTH);                       // true fullscreen it
-        frame.setUndecorated(true);
         frame.setVisible(true);                                              // show gui
-
-
     }
 
     /**
@@ -380,6 +396,7 @@ public class viewer extends TimerTask {
      * @param args
      */
     public static void main(String[] args) {
+        frame.setUndecorated(true);         /**We set undecorated here since updating it in the renderer will cause errors*/
         Timer time = new Timer(false);
         time.scheduleAtFixedRate(new viewer(), 0, timerRefresh);
     }
@@ -394,13 +411,13 @@ public class viewer extends TimerTask {
      */
     public void run()
     {
+
         Socket client = null;                               // Socket connection to the server
         try {
             client = connectionToServer();
             // This goes into a loop for every 15 seconds
             try{
                 Billboard currBill = getBillboardInfo(client);   // Get billboard information
-                System.out.println(currBill);
                 renderer(currBill);                              // JFrame renderer
             }
             catch(Exception e)
