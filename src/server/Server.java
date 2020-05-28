@@ -143,6 +143,9 @@ public class Server {
                         e.printStackTrace();
                     }
                 }
+                if (request.equals("DeleteBillboard")) {
+                    DeleteBillboard(receiver, send);
+                }
 
                 // Edit user
                 if (request.equals("EditUser")) {
@@ -677,6 +680,69 @@ public class Server {
             send.writeObject(billboard);
         }
         send.flush();
+    }
+
+    private static void DeleteBillboard(ObjectInputStream receiver, ObjectOutputStream send) throws IOException, SQLException {
+        int billboardID = receiver.read();
+
+//        Returns if the billboard is not scheduled
+        String query = "SELECT `billboardName`, `user`, users.createBillboard, `users`.editAllBillboard FROM billboards " +
+                "LEFT JOIN schedules ON schedules.idBillboard = billboards.idBillboards " +
+                "LEFT JOIN users ON billboards.userId = users.idUsers " +
+                "WHERE (schedules.idBillboard IS NULL) AND (billboards.idBillboards = " + billboardID + ")";
+        //        Returns if the billboard is currently scheduled
+
+
+        Statement st = ServerInit.conn.createStatement();
+        st.executeQuery("USE `cab302`;");
+        ResultSet rs = st.executeQuery(query);
+//        If Data is found
+        if (rs.isBeforeFirst()) {
+            rs.next();
+            if (rs.getInt("createBillboard") == 1 || rs.getInt("editAllBillboard") == 1) {
+                send.write(1);
+                send.writeUTF(rs.getString("billboardName"));
+                send.flush();
+                if (receiver.read() == 0) {
+                    query = "DELETE FROM billboards WHERE idBillboards = " + billboardID + ";";
+                    st = ServerInit.conn.createStatement();
+                    st.executeQuery("USE `cab302`;");
+                    rs = st.executeQuery(query);
+                }
+            } else {
+                send.write(0);
+            }
+
+//            IF the billboard is scheduled in the database
+        } else {
+            query = "SELECT `billboardName`, `user`, users.createBillboard, users.editAllBillboard FROM billboards " +
+                    "LEFT JOIN schedules ON schedules.idBillboard = billboards.idBillboards " +
+                    "LEFT JOIN users ON billboards.userId = users.idUsers " +
+                    "WHERE (schedules.idBillboard IS NOT NULL) AND (billboards.idBillboards = " + billboardID + ");";
+            st = ServerInit.conn.createStatement();
+            st.executeQuery("USE `cab302`;");
+            rs = st.executeQuery(query);
+
+            if (rs.isBeforeFirst()) {
+                rs.next();
+                if (rs.getInt("editAllBillboard") == 1) {
+                    send.write(1);
+                    send.writeUTF(rs.getString("billboardName"));
+                    send.flush();
+                    if (receiver.read() == 0) {
+                        String deleteSchedule = "DELETE FROM schedules WHERE schedules.idBillboard = " + billboardID + ";";
+                        query = "DELETE FROM billboards WHERE idBillboards = " + billboardID + ";";
+                        st = ServerInit.conn.createStatement();
+                        st.executeQuery("USE `cab302`;");
+                        st.executeQuery(deleteSchedule);
+                        rs = st.executeQuery(query);
+                    }
+                } else {
+                    send.write(0);
+                }
+            }
+            send.flush();
+        }
     }
 
 //    Returns the boolean array containing the permission

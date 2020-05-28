@@ -39,12 +39,10 @@ public class DialogWindow {
      *
      * @param message   Message to detail what the user is to accept or decline.
      * @param title     Title of window pane.
+     * @return int      1 Means No, 0 Means Yes
      */
-    static void showYesNoCancelPane(String message, String title) {
-        JOptionPane pane = new JOptionPane(message, JOptionPane.YES_NO_CANCEL_OPTION);
-        JDialog dialog = pane.createDialog(title);
-        dialog.setAlwaysOnTop(true);
-        dialog.setVisible(true);
+    static int showYesNoPane(String message, String title) {
+        return JOptionPane.showConfirmDialog(null,message, title, JOptionPane.YES_NO_OPTION);
     }
 
     // Edit Admin Settings

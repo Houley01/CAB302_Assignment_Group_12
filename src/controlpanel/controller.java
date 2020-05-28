@@ -525,4 +525,43 @@ public class controller {
             client.close();
         }
     }
+
+    public static void DeleteBillboard(String billboardId) throws IOException, ClassNotFoundException {
+        int id = Integer.parseInt(billboardId);
+        Socket client = connectionToServer();
+        if (client.isConnected()) {
+            OutputStream outputStream = client.getOutputStream();
+            InputStream inputStream = client.getInputStream();
+
+            ObjectOutputStream send = new ObjectOutputStream(outputStream);
+            ObjectInputStream receiver = new ObjectInputStream(inputStream);
+
+            send.writeUTF("DeleteBillboard");
+            send.write(id);
+            send.flush();
+
+            int val = receiver.read();
+            if (val == 1) {
+                String billboardName = receiver.readUTF();
+                int yesOrNo = DialogWindow.showYesNoPane("Are you sure you want to delete billboard: " +
+                        billboardName + "?", "Alert Deleting Billboard");
+                send.write(yesOrNo);
+                send.flush();
+            } else {
+//                Display POP ERROR MESSAGE
+                if (val == 0) {
+                    DialogWindow.NoAccessTo("to delete this billboard");
+                } else if (val == -1) {
+                    DialogWindow.showErrorPane("Please refresh the billboard list",
+                            "Error: Could NOT find billboard"
+                    );
+                }
+            }
+
+
+            send.close();
+            receiver.close();
+            client.close();
+        }
+    }
 }
