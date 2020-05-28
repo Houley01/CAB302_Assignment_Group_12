@@ -14,6 +14,7 @@ import java.io.*;
 import java.net.*;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.Permission;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 import java.sql.*;
@@ -92,7 +93,12 @@ public class Server {
                     String uname = receiver.readUTF();
                     String pass = receiver.readUTF();
                     // func check username and database
-                    send.writeBoolean(checkUserDetails(uname, pass));
+                    boolean chekuser = checkUserDetails(uname, pass);
+                    if (chekuser == true) {
+                        send.writeBoolean(true);
+                        send.writeObject(UserPermission(uname));
+
+                    }
                     send.flush();
                 }
                 // Auth token after successful login
@@ -135,6 +141,9 @@ public class Server {
                     } catch (SAXException e) {
                         e.printStackTrace();
                     }
+                }
+                if (request.equals("DeleteBillboard")) {
+                    DeleteBillboard(receiver, send);
                 }
 
                 // Edit user
@@ -682,101 +691,164 @@ public class Server {
         }
     }
 
+    private static String CheckIfBillboardIsScheduled(int billboardID, boolean scheduled) {
+        if (scheduled == false) {
+            return  "SELECT * FROM billboards " +
+                    "LEFT JOIN schedules ON schedules.idBillboard = billboards.idBillboards " +
+                    "LEFT JOIN users ON billboards.userId = users.idUsers " +
+                    "WHERE (schedules.idBillboard IS NULL) AND (billboards.idBillboards = " + billboardID + ")";
+        } else {
+            return  "SELECT * FROM billboards " +
+                    "LEFT JOIN schedules ON schedules.idBillboard = billboards.idBillboards " +
+                    "LEFT JOIN users ON billboards.userId = users.idUsers " +
+                    "WHERE (schedules.idBillboard IS NOT NULL) AND (billboards.idBillboards = " + billboardID + ");";
+        }
+    }    
+
+
     private static void GetBillboardInfo(ObjectInputStream receiver, ObjectOutputStream send) throws IOException, SQLException, ParserConfigurationException, SAXException, ParserConfigurationException, SAXException {
         int billboardID = receiver.read();
-        String query = "SELECT billboardName, fileLocation FROM billboards WHERE idBillboards = " + billboardID + ";";
+        String username = receiver.readUTF();
+
+        //        Returns if the billboard is not scheduled
+        String query = CheckIfBillboardIsScheduled(billboardID, false);
+        //        Returns if the billboard is currently scheduled
+        Statement st = ServerInit.conn.createStatement();
+        st.executeQuery("USE `cab302`;");
+        ResultSet rs = st.executeQuery(query);
+//        If Data is found
+        if (rs.isBeforeFirst()) {
+            rs.next();
+            if (rs.getInt("createBillboard") == 1
+                            || rs.getInt("editAllBillboard") == 1) {
+                send.writeInt(1);
+                String name = rs.getString("billboardName");
+                String fileLocation = rs.getString("fileLocation");
+                Billboard billboard = ReadXMLFile(new File(fileLocation), name);
+                send.writeObject(billboard);
+                send.flush();
+            }
+            else {
+                send.writeInt(-1);
+            }
+
+//            IF the billboard is scheduled in the database
+        } else {
+            query = CheckIfBillboardIsScheduled(billboardID, true);
+            st = ServerInit.conn.createStatement();
+            st.executeQuery("USE `cab302`;");
+            rs = st.executeQuery(query);
+
+            if (rs.isBeforeFirst()) {
+                rs.next();
+                if (rs.getInt("editAllBillboard") == 1) {
+                    send.writeInt(1);
+                    String name = rs.getString("billboardName");
+                    String fileLocation = rs.getString("fileLocation");
+                    Billboard billboard = ReadXMLFile(new File(fileLocation), name);
+                    send.writeObject(billboard);
+                } else {
+                    System.out.println("There is no billboards to be displayed");
+                    send.writeInt(-1);
+                }
+                send.flush();
+            }
+        }
+        send.flush();
+    }
+
+    private static void DeleteBillboard(ObjectInputStream receiver, ObjectOutputStream send) throws IOException, SQLException {
+        int billboardID = receiver.read();
+
+//        Returns if the billboard is not scheduled
+        String query = CheckIfBillboardIsScheduled(billboardID, false);
+        //        Returns if the billboard is currently scheduled
+        Statement st = ServerInit.conn.createStatement();
+        st.executeQuery("USE `cab302`;");
+        ResultSet rs = st.executeQuery(query);
+//        If Data is found
+        if (rs.isBeforeFirst()) {
+            rs.next();
+            if (rs.getInt("createBillboard") == 1 || rs.getInt("editAllBillboard") == 1) {
+                send.writeInt(1);
+                send.writeUTF(rs.getString("billboardName"));
+                send.flush();
+                if (receiver.read() == 0) {
+                    query = "DELETE FROM billboards WHERE idBillboards = " + billboardID + ";";
+                    st = ServerInit.conn.createStatement();
+                    st.executeQuery("USE `cab302`;");
+                    rs = st.executeQuery(query);
+                }
+            } else {
+                send.writeInt(0);
+            }
+
+//            IF the billboard is scheduled in the database
+        } else {
+            query = CheckIfBillboardIsScheduled(billboardID, true);
+            st = ServerInit.conn.createStatement();
+            st.executeQuery("USE `cab302`;");
+            rs = st.executeQuery(query);
+
+            if (rs.isBeforeFirst()) {
+                rs.next();
+                if (rs.getInt("editAllBillboard") == 1) {
+                    send.writeInt(1);
+                    send.writeUTF(rs.getString("billboardName"));
+                    send.flush();
+                    if (receiver.read() == 0) {
+                        String deleteSchedule = "DELETE FROM schedules WHERE schedules.idBillboard = " + billboardID + ";";
+                        query = "DELETE FROM billboards WHERE idBillboards = " + billboardID + ";";
+                        st = ServerInit.conn.createStatement();
+                        st.executeQuery("USE `cab302`;");
+                        st.executeQuery(deleteSchedule);
+                        rs = st.executeQuery(query);
+                    }
+                } else {
+                    send.writeInt(0);
+                }
+            }
+            send.flush();
+        }
+    }
+
+//    Returns the boolean array containing the permission
+//    INPUT Sting username
+    private static boolean[] UserPermission(String username) throws SQLException {
+        boolean[] permission = new boolean[4];
+        String query = "SELECT `createBillboard`, `editAllBillboard`, `scheduleBillboard`, `editUser` FROM `users` WHERE `user` = \""+ username + "\";";
         Statement st = ServerInit.conn.createStatement();
         st.executeQuery("USE `cab302`;");
         ResultSet rs = st.executeQuery(query);
         if (!rs.isBeforeFirst()) {
-            System.out.println("There is no billboards to be displayed");
-            send.write(-1);
+            System.out.println("There is no user");
         } else {
-            send.write(1);
             rs.next();
-            String name = rs.getString("billboardName");
-            String fileLocation = rs.getString("fileLocation");
-            Billboard billboard = ReadXMLFile(new File(fileLocation), name);
-
-            send.writeObject(billboard);
+//            Check to see if the 'Create Billboard' permission is ON or OFF
+            if (rs.getInt("createBillboard") == 1) {
+                permission[0] = true;
+            } else {
+                permission[0] = false;
+            }
+//            Check to see if the 'Edit All Billboards' permission is ON or OFF
+            if (rs.getInt("editAllBillboard") == 1) {
+                permission[1] = true;
+            } else {
+                permission[1] = false;
+            }
+//            Check to see if the 'Schedule Billboard' permission is ON or OFF
+            if (rs.getInt("scheduleBillboard") == 1) {
+                permission[2] = true;
+            } else {
+                permission[2] = false;
+            }
+//            Check to see if the 'Edit Billboard' permission is ON or OFF
+            if (rs.getInt("editUser") == 1) {
+                permission[3] = true;
+            } else {
+                permission[3] = false;
+            }
         }
-        send.flush();
+        return permission;
     }
 }
-
-
-
-// // List Billboards
-//                if (request.equals("ListBillboards")) {
-//                    RequestBillboardList(receiver, send);
-//                }
-
-//private static void RequestBillboardList(ObjectInputStream receiver, ObjectOutputStream send) throws IOException, ClassNotFoundException, SQLException {
-//        String query = "SELECT idBillboards, billboardName, users.fName, users.lName, dateMade, " +
-//                "dateModify, fileLocation FROM billboards LEFT JOIN users ON billboards.userId = users.idUsers " +
-//                "order by billboards.idBillboards;";
-//        Statement st = ServerInit.conn.createStatement();
-//        st.executeQuery("USE `cab302`;");
-//        ResultSet rs = st.executeQuery(query);
-//
-//        // checks if there is any data in the database
-//        if (!rs.isBeforeFirst()) {
-//            send.write(-1);
-//            send.flush();
-//            System.out.println("There is no billboards to be displayed"); // Debug use
-////            return "No User in database";
-//        } else {
-//            send.write(1);
-//            send.flush();
-//            // Contains the schedules in the database
-//            ArrayList<String[]> billboardList = new ArrayList<>();
-//
-//            System.out.println("Retrieving list of Schedules from database...");
-//
-//            while (rs.next()) {
-//                String id = rs.getString("idBillboards");
-//                String name = rs.getString("billboardName");
-//                String creator = rs.getString("users.fName") + " " + rs.getString("users.lName");
-//                String dateMade = rs.getString("dateMade");
-//                String dateModify = rs.getString("dateModify");
-//                String fileLocation = rs.getString("fileLocation");
-//
-//                String[] billboard = {id, name, creator, dateMade, dateModify, fileLocation};
-//                billboardList.add(billboard);
-//            }
-//            send.writeObject(billboardList);
-//            send.flush();
-//        }
-//    }
-//
-//    private static void GetBillboardInfo(ObjectInputStream receiver, ObjectOutputStream send) throws IOException, SQLException, ParserConfigurationException, SAXException {
-//        int billboardID = receiver.read();
-//        String query = "SELECT billboardName, fileLocation FROM billboards WHERE idBillboards = " + billboardID + ";";
-//        Statement st = ServerInit.conn.createStatement();
-//        st.executeQuery("USE `cab302`;");
-//        ResultSet rs = st.executeQuery(query);
-//        if (!rs.isBeforeFirst()) {
-//            System.out.println("There is no billboards to be displayed");
-//            send.write(-1);
-//        } else {
-//            send.write(1);
-//            rs.next();
-//            String name = rs.getString("billboardName");
-//            String fileLocation = rs.getString("fileLocation");
-//            Billboard billboard = ReadXMLFile(new File(fileLocation), name);
-//
-//            send.writeObject(billboard);
-//        }
-//        send.flush();
-//
-////
-//    }
-
-
-
-
-
-
-
-
-

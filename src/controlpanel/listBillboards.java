@@ -85,7 +85,29 @@ public class listBillboards extends JFrame {
                 }
             }
         });
-//      NOTE:: ADD ARE YOU SURE YOU WANT TO REMOVE DIALOG BOX
+
+
+        deleteButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+//                Check 1 if billboard is schedule
+//                Check 2 if User is creator
+//                Check 2 else if user has edit all permission
+
+                if (tableBillboard.getSelectedRow() != -1 ) {
+                    String billboardSelected = (String) tableBillboard.getValueAt(tableBillboard.getSelectedRow(), 0);
+//                    if the data in the column is equal to empty string "" then don't do the function
+                    if (billboardSelected.equals("") == false) {
+                        try {
+                            controller.DeleteBillboard(billboardSelected);
+                        } catch (IOException | ClassNotFoundException ioException) {
+                            ioException.printStackTrace();
+                        }
+                    }
+                }
+
+            }
+        });
 
         refreshButton.addActionListener(new ActionListener() {
             @Override
