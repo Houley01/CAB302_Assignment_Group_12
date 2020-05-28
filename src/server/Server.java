@@ -19,9 +19,7 @@ import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 import java.sql.*;
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.HashMap;
+import java.util.*;
 import java.util.Date;
 
 import static resources.CustomXMFile.ReadXMLFile;

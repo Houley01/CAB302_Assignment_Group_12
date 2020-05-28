@@ -27,7 +27,6 @@ import java.util.List;
 import static com.sun.java.accessibility.util.AWTEventMonitor.addKeyListener;
 import static controlpanel.controller.connectionToServer;
 import static resources.CustomXMFile.ReadXMLFile;
-import static server.Server.RequestBillboardList;
 
 
 // this class stores all attributes of component on the billboard
