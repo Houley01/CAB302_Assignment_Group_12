@@ -3,6 +3,10 @@ package controlpanel;
 import javax.naming.spi.ObjectFactoryBuilder;
 import javax.swing.*;
 import java.awt.*;
+import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
+import java.util.ArrayList;
 
 /**
  *  Window to create dialog windows without causing bugs that cause non-readable text fields
@@ -39,12 +43,28 @@ public class DialogWindow {
      *
      * @param message   Message to detail what the user is to accept or decline.
      * @param title     Title of window pane.
+     * @return int      1 Means No, 0 Means Yes
      */
-    static void showYesNoCancelPane(String message, String title) {
-        JOptionPane pane = new JOptionPane(message, JOptionPane.YES_NO_CANCEL_OPTION);
-        JDialog dialog = pane.createDialog(title);
-        dialog.setAlwaysOnTop(true);
-        dialog.setVisible(true);
+    static int showYesNoPane(String message, String title) {
+        return JOptionPane.showConfirmDialog(null,message, title, JOptionPane.YES_NO_OPTION);
+    }
+
+    static void showPasswordSettingsRegularUser() throws IOException, InvalidKeySpecException, NoSuchAlgorithmException, ClassNotFoundException {
+        JFrame editPassword = new JFrame();
+        String selectedUser = controller.loggedInUser;
+        Object changePassword = JOptionPane.showInputDialog(editPassword, "Enter new password:");
+        Object changePasswordConfirm = JOptionPane.showInputDialog(editPassword, "Confirm new password:");
+
+        String newPassword = (String) changePassword;
+        String newPasswordConfirm = (String) changePasswordConfirm;
+
+        // Checking that the new password and it's confirmed entry match
+        if (changePassword.equals(changePasswordConfirm) && newPassword != null && !newPassword.isEmpty() && newPasswordConfirm != null && !newPasswordConfirm.isEmpty()) {
+            controller.changePassword(selectedUser, (String) changePasswordConfirm);
+        } else {
+            DialogWindow.showErrorPane("Passwords don't match or field(s) were empty. Please try again.", "Error");
+            System.out.println("Passwords didn't match or were empty");
+        }
     }
 
     // Edit Admin Settings
@@ -54,10 +74,25 @@ public class DialogWindow {
      *  Edit password window. Changes the users current password
      *  to the newly entered password.
      */
-    static void showPasswordSettings() {
+    static void showPasswordSettings() throws IOException, InvalidKeySpecException, NoSuchAlgorithmException, ClassNotFoundException {
         JFrame editPassword = new JFrame();
-        Object changePassword = JOptionPane.showInputDialog(editPassword, "Change your password:");
-        System.out.println(changePassword);
+        String selectedUser = getListOfUsers();
+        Object changePassword = JOptionPane.showInputDialog(editPassword, "Enter new password:");
+        Object changePasswordConfirm = JOptionPane.showInputDialog(editPassword, "Confirm new password:");
+
+        //System.out.println(changePassword);
+        //System.out.println(changePasswordConfirm);
+
+        String newPassword = (String) changePassword;
+        String newPasswordConfirm = (String) changePasswordConfirm;
+
+        // Checking that the new password and it's confirmed entry match
+        if (changePassword.equals(changePasswordConfirm) && newPassword != null && !newPassword.isEmpty() && newPasswordConfirm != null && !newPasswordConfirm.isEmpty()) {
+            controller.changePassword(selectedUser, (String) changePasswordConfirm);
+        } else {
+            DialogWindow.showErrorPane("Passwords don't match or field(s) were empty. Please try again.", "Error");
+            System.out.println("Passwords didn't match or were empty");
+        }
     }
 
     // User Permissions
@@ -100,15 +135,33 @@ public class DialogWindow {
      *  User details window pane.
      *  Opens two other windows which the user inputs their first and last names accordingly.
      */
-    static void showUserDetails() {
-        JFrame editFirstName = new JFrame();
-        Object changeFirstName = JOptionPane.showInputDialog(editFirstName, "Update First Name:");
-        JFrame editLastName = new JFrame();
-        Object changeLastName = JOptionPane.showInputDialog(editLastName, "Update Last Name:");
-        System.out.println(changeFirstName);
-        System.out.println(changeLastName);
-    }
+    static void showUserDetails() throws IOException, ClassNotFoundException {
+        String selectedUser = getListOfUsers();
 
+        String[] userInfo = controller.getUserInfo(selectedUser);
+
+        JFrame editFirstName = new JFrame();
+        Object changeFirstName = JOptionPane.showInputDialog(editFirstName, "Update First Name:", userInfo[0]);
+        JFrame editLastName = new JFrame();
+        Object changeLastName = JOptionPane.showInputDialog(editLastName, "Update Last Name:", userInfo[1]);
+        //System.out.println(changeFirstName);
+        //System.out.println(changeLastName);
+        controller.updateUserDetails(selectedUser, (String) changeFirstName, (String) changeLastName);
+
+
+    }
+    /**
+     * Developer defined errors (e.g. inability to connect to server).
+     *
+     * @param accessing   For letting the user know what task they can not access
+     */
+
+    static protected void NoAccessTo(String accessing) {
+        JOptionPane pane = new JOptionPane("You do not have access to the " + accessing + ".\nPlease contact your IT Service Team", JOptionPane.ERROR_MESSAGE);
+        JDialog dialog = pane.createDialog("Permission Error");
+        dialog.setAlwaysOnTop(true);
+        dialog.setVisible(true);
+    }
     // Create User
 
     /**
@@ -158,10 +211,18 @@ public class DialogWindow {
      * <h1>Delete user from system.</h1>
      * User inputs a <i>username</i> to remove from the billboard system.
      */
-    static void showRemoveUser() {
+    static void showRemoveUser() throws IOException, ClassNotFoundException {
+        String selectedUser = getListOfUsers();
         JFrame deleteUser = new JFrame();
-        String removeUser = JOptionPane.showInputDialog(deleteUser, "Delete a User:");
-        System.out.println(removeUser);
+        controller.deleteUserFromDB(controller.getListOfUsers(), selectedUser);
     }
 
+    static String getListOfUsers() throws IOException, ClassNotFoundException {
+        String[] listOfUsers = controller.getListOfUsers().toArray(new String[0]);
+        String  selectedUser = (String) JOptionPane.showInputDialog(null, "Select User",
+                "Select User", JOptionPane.QUESTION_MESSAGE, null,
+                listOfUsers, listOfUsers[0]);
+
+        return selectedUser;
+    }
 }

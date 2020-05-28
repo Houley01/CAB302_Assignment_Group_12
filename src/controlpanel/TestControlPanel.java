@@ -7,6 +7,8 @@ import javax.swing.*;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 public class TestControlPanel {
     /*
@@ -99,6 +101,76 @@ public class TestControlPanel {
         String hashedPassword = controller.plaintextToHashedPassword(password);
 
         assertEquals(true, !password.equals(hashedPassword));
+
+    }
+
+    // New password is hashed before sent to server
+    @Test
+    public void testPasswordChange() throws InvalidKeySpecException, NoSuchAlgorithmException {
+        String password = "password";
+
+        String hashedPassword = controller.hashNewPassword(password);
+
+        assertEquals(true, !password.equals(hashedPassword));
+
+    }
+
+    // Update the details of the user before sent to server
+    @Test
+    public void testUpdateUserInfo() {
+        String[] userDetails = {"John", "Smith"};
+
+        String[] updatedUserDetails = controller.updateUserInfo("Jack", "Doe");
+
+        assertEquals(false, Arrays.equals(userDetails, updatedUserDetails));
+
+    }
+
+    // Checks that the user exists before sending delete request to server
+    @Test
+    public void testDeleteUser() {
+        ArrayList<String> listOfUsers = new ArrayList<>();
+        listOfUsers.add("User One");
+        listOfUsers.add("User Two");
+        listOfUsers.add("User Three");
+
+        boolean wasUserInList = controller.deleteUser(listOfUsers, "User One");
+
+
+        assertEquals(true, wasUserInList);
+
+    }
+
+    // Checks that the user doesn't exist and because it doesn't, work execute further to send the request to the server
+    @Test
+    public void testDeleteUserNoChange() {
+        ArrayList<String> listOfUsers = new ArrayList<>();
+        listOfUsers.add("User One");
+        listOfUsers.add("User Two");
+        listOfUsers.add("User Three");
+
+        boolean wasUserInList = controller.deleteUser(listOfUsers, "User Four");
+
+
+        assertEquals(false, wasUserInList);
+
+    }
+
+    // Checks that the user cannot delete themselves
+    @Test
+    public void testDeleteUserSelfRemoval() {
+        controller con = new controller();
+        con.loggedInUser = "ThisIsATestUser";
+        ArrayList<String> listOfUsers = new ArrayList<>();
+        listOfUsers.add("User One");
+        listOfUsers.add("User Two");
+        listOfUsers.add("User Three");
+        listOfUsers.add(con.loggedInUser);
+
+        boolean wasUserInList = controller.deleteUser(listOfUsers, "ThisIsATestUser");
+
+
+        assertEquals(false, wasUserInList);
 
     }
 }

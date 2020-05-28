@@ -1,6 +1,7 @@
 package controlpanel;
 
 import resources.Billboard;
+import resources.UserPermission;
 
 import java.awt.*;
 import javax.swing.*;
@@ -10,6 +11,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
 
 /**
@@ -32,9 +34,10 @@ import java.util.Base64;
 public class controller {
 
     public static boolean loginSuccessful = false;
-    private static String loggedInUser;
+    static String loggedInUser;
     private static String token;
     private static ArrayList<String[]> schedules;
+    public static UserPermission permission = new UserPermission();
 
     /**
      *  Connection to server via reading server.config file. Throws
@@ -181,6 +184,8 @@ public class controller {
                 System.out.println("correct username and password"); // DEBUG CODE
                 loginSuccessful = true;
                 loggedInUser = username;
+                boolean[] temp = (boolean[]) receiver.readObject();
+                permission.SetUserPermission(temp);
                 getAuthToken();
             } else {
                 // Alert the user that they have incorrectly entered they username or password with
@@ -238,6 +243,50 @@ public class controller {
         }
 
         return hashedPassword;
+    }
+
+    static String hashNewPassword(String newPassword) throws InvalidKeySpecException, NoSuchAlgorithmException {
+
+        String newPasswordHashed = plaintextToHashedPassword(newPassword);
+
+        System.out.println("hashing new password...");
+        System.out.println(newPasswordHashed);
+
+        return newPasswordHashed;
+    }
+
+    static void changePassword(String username, String password) throws IOException, InvalidKeySpecException, NoSuchAlgorithmException {
+
+        Socket client = connectionToServer();
+
+        // connects to the server with information and attempts to get the auth token for the user after successful login
+        if (client.isConnected()) {
+
+            OutputStream outputStream = client.getOutputStream();
+            InputStream inputStream = client.getInputStream();
+
+            ObjectOutputStream send = new ObjectOutputStream(outputStream);
+            ObjectInputStream receiver = new ObjectInputStream(inputStream);
+
+            String newPassword = hashNewPassword(password);
+
+            System.out.println("Sending new password to server");
+            System.out.println(username);
+
+            send.writeUTF("changePassword");
+            send.writeUTF(username);
+            send.writeUTF(newPassword);
+            send.writeUTF(loggedInUser);
+            send.writeUTF(token);
+            send.flush(); // Must be done before switching to reading state
+
+
+//      End connections
+            send.close();
+            receiver.close();
+            client.close();
+
+        }
     }
 
     /**
@@ -381,14 +430,18 @@ public class controller {
      *  Toggle switch to show or hide admin preferences via modifying isVisible state
      */
     public static void showAdminPreferences() {
-        toggleVisibility(usersPage.adminWindow);
+        if (controller.permission.GetUserPermission("EditUser") == true) {
+            toggleVisibility(usersPage.adminWindow);
+        } else {
+            DialogWindow.NoAccessTo("Admin options");
+        }
     }
 
     /**
      *  Toggle switch to show or hide user preferences via modifying isVisible state
      */
     public static void ShowUserPreferences() {
-        toggleVisibility(usersPage.userWindow);
+        //toggleVisibility(usersPage.userWindow);
     }
 
     /**
@@ -493,9 +546,10 @@ public class controller {
 
             send.writeUTF("GetBillboard");
             send.write(id);
+            send.writeUTF(loggedInUser);
             send.flush();
 
-            int val = receiver.read();
+            int val = receiver.readInt();
             if (val == 1) {
                 Billboard billboard = (Billboard) receiver.readObject();
                 createBillboards.input1.setText(billboard.getTitle());
@@ -507,7 +561,12 @@ public class controller {
                 createBillboards.window.toFront();
                 showCreateBillboard();
 
-            } else {
+            }
+            if (val == -1) {
+                DialogWindow.NoAccessTo("to edit this billboard");
+            }
+
+            else {
 //                Display POP ERROR MESSAGE
                 DialogWindow.showErrorPane("Please refresh the billboard list", "Error: Could NOT find billboard");
             }
@@ -519,93 +578,191 @@ public class controller {
     }
 
 
-}
+    public static void DeleteBillboard(String billboardId) throws IOException {
+        int id = Integer.parseInt(billboardId);
+        Socket client = connectionToServer();
+        if (client.isConnected()) {
+            OutputStream outputStream = client.getOutputStream();
+            InputStream inputStream = client.getInputStream();
 
-//public static String[][] ListBillboards() throws IOException, ClassNotFoundException {
-//        Socket client = connectionToServer();
-//        ArrayList<String[]> billboardArrayList;
-//        String[][] billboardList = new String[][]{
-//                {"", "", "", "", "", ""},
-//                {"", "", "", "", "", ""},
-//                {"", "", "", "", "", ""},
-//                {"", "", "", "", "", ""},
-//                {"", "", "", "", "", ""},
-//                {"", "", "", "", "", ""}
-//        };
-//
-//        //  Checks if the sever is online
-//        if (client.isConnected()) {
-//            OutputStream outputStream = client.getOutputStream();
-//            InputStream inputStream = client.getInputStream();
-//
-//            ObjectOutputStream send = new ObjectOutputStream(outputStream);
-//            ObjectInputStream receiver = new ObjectInputStream(inputStream);
-//
-//            send.writeUTF("ListBillboards");
-//            send.flush();
-//
-//                // Store the current schedule listings
-//            int val = receiver.read();
-//            if (val == 1) {
-//                billboardArrayList = (ArrayList<String[]>) receiver.readObject();
-//
-//                if (billboardArrayList != null) {
-//                    billboardList = new String[billboardArrayList.size()][6];
-//                    int counter = 0;
-//                    for (String[] billboard : billboardArrayList) {
-//                        billboardList[counter][0] = billboard[0];
-//                        billboardList[counter][1] = billboard[1];
-//                        billboardList[counter][2] = billboard[2];
-//                        billboardList[counter][3] = billboard[3];
-//                        billboardList[counter][4] = billboard[4];
-//                        billboardList[counter][5] = billboard[5];
-//                        counter++;
-//                    }
-//                }
-//            }else {
-//                System.out.println("No data");
-//            }
-////      End connections
-//            send.close();
-//            receiver.close();
-//            client.close();
-//        }
-//        return billboardList;
-//    }
-//
-//    public static void EditSelectedBillboard(String billboardId) throws IOException, ClassNotFoundException {
-//        int id = Integer.parseInt(billboardId);
-//        Socket client = connectionToServer();
-//        if (client.isConnected()) {
-//            OutputStream outputStream = client.getOutputStream();
-//            InputStream inputStream = client.getInputStream();
-//
-//            ObjectOutputStream send = new ObjectOutputStream(outputStream);
-//            ObjectInputStream receiver = new ObjectInputStream(inputStream);
-//
-//            send.writeUTF("GetBillboard");
-//            send.write(id);
-//            send.flush();
-//
-//            int val = receiver.read();
-//            if (val == 1) {
-//                Billboard billboard = (Billboard) receiver.readObject();
-//                createBillboards.input1.setText(billboard.getTitle());
-//                createBillboards.input2.setText(billboard.getMessageText());
-//                createBillboards.informationColourInput.setText(billboard.getInformationText());
-//                createBillboards.textDisplayColour.setBackground(Color.decode(billboard.getMessageColour()));
-//                createBillboards.informationTextColor.setBackground(Color.decode(billboard.getInformationColour()));
-//                createBillboards.backgroundDisplayColour.setBackground(Color.decode(billboard.getBackgroundColour()));
-//                createBillboards.window.toFront();
-//                showCreateBillboard();
-//
-//            } else {
-////                Display POP ERROR MESSAGE
-//                DialogWindow.showErrorPane("Please refresh the billboard list", "Error: Could NOT find billboard");
-//            }
-//
-//            send.close();
-//            receiver.close();
-//            client.close();
-//        }
-//    }
+            ObjectOutputStream send = new ObjectOutputStream(outputStream);
+            ObjectInputStream receiver = new ObjectInputStream(inputStream);
+
+            send.writeUTF("DeleteBillboard");
+            send.write(id);
+            send.flush();
+
+            int val = receiver.readInt();
+            if (val == 1) {
+                String billboardName = receiver.readUTF();
+                int yesOrNo = DialogWindow.showYesNoPane("Are you sure you want to delete billboard: " +
+                        billboardName + "?", "Alert Deleting Billboard");
+                send.write(yesOrNo);
+                send.flush();
+            } else {
+//                Display POP ERROR MESSAGE
+                if (val == 0) {
+                    DialogWindow.NoAccessTo("to delete this billboard");
+                } else if (val == -1) {
+                    DialogWindow.showErrorPane("Please refresh the billboard list",
+                            "Error: Could NOT find billboard"
+                    );
+                }
+            }
+
+//      End connections
+                send.close();
+                receiver.close();
+                client.close();
+        }
+    }
+
+
+    static ArrayList<String> getListOfUsers() throws IOException, ClassNotFoundException {
+
+        ArrayList<String> listOfUsers = new ArrayList<>();
+
+        Socket client = connectionToServer();
+
+        // connects to the server with information and attempts to get the auth token
+        // for the user after successful login
+        if (client.isConnected()) {
+            OutputStream outputStream = client.getOutputStream();
+            InputStream inputStream = client.getInputStream();
+
+            ObjectOutputStream send = new ObjectOutputStream(outputStream);
+            ObjectInputStream receiver = new ObjectInputStream(inputStream);
+
+            send.writeUTF("getUsers");
+            send.flush();
+
+            // Store the current schedule listings
+            listOfUsers = (ArrayList<String>) receiver.readObject();
+
+            // End connections
+            send.close();
+            receiver.close();
+            client.close();
+        }
+        return listOfUsers;
+    }
+
+    static String[] getUserInfo(String username) throws IOException, ClassNotFoundException {
+
+        String[] userInfo = new String[2];
+
+        Socket client = connectionToServer();
+
+        // connects to the server with information and attempts to get the auth token
+        // for the user after successful login
+        if (client.isConnected()) {
+            OutputStream outputStream = client.getOutputStream();
+            InputStream inputStream = client.getInputStream();
+
+            ObjectOutputStream send = new ObjectOutputStream(outputStream);
+            ObjectInputStream receiver = new ObjectInputStream(inputStream);
+
+            send.writeUTF("getUserInfo");
+            send.writeUTF(username);
+            send.writeUTF(loggedInUser);
+            send.writeUTF(token);
+            send.flush();
+
+            // Store the current schedule listings
+            userInfo = (String[]) receiver.readObject();
+
+            // End connections
+            send.close();
+            receiver.close();
+            client.close();
+        }
+        return userInfo;
+    }
+
+    static String[] updateUserInfo(String firstName, String lastName) {
+        String[] updatedUserInfo = { firstName, lastName };
+        return updatedUserInfo;
+    }
+
+    static void updateUserDetails(String username, String firstName, String lastName) throws IOException {
+
+        Socket client = connectionToServer();
+
+        // connects to the server with information and attempts to get the auth token
+        // for the user after successful login
+        if (client.isConnected()) {
+            OutputStream outputStream = client.getOutputStream();
+            InputStream inputStream = client.getInputStream();
+
+            ObjectOutputStream send = new ObjectOutputStream(outputStream);
+            ObjectInputStream receiver = new ObjectInputStream(inputStream);
+
+            String[] updatedUserInfo = updateUserInfo(firstName, lastName);
+
+            send.writeUTF("updateUserInfo");
+            send.writeUTF(username);
+            send.writeUTF(updatedUserInfo[0]);
+            send.writeUTF(updatedUserInfo[1]);
+            send.writeUTF(loggedInUser);
+            send.writeUTF(token);
+            send.flush();
+
+            // End connections
+            send.close();
+            receiver.close();
+            client.close();
+        }
+    }
+
+    static boolean deleteUser(ArrayList<String> userList, String username) {
+        boolean wasUserInList = false;
+
+        ArrayList<String> currentUserList = userList;
+
+        if (!username.equals(loggedInUser)) {
+            if (currentUserList.contains(username)) {
+                currentUserList.remove(username);
+                wasUserInList = true;
+            }
+        } else {
+            // Ensure that the dialog doesn't attempt to show up for the unit test
+            if (!loggedInUser.equals("ThisIsATestUser")) {
+                // Display POP ERROR MESSAGE
+                DialogWindow.showErrorPane("Cannot delete yourself. Please select a user that isn't yourself.",
+                        "Error: Attempted to delete self");
+            }
+        }
+
+        return wasUserInList;
+    }
+
+    static void deleteUserFromDB(ArrayList<String> userList, String username) throws IOException {
+
+        // If the user does exist in the list of users pulled from the database, send
+        // delete request to the server
+        if (deleteUser(userList, username)) {
+            Socket client = connectionToServer();
+            System.out.println("Sending request to server to delete user");
+            // connects to the server with information and attempts to get the auth token
+            // for the user after successful login
+            if (client.isConnected()) {
+                OutputStream outputStream = client.getOutputStream();
+                InputStream inputStream = client.getInputStream();
+
+                ObjectOutputStream send = new ObjectOutputStream(outputStream);
+                ObjectInputStream receiver = new ObjectInputStream(inputStream);
+
+                send.writeUTF("deleteUser");
+                send.writeUTF(username);
+                send.writeUTF(loggedInUser);
+                send.writeUTF(token);
+                send.flush();
+
+                // End connections
+                send.close();
+                receiver.close();
+                client.close();
+            }
+        }
+    }
+}

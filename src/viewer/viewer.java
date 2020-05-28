@@ -28,6 +28,7 @@ import java.util.Timer;
 import static resources.CustomXMFile.ReadXMLFile;
 
 
+
 /**
  * Viewer class. Holds majority of the logic that runs the viewer application on the users end.
  * It makes calls to the server for billboard information and formats that information into GUI
