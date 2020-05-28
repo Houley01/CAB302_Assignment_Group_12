@@ -590,6 +590,71 @@ public class controller {
         return listOfUsers;
     }
 
+    static String[] getUserInfo(String username) throws IOException, ClassNotFoundException {
+
+        String[] userInfo = new String[2];
+
+        Socket client = connectionToServer();
+
+        // connects to the server with information and attempts to get the auth token for the user after successful login
+        if (client.isConnected()) {
+            OutputStream outputStream = client.getOutputStream();
+            InputStream inputStream = client.getInputStream();
+
+            ObjectOutputStream send = new ObjectOutputStream(outputStream);
+            ObjectInputStream receiver = new ObjectInputStream(inputStream);
+
+            send.writeUTF("getUserInfo");
+            send.writeUTF(username);
+            send.writeUTF(loggedInUser);
+            send.writeUTF(token);
+            send.flush();
+
+            // Store the current schedule listings
+            userInfo = (String[]) receiver.readObject();
+
+//      End connections
+            send.close();
+            receiver.close();
+            client.close();
+        }
+        return userInfo;
+    }
+
+    static String[] updateUserInfo(String firstName, String lastName) {
+        String[] updatedUserInfo = {firstName, lastName};
+        return updatedUserInfo;
+    }
+
+    static void updateUserDetails(String username, String firstName, String lastName) throws IOException {
+
+        Socket client = connectionToServer();
+
+        // connects to the server with information and attempts to get the auth token for the user after successful login
+        if (client.isConnected()) {
+            OutputStream outputStream = client.getOutputStream();
+            InputStream inputStream = client.getInputStream();
+
+            ObjectOutputStream send = new ObjectOutputStream(outputStream);
+            ObjectInputStream receiver = new ObjectInputStream(inputStream);
+
+            String[] updatedUserInfo = updateUserInfo(firstName, lastName);
+
+            send.writeUTF("updateUserInfo");
+            send.writeUTF(username);
+            send.writeUTF(updatedUserInfo[0]);
+            send.writeUTF(updatedUserInfo[1]);
+            send.writeUTF(loggedInUser);
+            send.writeUTF(token);
+            send.flush();
+
+//      End connections
+            send.close();
+            receiver.close();
+            client.close();
+        }
+    }
+
 }
 
 //public static String[][] ListBillboards() throws IOException, ClassNotFoundException {

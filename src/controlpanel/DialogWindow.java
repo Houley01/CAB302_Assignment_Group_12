@@ -64,8 +64,8 @@ public class DialogWindow {
         Object changePassword = JOptionPane.showInputDialog(editPassword, "Enter new password:");
         Object changePasswordConfirm = JOptionPane.showInputDialog(editPassword, "Confirm new password:");
 
-        System.out.println(changePassword);
-        System.out.println(changePasswordConfirm);
+        //System.out.println(changePassword);
+        //System.out.println(changePasswordConfirm);
 
         String newPassword = (String) changePassword;
         String newPasswordConfirm = (String) changePasswordConfirm;
@@ -119,13 +119,20 @@ public class DialogWindow {
      *  User details window pane.
      *  Opens two other windows which the user inputs their first and last names accordingly.
      */
-    static void showUserDetails() {
+    static void showUserDetails() throws IOException, ClassNotFoundException {
+        String selectedUser = getListOfUsers();
+
+        String[] userInfo = controller.getUserInfo(selectedUser);
+
         JFrame editFirstName = new JFrame();
-        Object changeFirstName = JOptionPane.showInputDialog(editFirstName, "Update First Name:");
+        Object changeFirstName = JOptionPane.showInputDialog(editFirstName, "Update First Name:", userInfo[0]);
         JFrame editLastName = new JFrame();
-        Object changeLastName = JOptionPane.showInputDialog(editLastName, "Update Last Name:");
-        System.out.println(changeFirstName);
-        System.out.println(changeLastName);
+        Object changeLastName = JOptionPane.showInputDialog(editLastName, "Update Last Name:", userInfo[1]);
+        //System.out.println(changeFirstName);
+        //System.out.println(changeLastName);
+        controller.updateUserDetails(selectedUser, (String) changeFirstName, (String) changeLastName);
+
+
     }
 
     // Create User

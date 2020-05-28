@@ -112,4 +112,15 @@ public class TestControlPanel {
         assertEquals(true, !password.equals(hashedPassword));
 
     }
+
+    // Update the details of the user before sent to server
+    @Test
+    public void testUpdateUserInfo() {
+        String[] userDetails = {"John", "Smith"};
+
+        String[] updatedUserDetails = controller.updateUserInfo("Jack", "Doe");
+
+        assertEquals(false, userDetails.equals(updatedUserDetails));
+
+    }
 }
