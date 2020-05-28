@@ -265,9 +265,13 @@ public class controller {
 
             String newPassword = hashNewPassword(password);
 
+            System.out.println("Sending new password to server");
+            System.out.println(username);
+
             send.writeUTF("changePassword");
-            send.writeUTF(newPassword);
             send.writeUTF(username);
+            send.writeUTF(newPassword);
+            send.writeUTF(loggedInUser);
             send.writeUTF(token);
             send.flush(); // Must be done before switching to reading state
 
@@ -558,6 +562,33 @@ public class controller {
         }
     }
 
+    static ArrayList<String> getListOfUsers() throws IOException, ClassNotFoundException {
+
+        ArrayList<String> listOfUsers = new ArrayList<>();
+
+        Socket client = connectionToServer();
+
+        // connects to the server with information and attempts to get the auth token for the user after successful login
+        if (client.isConnected()) {
+            OutputStream outputStream = client.getOutputStream();
+            InputStream inputStream = client.getInputStream();
+
+            ObjectOutputStream send = new ObjectOutputStream(outputStream);
+            ObjectInputStream receiver = new ObjectInputStream(inputStream);
+
+            send.writeUTF("getUsers");
+            send.flush();
+
+            // Store the current schedule listings
+            listOfUsers = (ArrayList<String>) receiver.readObject();
+
+//      End connections
+            send.close();
+            receiver.close();
+            client.close();
+        }
+        return listOfUsers;
+    }
 
 }
 
@@ -649,3 +680,4 @@ public class controller {
 //            client.close();
 //        }
 //    }
+

@@ -6,6 +6,7 @@ import java.awt.*;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
+import java.util.ArrayList;
 
 /**
  *  Window to create dialog windows without causing bugs that cause non-readable text fields
@@ -57,33 +58,24 @@ public class DialogWindow {
      *  Edit password window. Changes the users current password
      *  to the newly entered password.
      */
-    static void showPasswordSettings() throws IOException, InvalidKeySpecException, NoSuchAlgorithmException {
+    static void showPasswordSettings() throws IOException, InvalidKeySpecException, NoSuchAlgorithmException, ClassNotFoundException {
         JFrame editPassword = new JFrame();
-        Object user = JOptionPane.showInputDialog(editPassword, "Enter the username that you wish to change the password for:");
+        String selectedUser = getListOfUsers();
         Object changePassword = JOptionPane.showInputDialog(editPassword, "Enter new password:");
         Object changePasswordConfirm = JOptionPane.showInputDialog(editPassword, "Confirm new password:");
 
         System.out.println(changePassword);
         System.out.println(changePasswordConfirm);
 
-        String username = (String) user;
         String newPassword = (String) changePassword;
         String newPasswordConfirm = (String) changePasswordConfirm;
 
-        System.out.println(username);
-        System.out.println(newPassword);
-        System.out.println(newPasswordConfirm);
-
-        // Checking that the new password and it's confirmed entry match, and ensuring that the entered username was entered
-        if ((changePassword.equals(changePasswordConfirm)) && username != null && username.length() > 0 && newPassword != null && newPassword.length() > 0 && newPasswordConfirm != null && newPasswordConfirm.length() > 0) {
-            controller.changePassword((String) user, (String) changePasswordConfirm);
+        // Checking that the new password and it's confirmed entry match
+        if (changePassword.equals(changePasswordConfirm) && newPassword != null && !newPassword.isEmpty() && newPasswordConfirm != null && !newPasswordConfirm.isEmpty()) {
+            controller.changePassword(selectedUser, (String) changePasswordConfirm);
         } else {
-            if (username == null || username.length() == 0) {
-                DialogWindow.showErrorPane("No user entered. Please try again.", "Error");
-            } else {
-                DialogWindow.showErrorPane("Passwords don't match. Please try again.", "Error");
-            }
-            System.out.println("No user entered or passwords didn't match");
+            DialogWindow.showErrorPane("Passwords don't match or field(s) were empty. Please try again.", "Error");
+            System.out.println("Passwords didn't match or were empty");
         }
     }
 
@@ -191,4 +183,12 @@ public class DialogWindow {
         System.out.println(removeUser);
     }
 
+    static String getListOfUsers() throws IOException, ClassNotFoundException {
+        String[] listOfUsers = controller.getListOfUsers().toArray(new String[0]);
+        String  selectedUser = (String) JOptionPane.showInputDialog(null, "Select User",
+                "Select User", JOptionPane.QUESTION_MESSAGE, null,
+                listOfUsers, listOfUsers[0]);
+
+        return selectedUser;
+    }
 }

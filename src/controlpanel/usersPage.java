@@ -113,6 +113,8 @@ public class usersPage {
                     ex.printStackTrace();
                 } catch (NoSuchAlgorithmException ex) {
                     ex.printStackTrace();
+                } catch (ClassNotFoundException ex) {
+                    ex.printStackTrace();
                 }
             }
         });
@@ -133,7 +135,13 @@ public class usersPage {
         editUserDetails.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                DialogWindow.showUserDetails();
+                try {
+                    DialogWindow.showUserDetails();
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                } catch (ClassNotFoundException ex) {
+                    ex.printStackTrace();
+                }
             }
         });
 

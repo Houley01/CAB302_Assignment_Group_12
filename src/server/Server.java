@@ -18,9 +18,7 @@ import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 import java.sql.*;
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.HashMap;
+import java.util.*;
 import java.util.Date;
 
 import static resources.CustomXMFile.ReadXMLFile;
@@ -85,7 +83,6 @@ public class Server {
                 ObjectInputStream receiver = new ObjectInputStream(server.getInputStream());
                 ObjectOutputStream send = new ObjectOutputStream(server.getOutputStream());
 
-
                 String request = receiver.readUTF();
 
                 // Username and password
@@ -143,13 +140,18 @@ public class Server {
 
                 // Changes user's password
                 if (request.equals("changePassword")) {
-                    String password = receiver.readUTF();
+                    System.out.println("request: Password...");
                     String username = receiver.readUTF();
+                    String password = receiver.readUTF();
+                    String loggedInUser = receiver.readUTF();
                     String token = receiver.readUTF();
-                    if (checkTokenIsValid(username, token)) {
+
+                    if (checkTokenIsValid(loggedInUser, token)) {
                         System.out.println("Changing Password...");
                         changeUserPassword(username, password);
                         System.out.println("Changed Password...");
+                    } else {
+                        System.out.println("Token wasn't valid");
                     }
                     send.flush();
                 }
@@ -157,6 +159,12 @@ public class Server {
                 // Viewer Request Billboards
                 if (request.equals("ViewerRequest")) {
 
+                }
+
+                // Get a list of users in the database
+                if (request.equals("getUsers")) {
+                    send.writeObject(getAllUsernames());
+                    send.flush();
                 }
 
 
@@ -433,26 +441,28 @@ public class Server {
      * @return All users in object
      * @throws SQLException
      */
-    private static Object getAllUsernames() throws SQLException {
-        Object data = new Object();
-        String query = "SELECT `user` FROM `users`";
+    private static ArrayList<String> getAllUsernames() throws SQLException {
+        System.out.println("Getting usernames...");
+        ArrayList<String> listOfUsers = new ArrayList<>();
+        String query = "SELECT user FROM users";
 
         Statement st = ServerInit.conn.createStatement();
-        st.executeQuery("USE `cab302`;");
+        st.executeQuery("USE cab302;");
         ResultSet rs = st.executeQuery(query);
         // If no user are found in database
         if (!rs.isBeforeFirst()) {
             System.out.println("No user in database"); // Debug use
 //            return "No User in database";
         } else {
-            int i = 1;
-            while (rs.next())
-                System.out.println(rs.getString(i));
-            data += rs.getString(i) + ",";
-            i++;
-
+            while (rs.next()) {
+                String user = rs.getString("user");
+                listOfUsers.add(user);
+            }
         }
-        return data;
+
+        System.out.println(listOfUsers);
+
+        return listOfUsers;
     }
 
     /**
@@ -680,6 +690,7 @@ public class Server {
         String saltHashedPassword = addSaltToHashedPassword(password);
 
         String query = "UPDATE users SET pass = '" + saltHashedPassword + "' WHERE user = '" + username + "'";
+        System.out.println(query);
         Statement st = ServerInit.conn.createStatement();
         st.executeQuery("USE `cab302`;");
         st.executeQuery(query);
