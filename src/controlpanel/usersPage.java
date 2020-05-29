@@ -167,7 +167,17 @@ public class usersPage {
         createUser.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                DialogWindow.showCreateUser();
+                try {
+                    DialogWindow.showCreateUser();
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                } catch (InvalidKeySpecException ex) {
+                    ex.printStackTrace();
+                } catch (NoSuchAlgorithmException ex) {
+                    ex.printStackTrace();
+                } catch (ClassNotFoundException ex) {
+                    ex.printStackTrace();
+                }
             }
         });
 

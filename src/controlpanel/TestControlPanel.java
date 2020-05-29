@@ -213,4 +213,83 @@ public class TestControlPanel {
 
         assertEquals(true, Arrays.equals(userPermissions, updatedUserPermissions));
     }
+
+    @Test
+    public void testCreateNewUserAllCorrect() throws IOException, InvalidKeySpecException, NoSuchAlgorithmException, ClassNotFoundException {
+        controller con = new controller();
+        String[] userData = {"ThisIsATestUser", "Test", "User", "password"};
+        ArrayList<String> listOfUsers = new ArrayList<>();
+        listOfUsers.add("User One");
+        listOfUsers.add("User Two");
+        listOfUsers.add("User Three");
+
+        boolean wasAllUserDataEntered = con.createNewUser(userData, listOfUsers);
+
+        assertEquals(true, wasAllUserDataEntered);
+    }
+
+    @Test
+    public void testCreateNewUserMissingFields() throws IOException, InvalidKeySpecException, NoSuchAlgorithmException, ClassNotFoundException {
+        controller con = new controller();
+        String[] userData = {"ThisIsATestUser", "", "User", "password"};
+        ArrayList<String> listOfUsers = new ArrayList<>();
+        listOfUsers.add("User One");
+        listOfUsers.add("User Two");
+        listOfUsers.add("User Three");
+
+        boolean wasAllUserDataEntered = con.createNewUser(userData, listOfUsers);
+
+        assertEquals(false, wasAllUserDataEntered);
+    }
+
+    // Test checks that the password is hashed before sent to the server
+    @Test
+    public void testCreateNewUserPasswordHashed() throws IOException, InvalidKeySpecException, NoSuchAlgorithmException, ClassNotFoundException {
+        controller con = new controller();
+        String[] userData = {"ThisIsATestUser", "Test", "User", "password"};
+        ArrayList<String> listOfUsers = new ArrayList<>();
+        listOfUsers.add("User One");
+        listOfUsers.add("User Two");
+        listOfUsers.add("User Three");
+
+        // Password hashed before validating user data
+        System.out.println(userData[3]);
+
+        con.createNewUser(userData, listOfUsers);
+
+        // Password hashed after validated user data
+        System.out.println(userData[3]);
+
+        assertEquals(false, userData[3].equals("password"));
+    }
+
+    // Test checks that the username for the new user doesn't already exist
+    @Test
+    public void testCreateNewUserUsernameDoesNotExist() throws IOException, InvalidKeySpecException, NoSuchAlgorithmException, ClassNotFoundException {
+        controller con = new controller();
+        String[] userData = {"ThisIsATestUser", "Test", "User", "password"};
+        ArrayList<String> listOfUsers = new ArrayList<>();
+        listOfUsers.add("User One");
+        listOfUsers.add("User Two");
+        listOfUsers.add("User Three");
+
+        boolean wasAllUserDataEntered = con.createNewUser(userData, listOfUsers);
+
+        assertEquals(true, wasAllUserDataEntered);
+    }
+
+    // Test checks that the username for the new user already exists
+    @Test
+    public void testCreateNewUserUsernameAlreadyExist() throws IOException, InvalidKeySpecException, NoSuchAlgorithmException, ClassNotFoundException {
+        controller con = new controller();
+        String[] userData = {"ThisIsATestUser", "Test", "User", "password"};
+        ArrayList<String> listOfUsers = new ArrayList<>();
+        listOfUsers.add("ThisIsATestUser");
+        listOfUsers.add("User Two");
+        listOfUsers.add("User Three");
+
+        boolean wasAllUserDataEntered = con.createNewUser(userData, listOfUsers);
+
+        assertEquals(false, wasAllUserDataEntered);
+    }
 }

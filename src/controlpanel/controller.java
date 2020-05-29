@@ -853,4 +853,72 @@ public class controller {
             }
         }
     }
+
+    static boolean createNewUser(String[] userData, ArrayList<String> listOfUsers) throws IOException, InvalidKeySpecException, NoSuchAlgorithmException, ClassNotFoundException {
+        // We assume the data entered had no missing fields until we find a field that was either null or empty
+        boolean wasAllUserDataEnteredCorrect = true;
+
+        if (!listOfUsers.contains(userData[0])) {
+            for (String s : userData) {
+                if ((s == null || s.isEmpty())) {
+                    wasAllUserDataEnteredCorrect = false;
+
+                    // Display the GUI error if the above condition is not a result of the unit test
+                    if (!userData[0].equals("ThisIsATestUser")) {
+                        DialogWindow.showErrorPane("Attempted to create a user with empty fields. Please ensure you fill every field and try again.",
+                                "Error: Attempted to create user with missing fields");
+                        break;
+                    }
+                }
+            }
+            userData[3] = plaintextToHashedPassword(userData[3]);
+        }
+         else {
+            // Username already exists
+            wasAllUserDataEnteredCorrect = false;
+
+            // Display the GUI error if the above condition is not a result of the unit test
+            if (!userData[0].equals("ThisIsATestUser")) {
+                DialogWindow.showErrorPane("Attempted to create a user with a username that already exists. Please choose a different username and try again.",
+                        "Error: Attempted to create user with a username that already exists");
+            }
+        }
+        return wasAllUserDataEnteredCorrect;
+    }
+
+    static void createNewUserToDB(String[] userData, boolean[] userPermissions) throws IOException, InvalidKeySpecException, NoSuchAlgorithmException, ClassNotFoundException {
+
+        // If data had no missing fields, submit the user creation details to the server
+        if (createNewUser(userData, getListOfUsers())) {
+            Socket client = connectionToServer();
+
+            // connects to the server with information and attempts to get the auth token
+            // for the user after successful login
+            if (client.isConnected()) {
+                OutputStream outputStream = client.getOutputStream();
+                InputStream inputStream = client.getInputStream();
+
+                ObjectOutputStream send = new ObjectOutputStream(outputStream);
+                ObjectInputStream receiver = new ObjectInputStream(inputStream);
+
+                send.writeUTF("createNewUser");
+                send.writeUTF(userData[0]);
+                send.writeUTF(userData[1]);
+                send.writeUTF(userData[2]);
+                send.writeUTF(userData[3]);
+                send.writeBoolean(userPermissions[0]);
+                send.writeBoolean(userPermissions[1]);
+                send.writeBoolean(userPermissions[2]);
+                send.writeBoolean(userPermissions[3]);
+                send.writeUTF(loggedInUser);
+                send.writeUTF(token);
+                send.flush();
+
+                // End connections
+                send.close();
+                receiver.close();
+                client.close();
+            }
+        }
+        }
 }

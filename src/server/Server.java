@@ -283,6 +283,33 @@ public class Server {
                     send.flush();
                 }
 
+                // Create a new user
+                if (request.equals("createNewUser")) {
+                    System.out.println("request: create new user...");
+                    String username = receiver.readUTF();
+                    String firstName = receiver.readUTF();
+                    String lastName = receiver.readUTF();
+                    String password = receiver.readUTF();
+                    boolean createBillboardPermission = receiver.readBoolean();
+                    boolean editBillboardPermission = receiver.readBoolean();
+                    boolean scheduleBillboardPermission = receiver.readBoolean();
+                    boolean editUserPermission = receiver.readBoolean();
+                    String loggedInUser = receiver.readUTF();
+                    String token = receiver.readUTF();
+
+                    String[] userData = {username, firstName, lastName, password};
+                    boolean[] permissions = {createBillboardPermission, editBillboardPermission, scheduleBillboardPermission, editUserPermission};
+
+                    if (checkTokenIsValid(loggedInUser, token)) {
+                        System.out.println("Creating new user...");
+                        createNewUser(userData, permissions);
+                        System.out.println("Created new user");
+                    } else {
+                        System.out.println("Token wasn't valid");
+                    }
+                    send.flush();
+                }
+
 
                 // End connections
                 receiver.close();
@@ -688,6 +715,29 @@ public class Server {
 
         String query = "UPDATE users SET createBillboard = '" + updatedPermissions[0] + "', editAllBillboard = '" + updatedPermissions[1] + "'" +
                 ", scheduleBillboard = '" + updatedPermissions[2] + "', editUser = '" + updatedPermissions[3] + "' WHERE user = '" + username + "'";
+        System.out.println(query);
+        Statement st = ServerInit.conn.createStatement();
+        st.executeQuery("USE `cab302`;");
+        st.executeQuery(query);
+    }
+
+    private static void createNewUser(String[] userData, boolean[] permissions) throws SQLException, InvalidKeySpecException, NoSuchAlgorithmException, IOException {
+
+        String saltHashedPassword = addSaltToHashedPassword(userData[3]);
+
+        for (boolean b : permissions) {
+            System.out.println(b);
+        }
+
+        int[] updatedPermissions = new int[4];
+
+        updatedPermissions[0] = permissions[0] ? 1 : 0;
+        updatedPermissions[1] = permissions[1] ? 1 : 0;
+        updatedPermissions[2] = permissions[2] ? 1 : 0;
+        updatedPermissions[3] = permissions[3] ? 1 : 0;
+
+        String query = "INSERT INTO users (user, pass, fName, lName, createBillboard, editAllBillboard, scheduleBillboard, editUser) VALUES ('" + userData[0] + "', '" + saltHashedPassword + "', " +
+                "'" + userData[1] + "', '" + userData[2] + "', '" + updatedPermissions[0] + "', '" + updatedPermissions[1] + "', '" + updatedPermissions[2] + "', '" + updatedPermissions[3] + "');";
         System.out.println(query);
         Statement st = ServerInit.conn.createStatement();
         st.executeQuery("USE `cab302`;");
