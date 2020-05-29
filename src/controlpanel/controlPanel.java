@@ -28,9 +28,6 @@ public class controlPanel extends JFrame {
     public static final int WINDOWWIDTH = 900;
     public static final int WINDOWHEIGHT = 800;
     public static final Font titleFont = new Font("Ariel", Font.BOLD, 20);
-//    public JDesktopPane pane = new JDesktopPane();
-//    private static JPasswordField passwordText;
-//    private static JTextField  usernameText;
 
     public static void main(String[] args) throws IOException, ClassNotFoundException {
         new ControlPanelFrameHandler();

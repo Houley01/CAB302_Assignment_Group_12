@@ -1,11 +1,9 @@
 package controlpanel;
 
 import javax.swing.*;
-import javax.swing.event.MenuListener;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
-import java.net.*;
 import java.util.ArrayList;
 
 public class ControlPanelFrameHandler extends JFrame {
@@ -13,24 +11,42 @@ public class ControlPanelFrameHandler extends JFrame {
     public static final int WINDOWHEIGHT = 800;
     static JMenuBar bar = new JMenuBar();
 
-    public JDesktopPane pane = new JDesktopPane();
-    private JInternalFrame logWindow = login.loginScreen(); // The internal Windows
-    private JInternalFrame listBillboardWindow = listBillboards.listBillboards();
-    private JInternalFrame createBillboardWindow = createBillboards.createBillboards();
-    private JInternalFrame scheduleBillboardWindow = scheduleBillboards.scheduleBillboards();
-    private JInternalFrame createScheduleWindow = createSchedule.createSchedule();
-    private JInternalFrame userWindow = usersPage.userPage();
-    private JInternalFrame adminEditUser = usersPage.AdminEditUserWindow();
+    public static JDesktopPane pane = new JDesktopPane();
+    private static JInternalFrame logWindow = login.loginScreen(); // The internal Windows
+    private static JInternalFrame listBillboardWindow;
+//    List Billboard JInternalFrame
+    static {
+        try {
+            listBillboardWindow = listBillboards.listBillboards();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+    private static JInternalFrame createBillboardWindow = createBillboards.createBillboards();
+    private static JInternalFrame scheduleBillboardWindow;
+//    ScheduleBillboard JInternalFrame
+    static {
+        try {
+            scheduleBillboardWindow = scheduleBillboards.scheduleBillboards();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+    private static JInternalFrame createScheduleWindow = createSchedule.createSchedule();
+    private static JInternalFrame userWindow = usersPage.userPage();
+    private static JInternalFrame adminEditUser = usersPage.AdminEditUserWindow();
     //private JInternalFrame userEditUser = usersPage.UserEditUserWindow();
     private JInternalFrame helpWindow = HelpPage.HelpPage();
+    private static ArrayList<JInternalFrame> frames = new ArrayList<>();           // List to add JInteralFrames into so we don't need to
 
 
     public ControlPanelFrameHandler() throws IOException, ClassNotFoundException {
         super("Control Panel");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-
-        ArrayList<JInternalFrame> frames = new ArrayList<>();           // List to add JInteral frames into so we don't need to
-                                                                        // hard code all the settings.
 
 //      Master Frame Content
         JButton menuItemCreate = new JButton("Create Billboards");
@@ -70,6 +86,7 @@ public class ControlPanelFrameHandler extends JFrame {
         frames.add(createScheduleWindow);
         frames.add(userWindow);
         frames.add(adminEditUser);
+        frames.add(helpWindow);
 
         for(JInternalFrame comp : frames)
         {
@@ -85,6 +102,14 @@ public class ControlPanelFrameHandler extends JFrame {
         setLocation(new Point(500, 0));
         pack();
         setVisible(true);
+    }
+
+    public static void LogoutWindow() {
+        for(JInternalFrame comp : frames) {
+            comp.setVisible(false);
+        }
+        bar.setVisible(false);
+        logWindow.setVisible(true);
     }
 
 //    Action Listeners
@@ -128,7 +153,13 @@ public class ControlPanelFrameHandler extends JFrame {
 
     private class menuLogoutButton implements ActionListener {
         public void actionPerformed(ActionEvent e) {
-            controller.logout();
+            try {
+                controller.Logout();
+            } catch (IOException ioException) {
+                ioException.printStackTrace();
+            } catch (ClassNotFoundException classNotFoundException) {
+                classNotFoundException.printStackTrace();
+            }
         }
     }
 }

@@ -312,6 +312,10 @@ public class Server {
                     send.flush();
                 }
 
+                if (request.equals("Logout")) {
+                    logout(receiver,send);
+                }
+
 
                 // End connections
                 receiver.close();
@@ -1138,4 +1142,23 @@ public class Server {
         return permission;
     }
 
+    private static void logout(ObjectInputStream receiver, ObjectOutputStream send) throws IOException {
+        boolean DEBUGGING = false;
+        if (DEBUGGING) {
+            System.out.println("Before Logout");
+            for (String username : usersAuthenticated.keySet()) {
+                String value = usersAuthenticated.get(username).toString();
+                System.out.println("Username: " + username + " Value: " + value);
+            }
+        }
+        String Username = receiver.readUTF(); // Get username from client
+        usersAuthenticated.remove(Username);  // Remove session token from list
+        if (DEBUGGING) {
+            System.out.println("After Logout");
+            for (String username : usersAuthenticated.keySet()) {
+                String value = usersAuthenticated.get(username).toString();
+                System.out.println("Username: " + username + " Value: " + value);
+            }
+        }
+    }
 }

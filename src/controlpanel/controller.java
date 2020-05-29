@@ -475,9 +475,31 @@ public class controller {
      * Logs the current user out of their session.
      * Todo modify code to actually log the user out to the login page
      */
-    public static void logout() {
-//       EXIT FOR THE MOMENT WILL CHANGE to login page
-        System.exit(0);
+    public static void Logout() throws IOException, ClassNotFoundException {
+        ControlPanelFrameHandler.LogoutWindow();
+        Socket client = connectionToServer();
+        //  Checks if the sever is online
+        if (client.isConnected()) {
+            OutputStream outputStream = client.getOutputStream();
+            InputStream inputStream = client.getInputStream();
+
+            ObjectOutputStream send = new ObjectOutputStream(outputStream);
+            ObjectInputStream receiver = new ObjectInputStream(inputStream);
+
+            send.writeUTF("Logout"); // Send logout to server
+            send.writeUTF(loggedInUser); // Send username to server
+            send.flush();
+//      End connections
+            send.close();
+            receiver.close();
+            client.close();
+        }
+//        Clear local client stored information
+        loggedInUser = "";
+        loginSuccessful = false;
+        boolean[] falsePermission = {false, false, false, false};
+        permission.SetUserPermission(falsePermission);
+        token = "";
     }
 
     public static String[][] ListBillboards() throws IOException, ClassNotFoundException {
