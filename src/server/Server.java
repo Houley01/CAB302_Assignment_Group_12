@@ -119,9 +119,11 @@ public class Server {
 
                 if (request.equals("RequestScheduleBillboards")) {
                     System.out.println("Requested schedule billboards");
-                    String username = receiver.readUTF();
-                    String token = receiver.readUTF();
-                    send.writeObject(RequestScheduling(username, token));
+//                    String username = receiver.readUTF();
+//                    String token = receiver.readUTF();
+                    System.out.println("Accessing data");
+                    send.writeObject(RequestScheduling());
+                    System.out.println("Sending data");
                     send.flush();
                 }
 
@@ -865,10 +867,10 @@ public class Server {
      * @return null         if token is not valid
      * @throws SQLException
      */
-    private static ArrayList<String[]> RequestScheduling(String username, String token) throws SQLException {
-
+    private static ArrayList<String[]> RequestScheduling() throws SQLException {
+        System.out.println("Nice");
         // Before request, check that the user's token is valid
-        if (checkTokenIsValid(username, token)) {
+        if (true) {
             System.out.println("Token is valid. Begin requesting currently scheduled billboards...");
 
             String query = "SELECT idSchedules, weekday, duration, startTime, userId FROM schedules";

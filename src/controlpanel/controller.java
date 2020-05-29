@@ -6,6 +6,7 @@ import resources.UserPermission;
 import java.awt.*;
 import javax.swing.*;
 import java.io.*;
+import java.lang.reflect.Array;
 import java.net.*;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -412,12 +413,7 @@ public class controller {
      *  Toggle switch to show or hide Schedule window via modifying isVisible state
      */
     public static void showSchedule() throws IOException, ClassNotFoundException {
-
         toggleVisibility(scheduleBillboards.window);
-        if(!scheduleBillboards.window.isVisible())
-        {
-            RequestBillboardScheduling();
-        }
     }
     /**
      *  Toggle switch to show or hide edit user window via modifying isVisible state
@@ -450,6 +446,8 @@ public class controller {
     public static void showHelpScreen() {
         toggleVisibility(HelpPage.window);
     }
+
+    public static void showCreateSchedule(){toggleVisibility(createSchedule.window);}
 
     /**
      * Create base64 image from users selected file
@@ -577,7 +575,6 @@ public class controller {
         }
     }
 
-
     public static void DeleteBillboard(String billboardId) throws IOException {
         int id = Integer.parseInt(billboardId);
         Socket client = connectionToServer();
@@ -616,6 +613,72 @@ public class controller {
                 client.close();
         }
     }
+
+    /**
+     * 3D Array list to 3D String array. Found on stackoverflow.
+     * <a href="https://stackoverflow.com/questions/34744288/java-3d-arraylist-into-a-3d-array">here</a>.
+     * Modified version to fit the application the version provided on stack overflow is for 3 layers of arrays.
+     *
+     * @author lupz
+     * @param input
+     * @return
+     */
+    public static String[][] MListToMArray(ArrayList<String[]> input)
+    {
+        String[][]                            output;
+        String[][]                              tmp;
+        String[] lvl2;
+        ArrayList<String>                       lvl3;
+
+
+        output = new String[input.size()][];
+        for (int outer = 0; outer < input.size(); ++outer) {
+            output[outer] = input.get(outer);
+        }
+        return output;
+    }
+
+    public static String[][] listSchedule() throws IOException, ClassNotFoundException {
+        Socket client = connectionToServer();           // Get user connection
+
+        ArrayList<String[]> scheduled;         // Create billboard array list
+
+
+        if(!client.isConnected())
+        {
+            System.out.println("No data");
+            return new String[][]{};
+        }
+
+        //  Checks if the sever is online
+        OutputStream outputStream = client.getOutputStream();
+        InputStream inputStream = client.getInputStream();
+
+        ObjectOutputStream send = new ObjectOutputStream(outputStream);
+        ObjectInputStream receiver = new ObjectInputStream(inputStream);
+
+        System.out.println("Connecting to server");
+
+        send.writeUTF("RequestScheduleBillboards");
+        send.flush();
+
+        int val = receiver.read();
+        System.out.println(val);
+        ArrayList<String[]> list = (ArrayList<String[]>) receiver.readObject();
+        scheduled =  list;
+        if(val == 1)
+        {
+            System.out.println(scheduled);
+            String[][] test = MListToMArray(scheduled);
+            System.out.println(Arrays.toString(test));
+        }
+        // End connections
+        send.close();
+        receiver.close();
+        client.close();
+        return new String[][]{};
+    }
+
 
 
     static ArrayList<String> getListOfUsers() throws IOException, ClassNotFoundException {

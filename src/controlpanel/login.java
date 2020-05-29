@@ -24,7 +24,6 @@ class login extends JFrame
      * Authentication for users, username and password is done in the controller.
      * @see controller
      *
-     * @deprecated          .getText()
      * @since               JDK13
      * @return window       JFrame object containing configurations and elements created.
      */

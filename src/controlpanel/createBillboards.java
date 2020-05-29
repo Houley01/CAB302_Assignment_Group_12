@@ -229,8 +229,8 @@ public class createBillboards {
      * @param imageFile File to be used for billboard image
      * @param urlImage  URL to be used for billboard image
      * @return int      -1 No url or image is given
-     *                   0 URl was given
-     *                   1 File was given
+     * @return int       0 URl was given
+     * @return int       1 File was given
      */
     private  static int URLOrImageFileOrNone(File imageFile, String urlImage) {
         if (imageFile != null || urlImage.equals("") == false) {

@@ -6,6 +6,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
 import java.net.*;
+import java.util.ArrayList;
 
 public class ControlPanelFrameHandler extends JFrame {
     public static final int WINDOWWIDTH = 900;
@@ -17,14 +18,19 @@ public class ControlPanelFrameHandler extends JFrame {
     private JInternalFrame listBillboardWindow = listBillboards.listBillboards();
     private JInternalFrame createBillboardWindow = createBillboards.createBillboards();
     private JInternalFrame scheduleBillboardWindow = scheduleBillboards.scheduleBillboards();
+    private JInternalFrame createScheduleWindow = createSchedule.createSchedule();
     private JInternalFrame userWindow = usersPage.userPage();
     private JInternalFrame adminEditUser = usersPage.AdminEditUserWindow();
     //private JInternalFrame userEditUser = usersPage.UserEditUserWindow();
     private JInternalFrame helpWindow = HelpPage.HelpPage();
 
+
     public ControlPanelFrameHandler() throws IOException, ClassNotFoundException {
         super("Control Panel");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
+
+        ArrayList<JInternalFrame> frames = new ArrayList<>();           // List to add JInteral frames into so we don't need to
+                                                                        // hard code all the settings.
 
 //      Master Frame Content
         JButton menuItemCreate = new JButton("Create Billboards");
@@ -51,43 +57,27 @@ public class ControlPanelFrameHandler extends JFrame {
         setJMenuBar(bar);
         bar.setVisible(false);
 
-//       // JInternalFrame List
+        /**
+         * Restructured how setting internal frames work.
+         * We just add them to a list and modify all of them with
+         * the same settings (The code was doing this before but
+         * it was hard coded)
+         */
+        frames.add(logWindow);
+        frames.add(listBillboardWindow);
+        frames.add(createBillboardWindow);
+        frames.add(scheduleBillboardWindow);
+        frames.add(createScheduleWindow);
+        frames.add(userWindow);
+        frames.add(adminEditUser);
 
-////        LOGIN Section \/
-        logWindow.setVisible(true);
-////        LOGIN Section /\
+        for(JInternalFrame comp : frames)
+        {
+            comp.setVisible(false);
+            pane.add(comp);
+        }
 
-//        BILLBOARD LIST \/
-        listBillboardWindow.setVisible(false);
-//        BILLBOARD LIST /\
-
-//        CREATE BILLBOARD \/
-        createBillboardWindow.setVisible(false);
-//        CREATE BILLBOARD /\
-
-//        Schedule Billboards \/
-        scheduleBillboardWindow.setVisible(false);
-//        Schedule Billboards /\
-
-//        EDIT USER \/
-        userWindow.setVisible(false);
-        adminEditUser.setVisible(false);
-        //userEditUser.setVisible(false);
-//        EDIT USER /\
-
-//        MASTER DISPLAY
-//        Add to the master window
-        pane.add(logWindow);
-//        pane.add(helpWindow);
-        pane.add(listBillboardWindow);
-        pane.add(createBillboardWindow);
-        pane.add(scheduleBillboardWindow);
-        pane.add(userWindow);
-        pane.add(adminEditUser);
-        //pane.add(userEditUser);
-        pane.add(helpWindow);
-
-
+        logWindow.setVisible(true); // We need the user to login first
         getContentPane().add(pane);
 
         // Display the window.
