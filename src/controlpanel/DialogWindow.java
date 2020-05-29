@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  *  Window to create dialog windows without causing bugs that cause non-readable text fields
@@ -108,16 +109,20 @@ public class DialogWindow {
      *  </ul>
      * @see Administrative user settings panel
      */
-    static void showUserPermissions() {
+    static void showUserPermissions() throws IOException, ClassNotFoundException {
+
+        String selectedUser = getListOfUsers();
+        boolean[] userPermissions = controller.getUserPermissions(selectedUser);
         JOptionPane pane = new JOptionPane("Select User Permissions", JOptionPane.PLAIN_MESSAGE);
         JPanel window2 = new JPanel();
         JDialog dialog = pane.createDialog("User Permissions");
-        JCheckBox billboardPermissions = new JCheckBox("Create Billboard");
-        JCheckBox editBillboardPermissions = new JCheckBox("Edit Billboards");
-        JCheckBox schedulePermissions = new JCheckBox("Schedule Billboards");
-        JCheckBox editUserPermissions = new JCheckBox("Edit User Permissions");
+        dialog.setSize(new Dimension(400, 200));
+        JCheckBox billboardPermissions = new JCheckBox("Create Billboard", userPermissions[0]);
+        JCheckBox editBillboardPermissions = new JCheckBox("Edit Billboards", userPermissions[1]);
+        JCheckBox schedulePermissions = new JCheckBox("Schedule Billboards", userPermissions[2]);
+        JCheckBox editUserPermissions = new JCheckBox("Edit User Permissions", userPermissions[3]);
 
-        pane.setLayout(new GridLayout(1,1));
+        pane.setLayout(new GridLayout(3,1));
         pane.add(window2);
         window2.setLayout(new GridLayout(2,2));
         window2.add(billboardPermissions);
@@ -127,7 +132,12 @@ public class DialogWindow {
 
         dialog.setAlwaysOnTop(true);
         dialog.setVisible(true);
+
+        boolean[] updatedPermissions = {billboardPermissions.isSelected(), editBillboardPermissions.isSelected(), schedulePermissions.isSelected(), editUserPermissions.isSelected()};
+
+        controller.updateUserPermissionsToDB(userPermissions, updatedPermissions, selectedUser);
     }
+
 
     // User Details
 
@@ -184,7 +194,7 @@ public class DialogWindow {
      *
      *  <b>Note</b>: Why? Why is it like this? - Freeman
      */
-    static void showCreateUser() {
+    static void showCreateUser() throws IOException, InvalidKeySpecException, NoSuchAlgorithmException, ClassNotFoundException {
         JFrame enterFirstName = new JFrame();
         Object inputFirstName = JOptionPane.showInputDialog(enterFirstName, "Enter First Name:");
         JFrame enterLastName = new JFrame();
@@ -193,16 +203,39 @@ public class DialogWindow {
         Object inputUserName = JOptionPane.showInputDialog(enterUserName, "Enter UserName");
         JFrame enterPassword = new JFrame();
         Object inputPassword = JOptionPane.showInputDialog(enterPassword, "Enter Password");
-        String[] userPermissions = {"Create Billboards", "Edit Billboards", "Schedule Billboards", "Edit Users"};
-        String  permissions = (String) JOptionPane.showInputDialog(null, "Select User Permissions:",
-                "User Permissions", JOptionPane.QUESTION_MESSAGE, null,
-                userPermissions, userPermissions[1]);
+
+        JOptionPane pane = new JOptionPane("Select User Permissions", JOptionPane.PLAIN_MESSAGE);
+        JPanel window2 = new JPanel();
+        JDialog dialog = pane.createDialog("User Permissions");
+        dialog.setSize(new Dimension(400, 200));
+        JCheckBox billboardPermissions = new JCheckBox("Create Billboard");
+        JCheckBox editBillboardPermissions = new JCheckBox("Edit Billboards");
+        JCheckBox schedulePermissions = new JCheckBox("Schedule Billboards");
+        JCheckBox editUserPermissions = new JCheckBox("Edit User Permissions");
+
+        pane.setLayout(new GridLayout(3,1));
+        pane.add(window2);
+        window2.setLayout(new GridLayout(2,2));
+        window2.add(billboardPermissions);
+        window2.add(editBillboardPermissions);
+        window2.add(schedulePermissions);
+        window2.add(editUserPermissions);
+
+        dialog.setAlwaysOnTop(true);
+        dialog.setVisible(true);
+
+        // Holds the information on the user to be passed to the Server
+        String[] userData = {(String) inputUserName, (String) inputFirstName, (String) inputLastName, (String) inputPassword};
+
+        // Holds the permissions for the user
+        boolean[] userPermissions = {billboardPermissions.isSelected(), editBillboardPermissions.isSelected(), schedulePermissions.isSelected(), editUserPermissions.isSelected()};
+
+        controller.createNewUserToDB(userData, userPermissions);
 
         System.out.println(inputFirstName);
         System.out.println(inputLastName);
         System.out.println(inputUserName);
         System.out.println(inputPassword);
-        System.out.println(permissions);
     }
 
     // Delete User
