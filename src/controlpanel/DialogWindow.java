@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  *  Window to create dialog windows without causing bugs that cause non-readable text fields
@@ -108,16 +109,20 @@ public class DialogWindow {
      *  </ul>
      * @see Administrative user settings panel
      */
-    static void showUserPermissions() {
+    static void showUserPermissions() throws IOException, ClassNotFoundException {
+
+        String selectedUser = getListOfUsers();
+        boolean[] userPermissions = controller.getUserPermissions(selectedUser);
         JOptionPane pane = new JOptionPane("Select User Permissions", JOptionPane.PLAIN_MESSAGE);
         JPanel window2 = new JPanel();
         JDialog dialog = pane.createDialog("User Permissions");
-        JCheckBox billboardPermissions = new JCheckBox("Create Billboard");
-        JCheckBox editBillboardPermissions = new JCheckBox("Edit Billboards");
-        JCheckBox schedulePermissions = new JCheckBox("Schedule Billboards");
-        JCheckBox editUserPermissions = new JCheckBox("Edit User Permissions");
+        dialog.setSize(new Dimension(400, 200));
+        JCheckBox billboardPermissions = new JCheckBox("Create Billboard", userPermissions[0]);
+        JCheckBox editBillboardPermissions = new JCheckBox("Edit Billboards", userPermissions[1]);
+        JCheckBox schedulePermissions = new JCheckBox("Schedule Billboards", userPermissions[2]);
+        JCheckBox editUserPermissions = new JCheckBox("Edit User Permissions", userPermissions[3]);
 
-        pane.setLayout(new GridLayout(1,1));
+        pane.setLayout(new GridLayout(3,1));
         pane.add(window2);
         window2.setLayout(new GridLayout(2,2));
         window2.add(billboardPermissions);
@@ -127,7 +132,12 @@ public class DialogWindow {
 
         dialog.setAlwaysOnTop(true);
         dialog.setVisible(true);
+
+        boolean[] updatedPermissions = {billboardPermissions.isSelected(), editBillboardPermissions.isSelected(), schedulePermissions.isSelected(), editUserPermissions.isSelected()};
+
+            controller.updateUserPermissionsToDB(userPermissions, updatedPermissions, selectedUser);
     }
+
 
     // User Details
 

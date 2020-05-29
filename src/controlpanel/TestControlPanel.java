@@ -173,4 +173,44 @@ public class TestControlPanel {
         assertEquals(false, wasUserInList);
 
     }
+
+    @Test
+    public void testupdateUserPermissions() {
+        controller con = new controller();
+        con.loggedInUser = "admin";
+        boolean[] userPermissions = {false, true, true, false};
+        boolean[] newUserPermissions = {true, true, true, true};
+        String username = "test user";
+
+        boolean[] updatedUserPermissions = controller.updateUserPermissions(userPermissions, newUserPermissions, username);
+
+        assertEquals(false, Arrays.equals(userPermissions, updatedUserPermissions));
+    }
+
+    @Test
+    public void testupdateUserPermissionsUnchanged() {
+        controller con = new controller();
+        con.loggedInUser = "admin";
+        boolean[] userPermissions = {false, true, true, false};
+        boolean[] newUserPermissions = {false, true, true, false};
+        String username = "test user";
+
+        boolean[] updatedUserPermissions = controller.updateUserPermissions(userPermissions, newUserPermissions, username);
+
+        assertEquals(true, Arrays.equals(userPermissions, updatedUserPermissions));
+    }
+
+    // Test shows that a user cannot change their own permissions
+    @Test
+    public void testupdateUserPermissionsSelfChange() {
+        controller con = new controller();
+        con.loggedInUser = "ThisIsATestUser";
+        boolean[] userPermissions = {false, true, true, false};
+        boolean[] newUserPermissions = {true, true, true, true};
+        String username = "ThisIsATestUser";
+
+        boolean[] updatedUserPermissions = controller.updateUserPermissions(userPermissions, newUserPermissions, username);
+
+        assertEquals(true, Arrays.equals(userPermissions, updatedUserPermissions));
+    }
 }

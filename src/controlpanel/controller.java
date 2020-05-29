@@ -430,7 +430,7 @@ public class controller {
      *  Toggle switch to show or hide admin preferences via modifying isVisible state
      */
     public static void showAdminPreferences() {
-        if (controller.permission.GetUserPermission("EditUser") == true) {
+        if (controller.permission.GetUserPermission("EditUser")) {
             toggleVisibility(usersPage.adminWindow);
         } else {
             DialogWindow.NoAccessTo("Admin options");
@@ -668,7 +668,7 @@ public class controller {
             send.writeUTF(token);
             send.flush();
 
-            // Store the current schedule listings
+            // Store the current list of users
             userInfo = (String[]) receiver.readObject();
 
             // End connections
@@ -753,6 +753,94 @@ public class controller {
                 ObjectInputStream receiver = new ObjectInputStream(inputStream);
 
                 send.writeUTF("deleteUser");
+                send.writeUTF(username);
+                send.writeUTF(loggedInUser);
+                send.writeUTF(token);
+                send.flush();
+
+                // End connections
+                send.close();
+                receiver.close();
+                client.close();
+            }
+        }
+    }
+
+    static boolean[] getUserPermissions(String username) throws IOException, ClassNotFoundException {
+
+        boolean[] userPermissions = new boolean[4];
+
+        Socket client = connectionToServer();
+
+        // connects to the server with information and attempts to get the auth token
+        // for the user after successful login
+        if (client.isConnected()) {
+            OutputStream outputStream = client.getOutputStream();
+            InputStream inputStream = client.getInputStream();
+
+            ObjectOutputStream send = new ObjectOutputStream(outputStream);
+            ObjectInputStream receiver = new ObjectInputStream(inputStream);
+
+            send.writeUTF("getUserPermissions");
+            send.writeUTF(username);
+            send.writeUTF(loggedInUser);
+            send.writeUTF(token);
+            send.flush();
+
+            // Store the list of permissions for the user
+            userPermissions[0] = receiver.readBoolean();
+            userPermissions[1] = receiver.readBoolean();
+            userPermissions[2] = receiver.readBoolean();
+            userPermissions[3] = receiver.readBoolean();
+
+            // End connections
+            send.close();
+            receiver.close();
+            client.close();
+        }
+        return userPermissions;
+    }
+
+    static boolean[] updateUserPermissions(boolean[] currentPermissions, boolean[] updatedPermissions, String username) {
+        boolean[] newPermissionsForUser = currentPermissions;
+
+        if (!username.equals(loggedInUser)) {
+            newPermissionsForUser = updatedPermissions;
+        } else if (!loggedInUser.equals("ThisIsATestUser")) {
+            // Display POP ERROR MESSAGE
+            DialogWindow.showErrorPane("Cannot change own permissions. Please select a user that isn't yourself.",
+                    "Error: Attempted to update own permissions");
+        }
+
+        return newPermissionsForUser;
+    }
+
+    static void updateUserPermissionsToDB(boolean[] currentPermissions, boolean[] updatedPermissions, String username) throws IOException {
+        System.out.println(username);
+        boolean[] newPermissionsForUser = updateUserPermissions(currentPermissions, updatedPermissions, username);
+
+        // If the permissions of a user that are being updated is not the user attempting to change their own, send the request to the server
+        if (!Arrays.equals(newPermissionsForUser, currentPermissions)) {
+            Socket client = connectionToServer();
+            System.out.println("Sending request to server to update user permissions for user: " + username);
+            // connects to the server with information and attempts to get the auth token
+            // for the user after successful login
+            if (client.isConnected()) {
+                OutputStream outputStream = client.getOutputStream();
+                InputStream inputStream = client.getInputStream();
+
+                ObjectOutputStream send = new ObjectOutputStream(outputStream);
+                ObjectInputStream receiver = new ObjectInputStream(inputStream);
+
+                for (boolean b : newPermissionsForUser) {
+                    System.out.println(b);
+                }
+
+                send.writeUTF("updatePermissions");
+                send.writeBoolean(newPermissionsForUser[0]);
+                send.writeBoolean(newPermissionsForUser[1]);
+                send.writeBoolean(newPermissionsForUser[2]);
+                send.writeBoolean(newPermissionsForUser[3]);
                 send.writeUTF(username);
                 send.writeUTF(loggedInUser);
                 send.writeUTF(token);

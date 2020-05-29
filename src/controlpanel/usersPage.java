@@ -131,11 +131,17 @@ public class usersPage {
 
 //        Heading - "User Permissions"
         JButton userPermission = new JButton("User Permissions");
-        userPermission.setBounds(100,100,140,40);
+        userPermission.setBounds(500,100,140,40);
         userPermission.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                DialogWindow.showUserPermissions();
+                try {
+                    DialogWindow.showUserPermissions();
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                } catch (ClassNotFoundException ex) {
+                    ex.printStackTrace();
+                }
             }
         });
 
