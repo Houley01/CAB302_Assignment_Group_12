@@ -19,10 +19,8 @@ import java.net.URL;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Base64;
+import java.util.*;
 import java.util.List;
-import java.util.TimerTask;
 import java.util.Timer;
 
 import static resources.CustomXMFile.ReadXMLFile;
@@ -148,6 +146,8 @@ public class viewer extends TimerTask {
                                                                                   // delete the extension.
             Billboard billboard = ReadXMLFile(new File(fileLocation), fileName);  // ReadXML returns a Billboard class
 
+            scheulder((ArrayList<String>) output);
+
             // Closing streams and socket
             send.close();
             receiver.close();
@@ -162,6 +162,15 @@ public class viewer extends TimerTask {
         }
         return null; // If it some how escapes the try catch.
     }
+
+    private static boolean scheulder(ArrayList<String> output)
+    {
+        System.out.println(output);
+        Date time = Calendar.getInstance().getTime();
+        System.out.println(time);
+        return false;
+    }
+
 
     /**
      * Helper function to simply creating new text fields.

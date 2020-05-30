@@ -336,7 +336,7 @@ public class scheduleBillboards {
                 }
                 else
                 {
-                    if(temp.size() > 0)
+                    if(temp != null && !temp.isEmpty())
                     {
                         rowData[outer][inner] = PositionData(outer, inner, temp);
                     }
