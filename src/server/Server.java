@@ -127,6 +127,12 @@ public class Server {
                     send.flush();
                 }
 
+                if(request.equals("CreateSchedule"))
+                {
+                    System.out.println("Creating new schedule ...");
+                    createNewSchedule(receiver, send);
+
+                }
 
                 // List Billboards
                 if (request.equals("ListBillboards")) {
@@ -1140,6 +1146,70 @@ public class Server {
             }
         }
         return permission;
+    }
+
+    private static String getBillboardId(ArrayList<String> data) throws SQLException {
+        String getBillboard = "SELECT `idBillboards` FROM `billboards` WHERE `billboardName` = '"+data.get(0)+"';";
+        Statement st = ServerInit.conn.createStatement();
+        st.executeQuery("USE `cab302`;");
+        ResultSet rs = st.executeQuery(getBillboard);
+        if(!rs.isBeforeFirst())
+        {
+            System.out.println("No billboard data");
+            return "";
+        }
+        rs.next();
+        String billid = rs.getString("idBillboards");
+        return billid;
+    }
+
+    private static String getUserId(ArrayList<String> data) throws SQLException {
+        String user = "";
+        for(String username : usersAuthenticated.keySet())
+        {
+            user = username;
+        }
+        String getUser = "SELECT * FROM `users` WHERE `user` = '"+user+"';";
+        Statement st2 = ServerInit.conn.createStatement();
+        st2.executeQuery("USE `cab302`;");
+        ResultSet rs2 = st2.executeQuery(getUser);
+        if(!rs2.isBeforeFirst())
+        {
+            System.out.println("No user data");
+            return "";
+        }
+        rs2.next();
+        String userid = rs2.getString("idUsers");
+        return userid;
+    }
+
+    private static Calendar formatTime(ArrayList<String> data)
+    {
+        Calendar c = Calendar.getInstance();
+        String hoursClean = data.get(2).split(" ")[0].replace("h", "");
+        String minsClean = data.get(2).split(" ")[1].replace("m", "");
+        int hour = Integer.parseInt(hoursClean);
+        int min = Integer.parseInt(minsClean);
+
+        c.set(Calendar.HOUR_OF_DAY, hour);
+        c.set(Calendar.MINUTE, min);
+        return c;
+    }
+
+    private static void createNewSchedule(ObjectInputStream receiver, ObjectOutputStream send) throws SQLException, IOException, ClassNotFoundException {
+        receiver.read();
+        ArrayList<String> data = (ArrayList<String>) receiver.readObject();
+
+        String billid = getBillboardId(data);
+        String userid = getUserId(data);
+        String date = formatTime(data).getTime().toString().split(" ")[3];
+
+        String query = "INSERT INTO schedules (`weekday`, `duration`, `startTime`, `idBillboard`, `userId`) " +
+                "VALUES ('"+data.get(1)+"', '"+data.get(3)+"','"+date+"','"+billid+"', '"+userid+"');";
+        System.out.println(query);
+        Statement st = ServerInit.conn.createStatement();
+        st.executeQuery("USE `cab302`;");
+        st.executeQuery(query);
     }
 
     private static void logout(ObjectInputStream receiver, ObjectOutputStream send) throws IOException {

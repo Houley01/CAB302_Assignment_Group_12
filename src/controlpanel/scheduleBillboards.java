@@ -1,10 +1,12 @@
 package controlpanel;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
+import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -15,6 +17,8 @@ import java.util.Date;
  */
 public class scheduleBillboards {
     static JInternalFrame window = new JInternalFrame( "Schedule Billboards", false, false, true);
+    private static JTable tableBillboard = new JTable();
+
 
     /**
      * Seeing the JLabel create everywhere started to get a little annoying so this function
@@ -79,7 +83,7 @@ public class scheduleBillboards {
      * @return window       JFrame window object with configuration settings
      */
     public static JInternalFrame scheduleBillboards() throws IOException, ClassNotFoundException {
-//        controller.listSchedule();
+
         windowSettings(window);
 //        Heading
         JPanel titlePanel = new JPanel();
@@ -90,10 +94,64 @@ public class scheduleBillboards {
         titlePanel.add(titleLabel);
 
         String[][] Data = controller.listSchedule();
-        System.out.println(Arrays.toString(Data));
-        System.out.println("Grabbed schedule");
 //      Calendar setup
 
+        DefaultTableModel tableCalendar = buildTable();
+        tableBillboard.setModel(tableCalendar);
+        tableBillboard.getTableHeader().setReorderingAllowed(false);
+        JScrollPane calendar = new JScrollPane(tableBillboard);
+        calendar.setSize(window.getWidth(), 400);
+        calendar.setLocation(0, 30);
+
+//      Button setup
+        JPanel buttons = new JPanel();
+
+        JButton createButton =  new JButton("Create new Scheduling");
+        JButton editButton =    new JButton("Edit Scheduling");      // We'll be "editing" the schedule dynamically
+        JButton deleteButton =  new JButton("Delete Scheduling");
+        JButton refreshButton =  new JButton("Refresh Scheduling");
+
+        createButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                controller.showCreateSchedule();
+            }
+        });
+
+        editButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+
+            }
+        });
+
+        refreshButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                reload(tableCalendar);
+            }
+        });
+
+        // Code was already here when I started working on it
+        // but I can't be screwed moving it into arrays to
+        // add dynamically. - Brendan
+        buttons.add(createButton);
+        buttons.add(editButton);
+        buttons.add(deleteButton);
+        buttons.add(refreshButton);
+
+        window.add(titlePanel);
+        window.add(calendar);
+        window.add(buttons);
+        return window;
+    }
+
+    /**
+     * Builds table
+     * @return table model
+     */
+    private static DefaultTableModel buildTable()
+    {
         /**
          * Table heading for the 3D matrix
          */
@@ -116,65 +174,37 @@ public class scheduleBillboards {
          *
          * Todo figure out how to implement the logic above. - Help
          */
-        String[][] rowData = {
-                {"8:30am", "", "", "", "", ""},
-                {"9:00am", "", "", "", "", ""},
-                {"9:30am", "", "", "", "", ""},
-                {"10:00am", "", "", "", "", ""},
-                {"10:30am", "", "", "", "", ""},
-                {"11:00am", "", "", "", "", ""},
-                {"11:30am", "", "", "", "", ""},
-                {"12:00pm", "", "", "", "", ""},
-                {"12:30pm", "", "", "", "", ""},
-                {"1:00pm", "", "", "", "", ""},
-                {"1:30pm", "", "", "", "", ""},
-                {"2:00pm", "", "", "", "", ""},
-                {"2:30pm", "", "", "", "", ""},
-                {"3:00pm", "", "", "", "", ""},
-                {"3:30pm", "", "", "", "", ""},
-                {"4:00pm", "", "", "", "", ""},
-                {"4:30pm", "", "", "", "", ""},
-                {"5:00pm", "", "", "", "", ""}
-        };
+        String[][] rowData = new String[24][columnHeading.length];
 
-        JTable tableCalendar = new JTable(rowData, columnHeading);
-        tableCalendar.getTableHeader().setReorderingAllowed(false);
-        JScrollPane calendar = new JScrollPane(tableCalendar);
-        calendar.setSize(window.getWidth(), 400);
-        calendar.setLocation(0, 30);
-
-//      Button setup
-        JPanel buttons = new JPanel();
-
-        JButton createButton = new JButton("Create new Scheduling");
-        JButton editButton = new JButton("Update Scheduling");      // We'll be "editing" the schedule dynamically
-        JButton deleteButton = new JButton("Delete Scheduling");
-
-        createButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                System.out.println("Nice");
-                controller.showCreateSchedule();
+        for(int outer = 0; outer < 24; outer++)                                 // TIME 1 am ... 12am (24 hour format)
+        {
+            for(int inner = 0; inner < columnHeading.length; inner++)           // Column position (0 to 6) per day
+            {
+                // If inner is 0 it has to be the time column
+                if(inner == 0)
+                {
+                    String am_or_pm = "am";
+                    int time = outer+1 >= 13 ? outer+1 - 12 : outer+1;                              // 12 hour conversion
+                    if(outer+1 >= 12 && outer+1 != 24) am_or_pm = "pm";                             // PM / AM formatter
+                    String hours = time < 10 ? "0"+String.valueOf(time) : String.valueOf(time);     // String conversion + formatting
+                    rowData[outer][inner] = hours + am_or_pm;                                       // Appending to array
+                }
+                // Empty data for now
+                else
+                {
+                    rowData[outer][inner] = "";
+                }
             }
-        });
+        }
 
-        editButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                System.out.println(this);
-            }
-        });
 
-        // Code was already here when I started working on it
-        // but I can't be screwed moving it into arrays to
-        // add dynamically. - Brendan
-        buttons.add(createButton);
-        buttons.add(editButton);
-        buttons.add(deleteButton);
-
-        window.add(titlePanel);
-        window.add(calendar);
-        window.add(buttons);
-        return window;
+        DefaultTableModel tableCalendar = new DefaultTableModel(rowData, columnHeading);
+        return tableCalendar;
     }
+    private static void reload(DefaultTableModel model)
+    {
+        model.setRowCount(0);
+        tableBillboard.setModel(buildTable());
+    }
+
 }

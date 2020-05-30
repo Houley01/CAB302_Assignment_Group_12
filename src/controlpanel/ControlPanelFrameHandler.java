@@ -36,7 +36,18 @@ public class ControlPanelFrameHandler extends JFrame {
             e.printStackTrace();
         }
     }
-    private static JInternalFrame createScheduleWindow = createSchedule.createSchedule();
+    private static JInternalFrame createScheduleWindow;
+
+    static {
+        try {
+            createScheduleWindow = createSchedule.createSchedule();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
     private static JInternalFrame userWindow = usersPage.userPage();
     private static JInternalFrame adminEditUser = usersPage.AdminEditUserWindow();
     //private JInternalFrame userEditUser = usersPage.UserEditUserWindow();

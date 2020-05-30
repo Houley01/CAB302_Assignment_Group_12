@@ -701,7 +701,20 @@ public class controller {
         return new String[][]{};
     }
 
+    public static void createNewSchedule(ArrayList<String> vals) throws IOException {
+        Socket client = connectionToServer();
+        if(!client.isConnected()) return;
+        OutputStream outputStream = client.getOutputStream();
+        InputStream inputStream = client.getInputStream();
 
+        ObjectOutputStream send = new ObjectOutputStream(outputStream);
+        ObjectInputStream receiver = new ObjectInputStream(inputStream);
+
+        System.out.println("Creating new schedule");
+        send.writeUTF("CreateSchedule");
+        send.writeObject(vals);
+        send.flush();
+    }
 
     static ArrayList<String> getListOfUsers() throws IOException, ClassNotFoundException {
 
