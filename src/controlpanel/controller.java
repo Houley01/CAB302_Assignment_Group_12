@@ -364,6 +364,7 @@ public class controller {
      *  Toggle switch to show or hide Schedule window via modifying isVisible state
      */
     public static void showSchedule() throws IOException, ClassNotFoundException {
+        scheduleBillboards.reload(scheduleBillboards.tableCalendar);
         toggleVisibility(scheduleBillboards.window);
     }
     /**
@@ -677,6 +678,38 @@ public class controller {
         return temp;
     }
 
+    public static ArrayList<String> GetBillBoardFromTimes(String min, String max) throws IOException, ClassNotFoundException {
+        Socket client = connectionToServer();
+        OutputStream outputStream = client.getOutputStream();
+        InputStream inputStream = client.getInputStream();
+
+        ObjectOutputStream send = new ObjectOutputStream(outputStream);
+        ObjectInputStream receiver = new ObjectInputStream(inputStream);
+
+        System.out.println("Creating new schedule");
+        send.writeUTF("GetScheduledBillboard");
+        send.writeUTF(min);
+        send.writeUTF(max);
+        send.flush();
+
+        ArrayList<String> temp = new ArrayList<>();
+
+        receiver.read();
+        try
+        {
+            temp = (ArrayList<String>) receiver.readObject();
+        }catch(Exception e)
+        {
+            e.printStackTrace();
+        }
+        System.out.println(temp);
+        send.close();
+        receiver.close();
+        client.close();
+
+        return temp;
+    }
+
     public static void createNewSchedule(ArrayList<String> vals) throws IOException {
         Socket client = connectionToServer();
         if(!client.isConnected()) return;
@@ -690,6 +723,8 @@ public class controller {
         send.writeUTF("CreateSchedule");
         send.writeObject(vals);
         send.flush();
+
+
     }
 
     public static ArrayList<String[]> RequestScheduleBillboards() throws IOException, ClassNotFoundException {

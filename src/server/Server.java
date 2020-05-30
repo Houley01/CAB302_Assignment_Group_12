@@ -135,6 +135,16 @@ public class Server {
                     }
                 }
 
+                if(request.equals("GetScheduledBillboard"))
+                {
+                    System.out.println("Getting selected billboard");
+                    String min = receiver.readUTF();
+                    String max = receiver.readUTF();
+                    System.out.println("Got all information");
+
+                    GetScheduledBillboard(send, min, max);
+                }
+
                 if(request.equals("CreateSchedule"))
                 {
                     System.out.println("Creating new schedule ...");
@@ -1012,8 +1022,36 @@ public class Server {
                     "LEFT JOIN users ON billboards.userId = users.idUsers " +
                     "WHERE (schedules.idBillboard IS NOT NULL) AND (billboards.idBillboards = " + billboardID + ");";
         }
-    }    
+    }
 
+    private static void GetScheduledBillboard(ObjectOutputStream send, String min, String max) throws SQLException, IOException {
+        String query = "SELECT * FROM schedules\n" +
+                "LEFT JOIN billboards ON schedules.idBillboard = billboards.idBillboards\n" +
+                "LEFT JOIN users ON schedules.userId = users.idUsers\n" +
+                "WHERE startTime > '"+min+"' AND startTime < '"+max+"';";
+        Statement st = ServerInit.conn.createStatement();
+        st.executeQuery("USE `cab302`;");
+        ResultSet rs = st.executeQuery(query);
+        if(rs.isBeforeFirst())
+        {
+            rs.next();
+
+            ArrayList<String> output = new ArrayList<>();
+
+
+            output.add(rs.getString("billboardName"));
+            output.add(rs.getString("startTime"));
+            output.add(rs.getString("weekday"));
+            output.add(rs.getString("user"));
+            output.add(rs.getString("duration"));
+            send.writeObject(output);
+            System.out.println("Sending information...");
+            send.flush();
+        }
+        else{
+            send.writeInt(-1);
+        }
+    }
 
     private static void GetBillboardInfo(ObjectInputStream receiver, ObjectOutputStream send) throws IOException, SQLException, ParserConfigurationException, SAXException, ParserConfigurationException, SAXException {
         int billboardID = receiver.read();
