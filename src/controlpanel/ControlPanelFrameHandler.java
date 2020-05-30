@@ -12,24 +12,22 @@ public class ControlPanelFrameHandler extends JFrame {
     static JMenuBar bar = new JMenuBar();
 
     public static JDesktopPane pane = new JDesktopPane();
-    private static JInternalFrame logWindow = login.loginScreen(); // The internal Windows
+    private static JInternalFrame logWindow = Login.loginScreen(); // The internal Windows
     private static JInternalFrame listBillboardWindow;
 //    List Billboard JInternalFrame
     static {
         try {
-            listBillboardWindow = listBillboards.listBillboards();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
+            listBillboardWindow = ListBillboards.listBillboards();
+        } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }
-    }
-    private static JInternalFrame createBillboardWindow = createBillboards.createBillboards();
+}
+    private static JInternalFrame createBillboardWindow = CreateBillboards.createBillboards();
     private static JInternalFrame scheduleBillboardWindow;
 //    ScheduleBillboard JInternalFrame
     static {
         try {
-            scheduleBillboardWindow = scheduleBillboards.scheduleBillboards();
+            scheduleBillboardWindow = ScheduleBillboards.scheduleBillboards();
         } catch (IOException e) {
             e.printStackTrace();
         } catch (ClassNotFoundException e) {
@@ -40,18 +38,16 @@ public class ControlPanelFrameHandler extends JFrame {
 
     static {
         try {
-            createScheduleWindow = createSchedule.createSchedule();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
+            createScheduleWindow = CreateSchedule.createSchedule();
+        } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }
     }
 
-    private static JInternalFrame userWindow = usersPage.userPage();
-    private static JInternalFrame adminEditUser = usersPage.AdminEditUserWindow();
-    //private JInternalFrame userEditUser = usersPage.UserEditUserWindow();
-    private JInternalFrame helpWindow = HelpPage.HelpPage();
+    private static JInternalFrame userWindow = UsersPage.userPage();
+    private static JInternalFrame adminEditUser = UsersPage.AdminEditUserWindow();
+    //private JInternalFrame userEditUser = UsersPage.UserEditUserWindow();
+    private JInternalFrame helpWindow = HelpPage.HelpWindow();
     private static ArrayList<JInternalFrame> frames = new ArrayList<>();           // List to add JInteralFrames into so we don't need to
 
 
@@ -68,12 +64,12 @@ public class ControlPanelFrameHandler extends JFrame {
         JButton menuItemLogout = new JButton("Logout");
 
 //      Menu Item Action Listener Caller
-        menuItemCreate.addActionListener(new menuCreateButton());
-        menuItemList.addActionListener(new menuItemListBillboard());
-        menuItemSchedule.addActionListener(new menuScheduleButton());
-        menuItemEditUser.addActionListener(new menuEditUserButton());
-        menuItemHelp.addActionListener(new menuHelpButton());
-        menuItemLogout.addActionListener(new menuLogoutButton());
+        menuItemCreate.addActionListener(new MenuCreateButton());
+        menuItemList.addActionListener(new MenuItemListBillboard());
+        menuItemSchedule.addActionListener(new MenuScheduleButton());
+        menuItemEditUser.addActionListener(new MenuEditUserButton());
+        menuItemHelp.addActionListener(new MenuHelpButton());
+        menuItemLogout.addActionListener(new MenuLogoutButton());
 
         bar.add(menuItemCreate);
         bar.add(menuItemList);
@@ -105,7 +101,7 @@ public class ControlPanelFrameHandler extends JFrame {
             pane.add(comp);
         }
 
-        logWindow.setVisible(true); // We need the user to login first
+        logWindow.setVisible(true); // We need the user to Login first
         getContentPane().add(pane);
 
         // Display the window.
@@ -124,52 +120,50 @@ public class ControlPanelFrameHandler extends JFrame {
     }
 
 //    Action Listeners
-    private class menuCreateButton implements ActionListener {
+    private class MenuCreateButton implements ActionListener {
         public void actionPerformed(ActionEvent e) {
-            if (controller.permission.GetUserPermission("CreateBillboard") == true ) {
-                controller.showCreateBillboard();
+            if (Controller.permission.GetUserPermission("CreateBillboard")) {
+                Controller.ShowCreateBillboard();
             } else {
                 DialogWindow.NoAccessTo("Creating Billboard");
             }
         }
     }
 
-    private class menuItemListBillboard implements ActionListener {
+    private class MenuItemListBillboard implements ActionListener {
         public void actionPerformed(ActionEvent e) {
-            controller.showListBillboard();
+            Controller.ShowListBillboard();
         }
     }
 
-    private class menuScheduleButton implements ActionListener {
+    private class MenuScheduleButton implements ActionListener {
         public void actionPerformed(ActionEvent e) {
             try {
-                controller.showSchedule();
+                Controller.ShowSchedule();
             } catch (IOException | ClassNotFoundException ex) {
                 ex.printStackTrace();
             }
         }
     }
 
-    public static class menuEditUserButton implements ActionListener {
+    public static class MenuEditUserButton implements ActionListener {
         public void actionPerformed(ActionEvent e) {
-            controller.showEditUser();
+            Controller.ShowEditUser();
         }
     }
 
-    private class menuHelpButton implements ActionListener {
+    private class MenuHelpButton implements ActionListener {
         public void actionPerformed(ActionEvent e) {
-            controller.showHelpScreen();
+            Controller.ShowHelpScreen();
         }
     }
 
-    private class menuLogoutButton implements ActionListener {
+    private class MenuLogoutButton implements ActionListener {
         public void actionPerformed(ActionEvent e) {
             try {
-                controller.Logout();
+                Controller.Logout();
             } catch (IOException ioException) {
                 ioException.printStackTrace();
-            } catch (ClassNotFoundException classNotFoundException) {
-                classNotFoundException.printStackTrace();
             }
         }
     }

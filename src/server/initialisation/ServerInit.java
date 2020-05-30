@@ -28,7 +28,7 @@ public class ServerInit {
     public static void setupDatabaseConnectionInfo() throws IOException {
         // Attempt to open file 'db.props' and retrieve DB connection information
         try {
-            InputStream in = ServerInit.class.getResourceAsStream("db.props");
+            InputStream in = ServerInit.class.getResourceAsStream("../../resources/db.props");
 
             Properties prop = new Properties();
             prop.load(in);
