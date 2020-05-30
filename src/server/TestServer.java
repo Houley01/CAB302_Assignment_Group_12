@@ -63,7 +63,7 @@ public class TestServer {
 
         assertEquals(false, username.equals(userCredentials[0]));
 
-        String hashedPassword = Server.plaintextToHashedPassword(password);
+        String hashedPassword = serverTester.plaintextToHashedPassword(password);
 
         assertEquals(false, Server.check(hashedPassword, userCredentials[1]));
     }
