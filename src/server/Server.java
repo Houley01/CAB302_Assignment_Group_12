@@ -5,7 +5,6 @@ import resources.Billboard;
 import resources.CustomXMFile;
 import server.databaseCreation.databaseCreation;
 import server.initialisation.ServerInit;
-
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
@@ -14,7 +13,6 @@ import java.io.*;
 import java.net.*;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.security.Permission;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 import java.sql.*;
@@ -46,7 +44,7 @@ public class Server {
      *  <ul>
      *      <li>User login</li>
      *      <li>User authentication</li>
-     *      <li><h3>Billboard controller</h3></li>
+     *      <li><h3>Billboard Controller</h3></li>
      *      <li>Billboard creation</li>
      *      <li>Billboard Schedule</li>
      *      <li>Billboard Listing</li>
@@ -154,31 +152,29 @@ public class Server {
 
                 // Edit user
                 if (request.equals("EditUser")) {
-                    System.out.println("EDIT USER");
+//                    System.out.println("EDIT USER");
 //                    for admin use
                     String check = receiver.readUTF();
                     if (check == "findUsername") {
-                        System.out.println("findUsername");
+//                        System.out.println("findUsername");
 
-//                        send.writeObject(getAllUsernames());
-//                        send.flush();
                     }
                 }
 
                 // Changes user's password
                 if (request.equals("changePassword")) {
-                    System.out.println("request: Password...");
+//                    System.out.println("request: Password...");
                     String username = receiver.readUTF();
                     String password = receiver.readUTF();
                     String loggedInUser = receiver.readUTF();
                     String token = receiver.readUTF();
 
                     if (checkTokenIsValid(loggedInUser, token)) {
-                        System.out.println("Changing Password...");
+//                        System.out.println("Changing Password...");
                         changeUserPassword(username, password);
-                        System.out.println("Changed Password...");
+//                        System.out.println("Changed Password...");
                     } else {
-                        System.out.println("Token wasn't valid");
+//                        System.out.println("Token wasn't valid");
                     }
                     send.flush();
                 }
