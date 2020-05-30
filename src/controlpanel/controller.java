@@ -146,6 +146,7 @@ public class Controller {
                 boolean[] temp = (boolean[]) receiver.readObject();
                 permission.SetUserPermission(temp);
                 GetAuthToken();
+                Login.passwordText.setText("");
                 ListBillboards();
             } else {
                 // Alert the user that they have incorrectly entered they username or password with
@@ -453,6 +454,7 @@ public class Controller {
         }
 //        Resetting the application for the user on the client-side
         loggedInUser = "";
+        Login.usernameText.setText("");
         loginSuccessful = false;
         boolean[] falsePermission = {false, false, false, false};
         permission.SetUserPermission(falsePermission);
@@ -840,10 +842,7 @@ public class Controller {
             send.flush();
 
             // Store the list of permissions for the user
-            userPermissions[0] = receiver.readBoolean();
-            userPermissions[1] = receiver.readBoolean();
-            userPermissions[2] = receiver.readBoolean();
-            userPermissions[3] = receiver.readBoolean();
+            userPermissions = (boolean[]) receiver.readObject();
 
             // End connections
             send.close();
@@ -889,10 +888,12 @@ public class Controller {
 //                }
 
                 send.writeUTF("updatePermissions");
-                send.writeBoolean(newPermissionsForUser[0]);
-                send.writeBoolean(newPermissionsForUser[1]);
-                send.writeBoolean(newPermissionsForUser[2]);
-                send.writeBoolean(newPermissionsForUser[3]);
+
+                send.writeObject(newPermissionsForUser);
+//                send.writeBoolean(newPermissionsForUser[0]);
+//                send.writeBoolean(newPermissionsForUser[1]);
+//                send.writeBoolean(newPermissionsForUser[2]);
+//                send.writeBoolean(newPermissionsForUser[3]);
                 send.writeUTF(username);
                 send.writeUTF(loggedInUser);
                 send.writeUTF(token);
@@ -972,5 +973,5 @@ public class Controller {
                 client.close();
             }
         }
-        }
+    }
 }

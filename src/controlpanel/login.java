@@ -10,8 +10,8 @@ import java.security.spec.InvalidKeySpecException;
 
 class Login extends JFrame
 {
-    private static JPasswordField passwordText;
-    final JTextField  usernameText;
+    public static JPasswordField passwordText;
+    public static JTextField  usernameText = new JTextField();
 
     Login(JTextField usernameText) {
         this.usernameText = usernameText;
@@ -34,7 +34,7 @@ class Login extends JFrame
 
         JLabel usernameLabel = new JLabel("Username:");
 
-        JTextField usernameText = new JTextField(15);
+        usernameText = new JTextField(15);
         //      Password
         JLabel passwordLabel = new JLabel("Password:");
         passwordText = new JPasswordField(15); // Hides the Password from the screen
@@ -60,12 +60,18 @@ class Login extends JFrame
             public void actionPerformed(ActionEvent e) {
                 String user = usernameText.getText();
                 String pass = passwordText.getText();
-                try {
-                    if(Controller.AuthenticateUserLogin(user, pass)) {
-                        Controller.HideLoginScreen();
-                    };
-                } catch (IOException | ClassNotFoundException | InvalidKeySpecException | NoSuchAlgorithmException ex) {
-                    ex.printStackTrace();
+                if (!user.equals("") && !pass.equals("")) {
+                    try {
+                        if (Controller.AuthenticateUserLogin(user, pass)) {
+                            Controller.HideLoginScreen();
+                        }
+                        ;
+                    } catch (IOException | ClassNotFoundException | InvalidKeySpecException | NoSuchAlgorithmException ex) {
+                        ex.printStackTrace();
+                    }
+                }
+                else {
+                    DialogWindow.ShowInformationPane("Please put a username and password in the textbox", "Not enough Information");
                 }
             }
         });

@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
-import java.text.ParseException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -20,9 +19,9 @@ public class TestServer {
 
         assertEquals(true, username.equals(userCredentials[0]));
 
-        String hashedPassword = Server.plaintextToHashedPassword(password);
+        String hashedPassword = Server.PlaintextToHashedPassword(password);
 
-        assertEquals(true, Server.check(hashedPassword, userCredentials[1]));
+        assertEquals(true, Server.Check(hashedPassword, userCredentials[1]));
     }
 
     @Test
@@ -34,9 +33,9 @@ public class TestServer {
 
         assertEquals(true, username.equals(userCredentials[0]));
 
-        String hashedPassword = Server.plaintextToHashedPassword(password);
+        String hashedPassword = Server.PlaintextToHashedPassword(password);
 
-        assertEquals(false, Server.check(hashedPassword, userCredentials[1]));
+        assertEquals(false, Server.Check(hashedPassword, userCredentials[1]));
     }
 
     @Test
@@ -48,9 +47,9 @@ public class TestServer {
 
         assertEquals(false, username.equals(userCredentials[0]));
 
-        String hashedPassword = Server.plaintextToHashedPassword(password);
+        String hashedPassword = Server.PlaintextToHashedPassword(password);
 
-        assertEquals(true, Server.check(hashedPassword, userCredentials[1]));
+        assertEquals(true, Server.Check(hashedPassword, userCredentials[1]));
     }
 
     @Test
@@ -62,9 +61,9 @@ public class TestServer {
 
         assertEquals(false, username.equals(userCredentials[0]));
 
-        String hashedPassword = Server.plaintextToHashedPassword(password);
+        String hashedPassword = Server.PlaintextToHashedPassword(password);
 
-        assertEquals(false, Server.check(hashedPassword, userCredentials[1]));
+        assertEquals(false, Server.Check(hashedPassword, userCredentials[1]));
     }
 
     @Test
@@ -72,9 +71,9 @@ public class TestServer {
         Server serverTester = new Server();
 
         String username = "admin";
-        String authToken = serverTester.generateAuthToken(username);
+        String authToken = serverTester.GenerateAuthToken(username);
 
-        assertEquals(true, serverTester.checkTokenIsValid(username, authToken));
+        assertEquals(true, serverTester.CheckTokenIsValid(username, authToken));
     }
 
     @Test
@@ -82,9 +81,9 @@ public class TestServer {
         Server serverTester = new Server();
 
         String usernameFake = "adminFake";
-        String authToken = serverTester.generateAuthToken("admin");
+        String authToken = serverTester.GenerateAuthToken("admin");
 
-        assertEquals(false, serverTester.checkTokenIsValid(usernameFake, authToken));
+        assertEquals(false, serverTester.CheckTokenIsValid(usernameFake, authToken));
     }
 
     @Test
@@ -93,9 +92,9 @@ public class TestServer {
 
         String username = "admin";
         String authTokenFake = "hi";
-        serverTester.generateAuthToken(username);
+        serverTester.GenerateAuthToken(username);
 
-        assertEquals(false, serverTester.checkTokenIsValid(username, authTokenFake));
+        assertEquals(false, serverTester.CheckTokenIsValid(username, authTokenFake));
     }
 
     @Test
@@ -115,7 +114,7 @@ public class TestServer {
 
         serverTester.usersAuthenticated.put(username,new String[] {authToken, expiry});
 
-        assertEquals(false, serverTester.checkTokenIsValid(username, authToken));
+        assertEquals(false, serverTester.CheckTokenIsValid(username, authToken));
     }
 
 
@@ -125,7 +124,7 @@ public class TestServer {
         Server serverTester = new Server();
 
         String username = "admin";
-        serverTester.generateAuthToken(username);
+        serverTester.GenerateAuthToken(username);
 
         // Function to add
         //serverTester.removeToken(username);
