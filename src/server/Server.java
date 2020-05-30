@@ -1203,9 +1203,19 @@ public class Server {
         String billid = getBillboardId(data);
         String userid = getUserId(data);
         String date = formatTime(data).getTime().toString().split(" ")[3];
+        int recurring = 0;
+        if(data.get(4).equals("Daily"))
+        {
+            recurring = 1440;
+        }
+        else if(data.get(4).equals("Hourly"))
+        {
+            recurring = 60;
+        }
 
-        String query = "INSERT INTO schedules (`weekday`, `duration`, `startTime`, `idBillboard`, `userId`) " +
-                "VALUES ('"+data.get(1)+"', '"+data.get(3)+"','"+date+"','"+billid+"', '"+userid+"');";
+
+        String query = "INSERT INTO schedules (`weekday`, `duration`, `startTime`, `recurring`, `idBillboard`, `userId`) " +
+                "VALUES ('"+data.get(1)+"', '"+data.get(3)+"','"+date+"', '"+recurring+"','"+billid+"', '"+userid+"');";
         System.out.println(query);
         Statement st = ServerInit.conn.createStatement();
         st.executeQuery("USE `cab302`;");

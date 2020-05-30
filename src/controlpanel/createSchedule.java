@@ -186,6 +186,7 @@ public class createSchedule {
                 {
                     try {
                         controller.createNewSchedule(getValues());
+                        window.setVisible(false);
                     } catch (IOException ex) {
                         ex.printStackTrace();
                     }
