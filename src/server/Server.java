@@ -981,8 +981,9 @@ public class Server {
 
     public static void viewerRequest(ObjectOutputStream send) throws IOException, ClassNotFoundException, SQLException
     {
-        String query = "SELECT * FROM schedules \n" +
-                "LEFT JOIN billboards ON schedules.idBillboard = billboards.idBillboards\n";
+        String query = "SELECT idBillboards, billboardName, users.fName, users.lName, dateMade, " +
+                "dateModify, fileLocation FROM billboards LEFT JOIN users ON billboards.userId = users.idUsers " +
+                "order by billboards.idBillboards;";
         Statement st = ServerInit.conn.createStatement();
         st.executeQuery("USE `cab302`;");
         ResultSet rs = st.executeQuery(query);
@@ -1003,9 +1004,6 @@ public class Server {
             while (rs.next()) {
                 String fileLocation = rs.getString("fileLocation");
                 billboardImages.add(fileLocation);
-                billboardImages.add(rs.getString("startTime"));
-                billboardImages.add(rs.getString("duration"));
-                billboardImages.add(rs.getString("weekday"));
             }
             send.writeObject(billboardImages);
             send.flush();
