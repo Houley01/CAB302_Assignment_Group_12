@@ -265,10 +265,10 @@ public class viewer extends TimerTask {
      * </code>
      * but if the server did supply data and we have a valid socket connection we format
      * the billboard data and send it to the users GUI.
-     *
+     * @param preview determine if the request was send from control panel
      * @see //getBillboardInfo
      */
-    private static void renderer(Billboard currBill) throws IOException
+    public static void renderer(Billboard currBill, boolean preview) throws IOException
     {
         Color bgColour = Color.decode("#333333");                                                                       // Default color
         removeFrameData();
@@ -281,6 +281,13 @@ public class viewer extends TimerTask {
                                                                                                                         // on top of images.
         panel.setLayout(overlay);                                                                                       // Applying overlay layout
         ArrayList<JComponent> jcomp = new ArrayList<>();                                                                // List to add JFrame components
+
+        /*
+        * If the preview is true pretend the sever is online
+        * */
+        if (preview) {
+            online = true;
+        }
 
         /**
          * If not online.
@@ -418,7 +425,7 @@ public class viewer extends TimerTask {
             // This goes into a loop for every 15 seconds
             try{
                 Billboard currBill = getBillboardInfo(client);   // Get billboard information
-                renderer(currBill);                              // JFrame renderer
+                renderer(currBill, false);                              // JFrame renderer
             }
             catch(Exception e)
             {

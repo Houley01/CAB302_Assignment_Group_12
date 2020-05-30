@@ -1,6 +1,7 @@
 package controlpanel;
 
 import resources.Billboard;
+import viewer.viewer;
 
 import javax.swing.*;
 import java.awt.*;
@@ -176,6 +177,27 @@ public class createBillboards {
                 if (returnInt == JFileChooser.APPROVE_OPTION) {
                     fileChosen = browseImage.getSelectedFile();
                     System.out.println(fileChosen.getAbsolutePath());
+                }
+            }
+        });
+        previewBB.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String title = input1.getText();
+                String messageText = input2.getText();
+                String messageColour = "#" + RGBToHex(textDisplayColour.getBackground());
+                String image = imageURL.getText();
+                String informationText = informationColourInput.getText();
+                String informationColour = "#" + RGBToHex(informationTextColor.getBackground());
+                String backgroundColour = "#" + RGBToHex(backgroundDisplayColour.getBackground());
+                int testImageOrURL = URLOrImageFileOrNone(fileChosen, image);
+                if (testImageOrURL == 1) {
+                    image = controller.CreateMD5(fileChosen);
+                }
+                try {
+                    viewer.renderer(new Billboard(title, messageText, messageColour, image, testImageOrURL, informationText, informationColour, backgroundColour), true);
+                } catch (IOException ioException) {
+                    ioException.printStackTrace();
                 }
             }
         });

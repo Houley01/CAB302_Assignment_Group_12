@@ -6,4 +6,4 @@ CREATE TABLE IF NOT EXISTS `schedules` (`idSchedules` INT(11) NOT NULL AUTO_INCR
 ALTER TABLE `billboards` ADD CONSTRAINT `FK_billboards_users` FOREIGN KEY (`userId`) REFERENCES `users` (`idUsers`) ON UPDATE CASCADE ON DELETE CASCADE;
 ALTER TABLE `schedules` ADD CONSTRAINT `FK_schedules_billboards` FOREIGN KEY (`idBillboard`) REFERENCES `billboards` (`idBillboards`);
 ALTER TABLE `schedules` ADD CONSTRAINT `FK_schedules_users` FOREIGN KEY (`userId`) REFERENCES `users` (`idUsers`);
-INSERT INTO `cab302`.`users` (`idUsers`, `user`, `pass`, `fName`, `lName`) VALUES ('1', 'admin', 'TNBeZf5SCG+QzxWQt21TxY0orQOFZXUY6S0RHs7/TOA=$MrRy4VfAGiWGVBahO1o0iTTXjLnNhDF+OsX9Sgbzwu0=', 'John', 'Smith');
+INSERT INTO `cab302`.`users` (`idUsers`, `user`, `pass`, `fName`, `lName`, `createBillboard`, `editAllBillboard`, `scheduleBillboard`, `editUser`) VALUES (NULL, 'admin', 'TNBeZf5SCG+QzxWQt21TxY0orQOFZXUY6S0RHs7/TOA=$MrRy4VfAGiWGVBahO1o0iTTXjLnNhDF+OsX9Sgbzwu0=', 'John', 'Smith', 1, 1, 1,1);
