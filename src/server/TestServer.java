@@ -12,20 +12,21 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 public class TestServer {
 
     @Test
-    public void verifyCredentialsTest() throws InvalidKeySpecException, NoSuchAlgorithmException, IOException {
+    public void VerifyCredentialsTest() throws InvalidKeySpecException, NoSuchAlgorithmException, IOException {
+        Server serverTester = new Server();
         String[] userCredentials = {"admin", "TNBeZf5SCG+QzxWQt21TxY0orQOFZXUY6S0RHs7/TOA=$MrRy4VfAGiWGVBahO1o0iTTXjLnNhDF+OsX9Sgbzwu0="};
         String username = "admin";
         String password = "password";
 
         assertEquals(true, username.equals(userCredentials[0]));
 
-        String hashedPassword = Server.PlaintextToHashedPassword(password);
+        String hashedPassword = serverTester.PlaintextToHashedPassword(password);
 
         assertEquals(true, Server.Check(hashedPassword, userCredentials[1]));
     }
 
     @Test
-    public void verifyCredentialsWrongPasswordTest() throws InvalidKeySpecException, NoSuchAlgorithmException, IOException {
+    public void VerifyCredentialsWrongPasswordTest() throws InvalidKeySpecException, NoSuchAlgorithmException, IOException {
         Server serverTester = new Server();
         String[] userCredentials = {"admin", "TNBeZf5SCG+QzxWQt21TxY0orQOFZXUY6S0RHs7/TOA=$MrRy4VfAGiWGVBahO1o0iTTXjLnNhDF+OsX9Sgbzwu0="};
         String username = "admin";
@@ -33,13 +34,13 @@ public class TestServer {
 
         assertEquals(true, username.equals(userCredentials[0]));
 
-        String hashedPassword = Server.PlaintextToHashedPassword(password);
+        String hashedPassword = serverTester.PlaintextToHashedPassword(password);
 
         assertEquals(false, Server.Check(hashedPassword, userCredentials[1]));
     }
 
     @Test
-    public void verifyCredentialsWrongUsernameTest() throws InvalidKeySpecException, NoSuchAlgorithmException, IOException {
+    public void VerifyCredentialsWrongUsernameTest() throws InvalidKeySpecException, NoSuchAlgorithmException, IOException {
         Server serverTester = new Server();
         String[] userCredentials = {"admin", "TNBeZf5SCG+QzxWQt21TxY0orQOFZXUY6S0RHs7/TOA=$MrRy4VfAGiWGVBahO1o0iTTXjLnNhDF+OsX9Sgbzwu0="};
         String username = "adminwrong";
@@ -47,13 +48,13 @@ public class TestServer {
 
         assertEquals(false, username.equals(userCredentials[0]));
 
-        String hashedPassword = Server.PlaintextToHashedPassword(password);
+        String hashedPassword = serverTester.PlaintextToHashedPassword(password);
 
         assertEquals(true, Server.Check(hashedPassword, userCredentials[1]));
     }
 
     @Test
-    public void verifyCredentialsWrongTest() throws InvalidKeySpecException, NoSuchAlgorithmException, IOException {
+    public void VerifyCredentialsWrongTest() throws InvalidKeySpecException, NoSuchAlgorithmException, IOException {
         Server serverTester = new Server();
         String[] userCredentials = {"admin", "TNBeZf5SCG+QzxWQt21TxY0orQOFZXUY6S0RHs7/TOA=$MrRy4VfAGiWGVBahO1o0iTTXjLnNhDF+OsX9Sgbzwu0="};
         String username = "adminwrong";
@@ -61,13 +62,13 @@ public class TestServer {
 
         assertEquals(false, username.equals(userCredentials[0]));
 
-        String hashedPassword = Server.PlaintextToHashedPassword(password);
+        String hashedPassword = serverTester.PlaintextToHashedPassword(password);
 
         assertEquals(false, Server.Check(hashedPassword, userCredentials[1]));
     }
 
     @Test
-    public void verifyTokenTest() {
+    public void VerifyTokenTest() {
         Server serverTester = new Server();
 
         String username = "admin";
@@ -77,7 +78,7 @@ public class TestServer {
     }
 
     @Test
-    public void verifyTokenUserNotAuthenticatedTest() {
+    public void VerifyTokenUserNotAuthenticatedTest() {
         Server serverTester = new Server();
 
         String usernameFake = "adminFake";
@@ -87,7 +88,7 @@ public class TestServer {
     }
 
     @Test
-    public void verifyTokenFakeTest() {
+    public void VerifyTokenFakeTest() {
         Server serverTester = new Server();
 
         String username = "admin";
@@ -98,7 +99,7 @@ public class TestServer {
     }
 
     @Test
-    public void verifyTokenExpiredTest() {
+    public void VerifyTokenExpiredTest() {
         Server serverTester = new Server();
 
         String username = "admin";
@@ -120,87 +121,15 @@ public class TestServer {
 
     // Test confirms that the token was removed after logout
     @Test
-    public void removeTokenOnLogoutTest() {
+    public void RemoveTokenOnLogoutTest() throws IOException {
         Server serverTester = new Server();
 
         String username = "admin";
         serverTester.GenerateAuthToken(username);
 
         // Function to add
-        //serverTester.removeToken(username);
+        serverTester.logout(username);
 
         assertEquals(false, serverTester.usersAuthenticated.containsKey(username));
-    }
-
-    @Test
-    public void editUserFirstNameTest() {
-        String[] userCredentials = {"1", "admin", "TNBeZf5SCG+QzxWQt21TxY0orQOFZXUY6S0RHs7/TOA=$MrRy4VfAGiWGVBahO1o0iTTXjLnNhDF+OsX9Sgbzwu0=", "John", "Smith"};
-        String[] firstNameToBeEdited = {"1", "admin", "TNBeZf5SCG+QzxWQt21TxY0orQOFZXUY6S0RHs7/TOA=$MrRy4VfAGiWGVBahO1o0iTTXjLnNhDF+OsX9Sgbzwu0=", "Jack", "Smith"};
-
-        // Function to add
-        //String[] userCredentialsModified = Server.editUserInfo(userCredentials, firstNameToBeEdited);
-
-        //assertEquals(true, userCredentialsModified.equals(firstNameToBeEdited));
-    }
-
-    @Test
-    public void editUserLastNameTest() {
-        String[] userCredentials = {"1", "admin", "TNBeZf5SCG+QzxWQt21TxY0orQOFZXUY6S0RHs7/TOA=$MrRy4VfAGiWGVBahO1o0iTTXjLnNhDF+OsX9Sgbzwu0=", "John", "Smith"};
-        String[] lastNameToBeEdited = {"1", "admin", "TNBeZf5SCG+QzxWQt21TxY0orQOFZXUY6S0RHs7/TOA=$MrRy4VfAGiWGVBahO1o0iTTXjLnNhDF+OsX9Sgbzwu0=", "Jack", "Smithers"};
-
-        // Function to add
-        //String[] userCredentialsModified = Server.editUserInfo(userCredentials, lastNameToBeEdited);
-
-        //assertEquals(true, userCredentialsModified.equals(lastNameToBeEdited));
-    }
-
-    // Check that a billboard can be created
-//    @Test
-//    public void createBillboardTest() throws ParseException {
-//        String[] billboardInfoToCreate = {"this is the title", "1", "current Time", "", "file location"};
-//        // Function to add
-//        boolean wasBillboardCreated = Server.CreateBillboard(billboardInfoToCreate);
-//        assertEquals(true, wasBillboardCreated);
-//    }
-//
-//    // Check that a billboard can be created with no required data
-//    @Test
-//    public void createBillboardNoDataTest() throws ParseException {
-//        String[] billboardInfoToCreate = {"", "1", "current Time", "", ""};
-//        // Function to add
-//        boolean wasBillboardCreated = Server.CreateBillboard(billboardInfoToCreate);
-//        assertEquals(false, wasBillboardCreated);
-//    }
-
-    // Check that a billboard can be scheduled
-    @Test
-    public void scheduleBillboardTest() {
-        String[] billboardInfoToSchedule = {"1", "this is the title", "1", "current Time", "Time Modified", "file location"};
-
-        // Function to add
-        //String[] scheduledBillboard = Server.scheduleBillboard(billboardInfoToSchedule);
-        //assertNotNull(scheduledBillboard);
-    }
-
-    // edit the various billboard fields and check it was successfully edited
-    @Test
-    public void editBillboardTest() {
-        String[] billboardToEdit = {"1", "testBillboard", "1", "current Time", "Time Modified", "This is the file location"};
-        String[] newBillboardInfo = {"1", "testBillboardNew", "1", "current Time", "Time Modified", "This is the new file location"};
-
-        // Function to add
-        //String[] billboardToEditModified = Server.editBillboardInfo(billboardToEdit, newBillboardInfo);
-        //assertEquals(true, billboardToEditModified.equals(newBillboardInfo));
-    }
-
-    // edit the billboard text and check it was successfully edited
-    @Test
-    public void editBillboardTitleTest() {
-        String[] billboardToEdit = {"1", "this is the title", "1", "current Time", "Time Modified", "file location"};
-        String[] newTitle = {"1", "this is the new title", "1", "current Time", "Time Modified", "file location"};
-
-        // Function to add
-        //String[] billboardToEditModified = Server.editBillboardInfo(billboardToEdit, newTitle);
-        //assertEquals(true, billboardToEditModified.equals(newTitle));
     }
 }

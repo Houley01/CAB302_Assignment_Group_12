@@ -298,7 +298,9 @@ public class Server {
                 }
 
                 if (request.equals("Logout")) {
-                    Logout(receiver,send);
+                    String username = receiver.readUTF(); // Get username from client
+                    Logout(username);
+                    send.flush();
                 }
 
 
@@ -1154,7 +1156,7 @@ public class Server {
         st.executeQuery(query);
     }
 
-    private static void Logout(ObjectInputStream receiver, ObjectOutputStream send) throws IOException {
+    static void Logout(String userToRemove) throws IOException {
         boolean DEBUGGING = false; // Change this to see if the session token is removed from server
         if (DEBUGGING) {
             System.out.println("Before Logout");
@@ -1163,8 +1165,7 @@ public class Server {
                 System.out.println("Username: " + username + " Value: " + value);
             }
         }
-        String Username = receiver.readUTF(); // Get username from client
-        usersAuthenticated.remove(Username);  // Remove session token from list
+        usersAuthenticated.remove(userToRemove);  // Remove session token from list
         if (DEBUGGING) {
             System.out.println("After Logout");
             for (String username : usersAuthenticated.keySet()) {
