@@ -6,10 +6,12 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 
 /**
  * Scheduling billboards. Logic is similar to listing billboards as the billboard data
@@ -18,6 +20,9 @@ import java.util.Date;
 public class scheduleBillboards {
     static JInternalFrame window = new JInternalFrame( "Schedule Billboards", false, false, true);
     private static JTable tableBillboard = new JTable();
+    private static boolean waitTillNext = false;
+    private static int nextDay = 0;
+    private static int previousCalc = 0;
 
 
     /**
@@ -128,7 +133,13 @@ public class scheduleBillboards {
         refreshButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                reload(tableCalendar);
+                try {
+                    reload(tableCalendar);
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                } catch (ClassNotFoundException ex) {
+                    ex.printStackTrace();
+                }
             }
         });
 
@@ -146,16 +157,63 @@ public class scheduleBillboards {
         return window;
     }
 
-    /**
-     * Builds table
-     * @return table model
-     */
-    private static DefaultTableModel buildTable()
+    private static HashMap<String, Integer> daysInWeek()
     {
+        HashMap<String, Integer> days = new HashMap<String, Integer>();
+        days.put("Monday", 1);
+        days.put("Tuesday", 2);
+        days.put("Wednesday", 3);
+        days.put("Thursday", 4);
+        days.put("Friday", 5);
+        days.put("Saturday", 6);
+        days.put("Sunday", 7);
+        return days;
+    }
+
+    /**
+     * This is called 2 for loops (24 * 8) so no loops please. I have broke this rule I have set myself and I
+     * have nothing to gain from it other than sanity. - Brendan
+     * @param outer     Outer for loop.
+     * @param inner     Inner for loop.
+     * @param master    Data to parse.
+     * @return
+     */
+    private static String PositionData(int outer, int inner, ArrayList<String[]> master) throws IOException, ClassNotFoundException {
+        for(String[] data : master)
+        {
+            int hour = Integer.parseInt(data[3].split(":")[0]);
+            int day = daysInWeek().get(data[1]);
+
+            int calculatedDuration = hour + (Integer.parseInt(data[2]) / 60);
+
+            if((hour <= outer && calculatedDuration >= outer))
+            {
+                System.out.println(calculatedDuration > 24 ? calculatedDuration : "");
+
+                if(day == inner)
+                {
+                    if(!(data[6].isEmpty()))
+                    {
+                        return controller.GetBillboardFromID(data[6]);
+                    }
+                }
+            }
+        }
+        return "";
+    }
+
+
+    /**
+     *
+     * @return
+     * @throws IOException
+     * @throws ClassNotFoundException
+     */
+    private static DefaultTableModel buildTable() throws IOException, ClassNotFoundException {
         /**
          * Table heading for the 3D matrix
          */
-        String[] columnHeading = {"Time", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"};
+        String[] columnHeading = {"Time", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
         /**
          * 3D matrix array set up? So, 0x0 = 8:30am but 1x1 would be Monday at 9:00am.
          * So the program needs to be able to grab the start date time / date and
@@ -176,8 +234,19 @@ public class scheduleBillboards {
          */
         String[][] rowData = new String[24][columnHeading.length];
 
+        ArrayList<String[]> temp = controller.RequestScheduleBillboards();
+
+        waitTillNext = false;
+        nextDay = 0;
+        previousCalc = 0;
+        /**
+         * ROWS
+         */
         for(int outer = 0; outer < 24; outer++)                                 // TIME 1 am ... 12am (24 hour format)
         {
+            /**
+             * COLUMNS
+             */
             for(int inner = 0; inner < columnHeading.length; inner++)           // Column position (0 to 6) per day
             {
                 // If inner is 0 it has to be the time column
@@ -189,10 +258,12 @@ public class scheduleBillboards {
                     String hours = time < 10 ? "0"+String.valueOf(time) : String.valueOf(time);     // String conversion + formatting
                     rowData[outer][inner] = hours + am_or_pm;                                       // Appending to array
                 }
-                // Empty data for now
                 else
                 {
-                    rowData[outer][inner] = "";
+                    if(temp.size() > 0)
+                    {
+                        rowData[outer][inner] = PositionData(outer, inner, temp);
+                    }
                 }
             }
         }
@@ -201,8 +272,7 @@ public class scheduleBillboards {
         DefaultTableModel tableCalendar = new DefaultTableModel(rowData, columnHeading);
         return tableCalendar;
     }
-    private static void reload(DefaultTableModel model)
-    {
+    private static void reload(DefaultTableModel model) throws IOException, ClassNotFoundException {
         model.setRowCount(0);
         tableBillboard.setModel(buildTable());
     }

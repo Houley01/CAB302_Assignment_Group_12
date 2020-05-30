@@ -298,7 +298,7 @@ public class createSchedule {
             if(count > duration)
             {
                 DialogWindow.showErrorPane(
-                        "You cannot schedule the billboard more frequently than the time alloted.",
+                        "You cannot schedule the billboard more frequently than the time allotted.",
                         "Error"
                 );
                 return false;

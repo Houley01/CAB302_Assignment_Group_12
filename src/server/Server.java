@@ -119,12 +119,20 @@ public class Server {
 
                 if (request.equals("RequestScheduleBillboards")) {
                     System.out.println("Requested schedule billboards");
-//                    String username = receiver.readUTF();
-//                    String token = receiver.readUTF();
+                    String username = receiver.readUTF();
+                    String token = receiver.readUTF();
+
+                    System.out.println(username);
+                    System.out.println(token);
                     System.out.println("Accessing data");
-                    send.writeObject(RequestScheduling());
-                    System.out.println("Sending data");
-                    send.flush();
+
+                    if (checkTokenIsValid(username, token)) {
+                        send.writeObject(RequestScheduling());
+                        System.out.println("Sending data");
+                        send.flush();
+                    } else {
+                        System.out.println("Token wasn't valid");
+                    }
                 }
 
                 if(request.equals("CreateSchedule"))
@@ -132,6 +140,12 @@ public class Server {
                     System.out.println("Creating new schedule ...");
                     createNewSchedule(receiver, send);
 
+                }
+
+                if(request.equals("GetBillboardFromID"))
+                {
+                    send.writeUTF(getBillboardName(receiver.readUTF()));
+                    send.flush();
                 }
 
                 // List Billboards
@@ -812,7 +826,6 @@ public class Server {
      * related to that entry to the new information entered from the user. Otherwise it creates a new
      * billboard entry.
      *
-     * @see main            For more context on stremable receiver and sender
      * @param receiver      Stream receiver
      * @param send          Stream sender
      * @return true         Billboard was created and database was updated successfully.
@@ -871,8 +884,6 @@ public class Server {
      * Scheduling listed from the database. Code checks to see if the current token
      * is valid and retrieves the data from the database then forms it into an array list.
      *
-     * @param username      Username of the person requesting the scheduling.
-     * @param token         Authentication token of the user.
      * @return schedules
      * @return null         if token is not valid
      * @throws SQLException
@@ -880,10 +891,10 @@ public class Server {
     private static ArrayList<String[]> RequestScheduling() throws SQLException {
         System.out.println("Nice");
         // Before request, check that the user's token is valid
-        if (true) {
+        if (true){
             System.out.println("Token is valid. Begin requesting currently scheduled billboards...");
 
-            String query = "SELECT idSchedules, weekday, duration, startTime, userId FROM schedules";
+            String query = "SELECT * FROM schedules";
             Statement st = ServerInit.conn.createStatement();
             st.executeQuery("USE `cab302`;");
             ResultSet rs = st.executeQuery(query);
@@ -903,9 +914,11 @@ public class Server {
                     String weekday = rs.getString("weekday");
                     String duration = rs.getString("duration");
                     String startTime = rs.getString("startTime");
+                    String recurring = rs.getString("recurring");
+                    String billId = rs.getString("idBillboard");
                     String userId = rs.getString("userId");
 
-                    String[] schedule = {id, weekday, duration, startTime, userId};
+                    String[] schedule = {id, weekday, duration, startTime, recurring, billId, userId};
                     schedules.add(schedule);
                 }
                 System.out.println("Successfully retrieved list of scheduled billboards");
@@ -1163,6 +1176,21 @@ public class Server {
         return billid;
     }
 
+    private static String getBillboardName(String id) throws SQLException {
+        String getBillboard = "SELECT `billboardName` FROM `billboards` WHERE `idBillboards` = '"+id+"';";
+        Statement st = ServerInit.conn.createStatement();
+        st.executeQuery("USE `cab302`;");
+        ResultSet rs = st.executeQuery(getBillboard);
+        if(!rs.isBeforeFirst())
+        {
+            System.out.println("No billboard data");
+            return "";
+        }
+        rs.next();
+        String billid = rs.getString("billboardName");
+        return billid;
+    }
+
     private static String getUserId(ArrayList<String> data) throws SQLException {
         String user = "";
         for(String username : usersAuthenticated.keySet())
@@ -1195,7 +1223,6 @@ public class Server {
         c.set(Calendar.MINUTE, min);
         return c;
     }
-
     private static void createNewSchedule(ObjectInputStream receiver, ObjectOutputStream send) throws SQLException, IOException, ClassNotFoundException {
         receiver.read();
         ArrayList<String> data = (ArrayList<String>) receiver.readObject();
@@ -1203,6 +1230,9 @@ public class Server {
         String billid = getBillboardId(data);
         String userid = getUserId(data);
         String date = formatTime(data).getTime().toString().split(" ")[3];
+
+        System.out.println(billid);
+
         int recurring = 0;
         if(data.get(4).equals("Daily"))
         {

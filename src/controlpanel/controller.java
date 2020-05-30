@@ -324,55 +324,6 @@ public class controller {
     }
 
     /**
-     * Connects to server and stores the current listings.
-     * - Todo database connectivity?
-     *
-     * @throws IOException
-     * @throws ClassNotFoundException
-     */
-    private static void RequestBillboardScheduling() throws IOException, ClassNotFoundException {
-
-        Socket client = connectionToServer();
-
-        // connects to the server with information and attempts to get the auth token for the user after successful login
-        if (client.isConnected()) {
-            OutputStream outputStream = client.getOutputStream();
-            InputStream inputStream = client.getInputStream();
-
-            ObjectOutputStream send = new ObjectOutputStream(outputStream);
-            ObjectInputStream receiver = new ObjectInputStream(inputStream);
-
-            send.writeUTF("RequestScheduleBillboards");
-
-            send.writeUTF(loggedInUser);
-            send.writeUTF(token);
-            send.flush();
-
-            // Store the current schedule listings
-            schedules = (ArrayList<String[]>) receiver.readObject();
-
-            if (schedules != null) {
-                int scheduleCounter = 1;
-                for(String[] schedule : schedules){
-                    System.out.println("\nScheduled billboard " + scheduleCounter + ":");
-                    System.out.println("Day: " + schedule[1]);
-                    System.out.println("Duration: " + schedule[2]);
-                    System.out.println("Start Time:  " + schedule[3]);
-
-                    scheduleCounter++;
-                }
-            } else {
-                System.out.println("There is currently no scheduled billboards");
-            }
-
-//      End connections
-            send.close();
-            receiver.close();
-            client.close();
-        }
-    }
-
-    /**
      *  Modifies visibility state of login.window to false and -renables nav bar-
      *
      */
@@ -661,14 +612,16 @@ public class controller {
     }
 
     public static String[][] listSchedule() throws IOException, ClassNotFoundException {
+        System.out.println(loggedInUser);
+        if(loggedInUser == null) return new String[][]{};
         Socket client = connectionToServer();           // Get user connection
 
         ArrayList<String[]> scheduled;         // Create billboard array list
 
-
-        if(!client.isConnected())
+        if(!client.isConnected() || loggedInUser == null)
         {
             System.out.println("No data");
+            client.close();
             return new String[][]{};
         }
 
@@ -682,6 +635,8 @@ public class controller {
         System.out.println("Connecting to server");
 
         send.writeUTF("RequestScheduleBillboards");
+        send.writeUTF(loggedInUser);
+        send.writeUTF(token);
         send.flush();
 
         int val = receiver.read();
@@ -701,6 +656,27 @@ public class controller {
         return new String[][]{};
     }
 
+    public static String GetBillboardFromID(String id) throws IOException, ClassNotFoundException {
+        Socket client = connectionToServer();
+        if(!client.isConnected()) return new String();
+        OutputStream outputStream = client.getOutputStream();
+        InputStream inputStream = client.getInputStream();
+
+        ObjectOutputStream send = new ObjectOutputStream(outputStream);
+        ObjectInputStream receiver = new ObjectInputStream(inputStream);
+
+        send.writeUTF("GetBillboardFromID");
+        send.writeUTF(id);
+        send.flush();
+
+        String temp = receiver.readUTF();
+
+        send.close();
+        receiver.close();
+        client.close();
+        return temp;
+    }
+
     public static void createNewSchedule(ArrayList<String> vals) throws IOException {
         Socket client = connectionToServer();
         if(!client.isConnected()) return;
@@ -714,6 +690,33 @@ public class controller {
         send.writeUTF("CreateSchedule");
         send.writeObject(vals);
         send.flush();
+    }
+
+    public static ArrayList<String[]> RequestScheduleBillboards() throws IOException, ClassNotFoundException {
+        if(loggedInUser == null) return new ArrayList<>();
+        Socket client = connectionToServer();
+        if(!client.isConnected()) return new ArrayList<String[]>();
+        OutputStream outputStream = client.getOutputStream();
+        InputStream inputStream = client.getInputStream();
+
+        ObjectOutputStream send = new ObjectOutputStream(outputStream);
+        ObjectInputStream receiver = new ObjectInputStream(inputStream);
+
+
+        System.out.println("Requesting new schedule");
+        send.writeUTF("RequestScheduleBillboards");
+        send.writeUTF(loggedInUser);
+        send.writeUTF(token);
+        send.flush();
+
+        receiver.read();
+        ArrayList<String[]> temp = (ArrayList<String[]>) receiver.readObject();
+        send.close();
+        receiver.close();
+        client.close();
+
+        return temp;
+
     }
 
     static ArrayList<String> getListOfUsers() throws IOException, ClassNotFoundException {
