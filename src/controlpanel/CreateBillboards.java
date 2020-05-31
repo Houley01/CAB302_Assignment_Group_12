@@ -1,7 +1,7 @@
 package controlpanel;
 
 import resources.Billboard;
-import viewer.viewer;
+import viewer.Viewer;
 
 import javax.swing.*;
 import java.awt.*;
@@ -118,7 +118,7 @@ public class CreateBillboards {
         buttonPanel.add(saveBB);
         buttonPanel.add(previewBB);
 
-//        Preview window - viewer.java
+//        Preview window - Viewer.java
 
         textColourPickerButton.addActionListener(new ActionListener() {
             @Override
@@ -197,7 +197,7 @@ public class CreateBillboards {
                     image = Controller.CreateMD5(fileChosen);
                 }
                 try {
-                    viewer.renderer(new Billboard(title, messageText, messageColour, image, testImageOrURL, informationText, informationColour, backgroundColour), true);
+                    Viewer.Renderer(new Billboard(title, messageText, messageColour, image, testImageOrURL, informationText, informationColour, backgroundColour), true);
                 } catch (IOException ioException) {
                     ioException.printStackTrace();
                 }

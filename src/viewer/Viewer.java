@@ -1,24 +1,15 @@
 package viewer;
 
-import controlpanel.DialogWindow;
-import org.junit.jupiter.params.aggregator.ArgumentAccessException;
-import org.xml.sax.SAXException;
 import resources.Billboard;
-
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
-import javax.xml.parsers.ParserConfigurationException;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
-import java.awt.image.ImageObserver;
 import java.io.*;
 import java.net.Socket;
 import java.net.URL;
-import java.security.NoSuchAlgorithmException;
-import java.security.spec.InvalidKeySpecException;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
@@ -37,7 +28,7 @@ import static resources.CustomXMFile.ReadXMLFile;
  *
  * This class is called every 15 seconds.
  */
-public class viewer extends TimerTask {
+public class Viewer extends TimerTask {
 
     public static final Font titleFont = new Font("Ariel", Font.BOLD, 20);
     public static Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize(); // Getting screen resolution (Main monitor / primary monitor)
@@ -46,6 +37,7 @@ public class viewer extends TimerTask {
     public static boolean online = false;                                             // Online / offline detector (server)
     public static JFrame frame = new JFrame("Billboard viewer");
     private static long timerRefresh = 15*1000;                                       // Refresh rate
+    private static boolean previewWindow = false;
 
 
     /**
@@ -57,12 +49,12 @@ public class viewer extends TimerTask {
      * @return Socket connection.
      * @throws IOException
      */
-    public static Socket connectionToServer() throws IOException {
+    public static Socket ConnectionToServer() throws IOException {
         System.out.println("Attempting connection.");
         try {
             // Gathers the information from server.config file
             resources.GetPropertyValues properties = new resources.GetPropertyValues();
-            properties.readPropertyFile();
+            properties.ReadPropertyFile();
 
             Socket client = new Socket();                                                                               // Create empty socket connection variable
             try
@@ -72,15 +64,15 @@ public class viewer extends TimerTask {
             }
             catch (Exception e)
             {                                                                                                           // We can expect the server to be offline.
-                System.out.println("Unable to connect to server.");                                                     // (we'll flood the console with error messages if we print stack trace)
+//                System.out.println("Unable to connect to server.");                                                     // (we'll flood the console with error messages if we print stack trace)
             }
 
             // If the server connection was made
             return client;
         } catch (IOException e) { // If something goes horribly wrong
-            e.printStackTrace();
+//            e.printStackTrace();
             // Developer message
-            System.out.println("Server connection doesn't exist.");
+//            System.out.println("Server connection doesn't exist.");
             Socket client = new Socket();
             return client;
         }
@@ -99,14 +91,8 @@ public class viewer extends TimerTask {
      * Todo: Update billboard viewer to the currently 'scheduled' billboard (Change query on Server side).
      *
      * @param client                        Socket connection to server.
-     * @throws IOException
-     * @throws SQLException
-     * @throws ClassNotFoundException
-     * @throws ParserConfigurationException
-     * @throws SAXException
-     * @throws NoSuchFieldException
      */
-    public static Billboard getBillboardInfo(Socket client) throws IOException, SQLException, ClassNotFoundException, ParserConfigurationException, SAXException, NoSuchFieldException {
+    public static Billboard GetBillboardInfo(Socket client)  {
         try
         {
             if(!online)         // If the server is offline don't return anything
@@ -135,8 +121,8 @@ public class viewer extends TimerTask {
             catch(Exception e)                                                    // We assume the server didn't give us any usable information
             {
                 // Debugging messages
-                System.out.println("There was no billboard data retrieved from the database.");
-                System.out.println("Check to see if the server is online, or if the billboards table has any populated data");
+//                System.out.println("There was no billboard data retrieved from the database.");
+//                System.out.println("Check to see if the server is online, or if the billboards table has any populated data");
                 return null; // Return nothing
             }
 
@@ -162,7 +148,7 @@ public class viewer extends TimerTask {
         }
         catch(Exception e)
         {
-            e.printStackTrace();
+//            e.printStackTrace();
         }
         return null; // If it some how escapes the try catch.
     }
@@ -177,7 +163,7 @@ public class viewer extends TimerTask {
      * @param <Int>     (Required for size)
      * @return          Formatted Java label
      */
-    private static <Int> JLabel formatText(String colour, Int size, String text)
+    private static <Int> JLabel FormatText(String colour, Int size, String text)
     {
         Color color = Color.decode(colour);                                     // Colour of the text.
         JLabel label = new JLabel(text);                                        // Creating the label.
@@ -197,7 +183,9 @@ public class viewer extends TimerTask {
      * @param input     Input string to be tested for a URL
      * @return bool     URL: true
      */
-    private static boolean urlTester(String input) { return input.matches("^(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]"); }
+    private static boolean UrlTester(String input) {
+        return input.matches("^(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]");
+    }
 
 
     /**
@@ -209,7 +197,7 @@ public class viewer extends TimerTask {
      * @return Buffered image from database or URL.
      * @throws IOException
      */
-    public static Image imageCalc(Billboard currBill) throws IOException {
+    public static Image ImageCalc(Billboard currBill) throws IOException {
         BufferedImage image = null;
         int storedVal = currBill.getImageOrUrl();
         if(storedVal == -1) return null;                                        // Exit if no data is presented
@@ -217,7 +205,7 @@ public class viewer extends TimerTask {
         boolean imgOrUrl = storedVal == 0 ? false : true;                       // Re-contextualize stored value into bool.
         if((storedVal == 0) != imgOrUrl || (storedVal == 1) != imgOrUrl)        // Test to see if the stored value is correct.
         {
-            imgOrUrl = urlTester(currBill.getImage());                          // If it fails use backup method.
+            imgOrUrl = UrlTester(currBill.getImage());                          // If it fails use backup method.
         }
 
         // Modifying images based off the URL check / stored value.
@@ -240,7 +228,7 @@ public class viewer extends TimerTask {
      * Code checks to see how many instances of JPanel exist inside of the frame. If equals two or more it will
      * delete the original / root panel / index 0.
      */
-    private static void removeFrameData()
+    private static void RemoveFrameData()
     {
         int compCount = frame.getContentPane().getComponentCount();             // Count of panels in the frame
         if(compCount > 1)                                                       // Check to see if we have more 1
@@ -272,10 +260,10 @@ public class viewer extends TimerTask {
      * @param preview determine if the request was send from control panel
      * @see //getBillboardInfo
      */
-    public static void renderer(Billboard currBill, boolean preview) throws IOException
+    public static void Renderer(Billboard currBill, boolean preview) throws IOException
     {
         Color bgColour = Color.decode("#333333");                                                                       // Default color
-        removeFrameData();
+        RemoveFrameData();
 
         JPanel panel = new JPanel();                                                                                    // Panel init
         listeners(frame);                                                                                               // Init the listeners
@@ -290,6 +278,7 @@ public class viewer extends TimerTask {
         * If the preview is true pretend the sever is online
         * */
         if (preview) {
+            previewWindow = true;
             online = true;
         }
 
@@ -298,7 +287,7 @@ public class viewer extends TimerTask {
          */
         if(!online)                                                                                                     // If the server is not online
         {
-            JLabel offlineMessage = formatText("#fc0335", w/30, "Server is offline please wait..."); // Non-interactable error message
+            JLabel offlineMessage = FormatText("#fc0335", w/30, "Server is offline please wait..."); // Non-interactable error message
             jcomp.add(offlineMessage);
         }
         /**
@@ -306,7 +295,7 @@ public class viewer extends TimerTask {
          */
         else if(currBill == null)                                                                                       // If there is no billboard data.
         {
-            JLabel noBillboard = formatText("#fc0335", w/30, "There are currently no billboards to display.");
+            JLabel noBillboard = FormatText("#fc0335", w/30, "There are currently no billboards to display.");
             jcomp.add(noBillboard);
         }
         /**
@@ -315,8 +304,8 @@ public class viewer extends TimerTask {
         else // Online
         {
             bgColour = Color.decode(currBill.getBackgroundColour());                                                    // AWT readable colour
-            JLabel message = formatText(currBill.getMessageColour(), w / 30, currBill.getMessageText());           // Creating text for the message
-            JLabel info = formatText(currBill.getInformationColour(), w / 50, currBill.getInformationText());      // Creating the info text
+            JLabel message = FormatText(currBill.getMessageColour(), w / 30, currBill.getMessageText());           // Creating text for the message
+            JLabel info = FormatText(currBill.getInformationColour(), w / 50, currBill.getInformationText());      // Creating the info text
 
             info.setVerticalTextPosition(JLabel.BOTTOM);
 
@@ -325,7 +314,7 @@ public class viewer extends TimerTask {
             jcomp.add(message);
             jcomp.add(info);
 
-            Image image = imageCalc(currBill);
+            Image image = ImageCalc(currBill);
             if(image != null)
             {
                 image = image.getScaledInstance(-1, h, Image.SCALE_SMOOTH);                                      // By far the easiest solution to
@@ -372,8 +361,9 @@ public class viewer extends TimerTask {
     {
         frame.addKeyListener(new KeyAdapter() {
             public void keyPressed(KeyEvent e) {
-                if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
-                    System.out.println("Escape key pressed");
+                if (e.getKeyCode() == KeyEvent.VK_ESCAPE && previewWindow) {
+                    frame.dispose(); // This is done so the preview does not close the control panel
+                } else if (e.getKeyCode() == KeyEvent.VK_ESCAPE && !previewWindow) {
                     System.exit(0);
                 }
             }
@@ -381,14 +371,28 @@ public class viewer extends TimerTask {
         frame.addMouseListener(new MouseListener() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                if(e.getModifiersEx() == InputEvent.BUTTON1_DOWN_MASK || e.getModifiersEx() == InputEvent.BUTTON2_DOWN_MASK || e.getModifiersEx() == InputEvent.BUTTON3_DOWN_MASK)
+                if ((e.getModifiersEx() == InputEvent.BUTTON1_DOWN_MASK
+                        || e.getModifiersEx() == InputEvent.BUTTON2_DOWN_MASK ||
+                        e.getModifiersEx() == InputEvent.BUTTON3_DOWN_MASK) && previewWindow)
+                {
+                    frame.dispose(); // This is done so the preview does not close the control panel
+                } else if(e.getModifiersEx() == InputEvent.BUTTON1_DOWN_MASK ||
+                        e.getModifiersEx() == InputEvent.BUTTON2_DOWN_MASK ||
+                        e.getModifiersEx() == InputEvent.BUTTON3_DOWN_MASK)
                 {
                     System.exit(0);
                 }
             }
             @Override
             public void mousePressed(MouseEvent e) {
-                if(e.getModifiersEx() == InputEvent.BUTTON1_DOWN_MASK || e.getModifiersEx() == InputEvent.BUTTON2_DOWN_MASK || e.getModifiersEx() == InputEvent.BUTTON3_DOWN_MASK)
+                if ((e.getModifiersEx() == InputEvent.BUTTON1_DOWN_MASK
+                        || e.getModifiersEx() == InputEvent.BUTTON2_DOWN_MASK
+                        || e.getModifiersEx() == InputEvent.BUTTON3_DOWN_MASK ) && previewWindow)
+                {
+                    frame.dispose();// This is done so the preview does not close the control panel
+                } else if(e.getModifiersEx() == InputEvent.BUTTON1_DOWN_MASK
+                        || e.getModifiersEx() == InputEvent.BUTTON2_DOWN_MASK
+                        || e.getModifiersEx() == InputEvent.BUTTON3_DOWN_MASK)
                 {
                     System.exit(0);
                 }
@@ -409,7 +413,7 @@ public class viewer extends TimerTask {
     public static void main(String[] args) {
         frame.setUndecorated(true);         /**We set undecorated here since updating it in the renderer will cause errors*/
         Timer time = new Timer(false);
-        time.scheduleAtFixedRate(new viewer(), 0, timerRefresh);
+        time.scheduleAtFixedRate(new Viewer(), 0, timerRefresh);
     }
 
     /**
@@ -425,19 +429,19 @@ public class viewer extends TimerTask {
 
         Socket client = null;                               // Socket connection to the server
         try {
-            client = connectionToServer();
+            client = ConnectionToServer();
             // This goes into a loop for every 15 seconds
             try{
-                Billboard currBill = getBillboardInfo(client);   // Get billboard information
-                renderer(currBill, false);                              // JFrame renderer
+                Billboard currBill = GetBillboardInfo(client);   // Get billboard information
+                Renderer(currBill, false);                              // JFrame renderer
             }
             catch(Exception e)
             {
-                e.printStackTrace();
+//                e.printStackTrace();
             }
             client.close(); // Close connection
         } catch (IOException e) {
-            e.printStackTrace();
+//            e.printStackTrace();
         }
     }
 

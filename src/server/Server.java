@@ -65,7 +65,7 @@ public class Server {
 
         // Gathers the information from server.config file
         resources.GetPropertyValues properties = new resources.GetPropertyValues();
-        properties.readPropertyFile();
+        properties.ReadPropertyFile();
 
         connectionInitiated = ServerInit.initialiseConnection();
 

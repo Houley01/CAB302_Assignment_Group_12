@@ -52,7 +52,7 @@ public class Controller {
         try {
             // Gathers the information from server.config file
             resources.GetPropertyValues properties = new resources.GetPropertyValues();
-            properties.readPropertyFile();
+            properties.ReadPropertyFile();
 
             // Create a socket connect If the server connection was made
             return new Socket(properties.serverName, GetPropertyValues.port);
@@ -436,7 +436,6 @@ public class Controller {
      * Sends a message to the server to remove
      */
     public static void Logout() throws IOException {
-        ControlPanelFrameHandler.LogoutWindow();
         Socket client = ConnectionToServer();
         //  Checks if the sever is online
         if (client.isConnected()) {
@@ -461,6 +460,7 @@ public class Controller {
         boolean[] falsePermission = {false, false, false, false};
         permission.SetUserPermission(falsePermission);
         token = "";
+        ControlPanelFrameHandler.LogoutWindow();
     }
 
     public static String[][] ListBillboards() throws IOException, ClassNotFoundException {

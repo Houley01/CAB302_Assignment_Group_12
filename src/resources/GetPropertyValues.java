@@ -25,7 +25,7 @@ public class GetPropertyValues {
      * @throws IOException
      * @throws FileNotFoundException        If the server properties file cannot be found or read
      */
-    public static void readPropertyFile() throws IOException {
+    public static void ReadPropertyFile() throws IOException {
 
 
         try {
