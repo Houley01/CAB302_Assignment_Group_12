@@ -25,12 +25,12 @@ public class GetPropertyValues {
      * @throws IOException
      * @throws FileNotFoundException        If the server properties file cannot be found or read
      */
-    public static void readPropertyFile() throws IOException {
+    public static void ReadPropertyFile() throws IOException {
 
 
         try {
             Properties prop = new Properties();
-            String propFileName = "resources\\server.properties";
+            String propFileName = "resources/server.properties";
 
             inputStream = GetPropertyValues.class.getClassLoader().getResourceAsStream(propFileName);
 
@@ -49,7 +49,7 @@ public class GetPropertyValues {
 //            System.out.println(result);
 
         } catch (Exception e) {
-            System.out.println("Exception: " + e);
+//            System.out.println("Exception: " + e);
         }
         inputStream.close();
 

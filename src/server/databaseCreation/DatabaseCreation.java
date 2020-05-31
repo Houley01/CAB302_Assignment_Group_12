@@ -20,7 +20,7 @@ import java.util.Scanner; // Import the Scanner class to read text files
  * which creates an empty database with all the endpoints
  * required to run the billboard.
  */
-public class databaseCreation {
+public class DatabaseCreation {
     // Check if the database has tables
 
     /**
@@ -30,7 +30,7 @@ public class databaseCreation {
      *
      * @throws SQLException
      */
-    public static void checkDatabaseExistence() throws SQLException {
+    public static void CheckDatabaseExistence() throws SQLException {
         System.out.println("Checking if DB exists...");
 
         DatabaseMetaData dbm = ServerInit.conn.getMetaData();
@@ -53,7 +53,7 @@ public class databaseCreation {
         // check for database existing and requiring to create the database
         if (!databaseExists) {
             System.out.println("Creating DB: cab302...");
-            createDatabase();
+            CreateDatabase();
         }
     }
 
@@ -65,7 +65,7 @@ public class databaseCreation {
      * @throws SQLException
      */
     // Create the database and tables if they don't exist
-    public static void createDatabase() throws SQLException {
+    public static void CreateDatabase() throws SQLException {
         Statement stmt = ServerInit.conn.createStatement();
 
         try {

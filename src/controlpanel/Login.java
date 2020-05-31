@@ -8,12 +8,12 @@ import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 
 
-class login extends JFrame
+class Login extends JFrame
 {
-    private static JPasswordField passwordText;
-    final JTextField  usernameText;
+    public static JPasswordField passwordText;
+    public static JTextField  usernameText = new JTextField();
 
-    login(JTextField usernameText) {
+    Login(JTextField usernameText) {
         this.usernameText = usernameText;
     }
 
@@ -21,24 +21,23 @@ class login extends JFrame
 
     /**
      * Login window. First window you see when you open the application for the control panel.
-     * Authentication for users, username and password is done in the controller.
-     * @see controller
+     * Authentication for users, username and password is done in the Controller.
+     * @see Controller
      *
      * @since               JDK13
      * @return window       JFrame object containing configurations and elements created.
      */
     public static JInternalFrame loginScreen() {
         window.setSize(250, 100);
-        window.setLocation((controlPanel.WINDOWWIDTH/2) - 125, (controlPanel.WINDOWHEIGHT/2) - 100);
+        window.setLocation((ControlPanel.WINDOWWIDTH/2) - 125, (ControlPanel.WINDOWHEIGHT/2) - 100);
         window.setLayout(new GridLayout(3,2));
 
         JLabel usernameLabel = new JLabel("Username:");
-        //        REMOVE PASSWORD........................\/  USED TO FILL IN TEXT FIELD
-        JTextField usernameText = new JTextField("admin", 15);
+
+        usernameText = new JTextField(15);
         //      Password
         JLabel passwordLabel = new JLabel("Password:");
-        //        REMOVE PASSWORD...................\/  USED TO FILL IN TEXT FIELD
-        passwordText = new JPasswordField("password", 15); // Hides the Password from the screen
+        passwordText = new JPasswordField(15); // Hides the Password from the screen
 
 
         JButton loginButton = new JButton("Login");
@@ -55,24 +54,24 @@ class login extends JFrame
 
 
 
-        //      Call when the login button is clicked
+        //      Call when the Login button is clicked
         loginButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 String user = usernameText.getText();
                 String pass = passwordText.getText();
-                try {
-                    if(controller.authenticateUserLogin(user, pass)) {
-//                        window.setVisible(false);
-//                        listBillboards.listBillboards().setVisible(true);
-                        controller.hideLoginScreen();
-                    };
-                } catch (IOException | ClassNotFoundException ex) {
-                    ex.printStackTrace();
-                } catch (InvalidKeySpecException ex) {
-                    ex.printStackTrace();
-                } catch (NoSuchAlgorithmException ex) {
-                    ex.printStackTrace();
+                if (!user.equals("") && !pass.equals("")) {
+                    try {
+                        if (Controller.AuthenticateUserLogin(user, pass)) {
+                            Controller.HideLoginScreen();
+                        }
+                        ;
+                    } catch (IOException | ClassNotFoundException | InvalidKeySpecException | NoSuchAlgorithmException ex) {
+                        ex.printStackTrace();
+                    }
+                }
+                else {
+                    DialogWindow.ShowInformationPane("Please put a username and password in the textbox", "Not enough Information");
                 }
             }
         });

@@ -21,21 +21,21 @@ public class HelpPage {
      *
      * @return window       Window help page contained in this variable.
      */
-    public static JInternalFrame HelpPage() {
+    public static JInternalFrame HelpWindow() {
         JPanel mainHeading = new JPanel();
-        JPanel window2 = new JPanel();
+        JPanel ButtonsPanel = new JPanel();
         window.setSize(600,300);
-        window2.setSize(300,150);
-        window.setLocation((controlPanel.WINDOWWIDTH/2) - 300, (controlPanel.WINDOWHEIGHT/2) - 200);
+        ButtonsPanel.setSize(300,150);
+        window.setLocation((ControlPanel.WINDOWWIDTH/2) - 300, (ControlPanel.WINDOWHEIGHT/2) - 200);
 
 //  Heading - "Need Help?"
         JLabel  needHelp = new JLabel("Need Help?");
         needHelp.setVerticalTextPosition(JLabel.TOP);
         needHelp.setHorizontalTextPosition(JLabel.LEFT);
-        needHelp.setFont(controlPanel.titleFont);
+        needHelp.setFont(ControlPanel.titleFont);
 
 //  Button - Java Doc
-        JButton javaDoc = new JButton("Java Doc", new ImageIcon("src\\controlpanel\\resources\\javadoc.png"));
+        JButton javaDoc = new JButton("Java Doc", new ImageIcon("src/controlpanel/resources/javadoc.png"));
         javaDoc.setBounds(100, 100, 140, 40);
 
         javaDoc.addActionListener(new ActionListener() {
@@ -50,7 +50,7 @@ public class HelpPage {
         });
 
         //  Button - "System Overview"
-        JButton systemOverview = new JButton("System Overview", new ImageIcon("src\\controlpanel\\resources\\systemoverview.png"));
+        JButton systemOverview = new JButton("System Overview", new ImageIcon("src/controlpanel/resources/systemoverview.png"));
         javaDoc.setBounds(100, 100, 140, 40);
 
         systemOverview.addActionListener(new ActionListener() {
@@ -67,10 +67,10 @@ public class HelpPage {
         window.setLayout(new GridLayout(2,1));
         mainHeading.add(needHelp);
         window.add(mainHeading);
-        window.add(window2);
-        window2.setLayout(new GridLayout(1,2));
-        window2.add(javaDoc);
-        window2.add(systemOverview);
+        window.add(ButtonsPanel);
+        ButtonsPanel.setLayout(new GridLayout(1,2));
+        ButtonsPanel.add(javaDoc);
+        ButtonsPanel.add(systemOverview);
 
         return window;
     }

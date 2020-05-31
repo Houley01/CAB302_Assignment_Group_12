@@ -3,9 +3,8 @@ package server;
 import org.xml.sax.SAXException;
 import resources.Billboard;
 import resources.CustomXMFile;
-import server.databaseCreation.databaseCreation;
+import server.databaseCreation.DatabaseCreation;
 import server.initialisation.ServerInit;
-
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
@@ -15,7 +14,6 @@ import java.io.*;
 import java.net.*;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.security.Permission;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 import java.sql.*;
@@ -47,7 +45,7 @@ public class Server {
      *  <ul>
      *      <li>User login</li>
      *      <li>User authentication</li>
-     *      <li><h3>Billboard controller</h3></li>
+     *      <li><h3>Billboard Controller</h3></li>
      *      <li>Billboard creation</li>
      *      <li>Billboard Schedule</li>
      *      <li>Billboard Listing</li>
@@ -68,19 +66,19 @@ public class Server {
 
         // Gathers the information from server.config file
         resources.GetPropertyValues properties = new resources.GetPropertyValues();
-        properties.readPropertyFile();
+        properties.ReadPropertyFile();
 
-        connectionInitiated = ServerInit.initaliseConnection();
+        connectionInitiated = ServerInit.initialiseConnection();
 
         if (connectionInitiated) {
-            databaseCreation.checkDatabaseExistence();
+            DatabaseCreation.CheckDatabaseExistence();
 
             // Reads the port number from the server.properties file
             ServerSocket serverSocket = new ServerSocket(properties.port);
 
             while (true) {
                 Socket server = serverSocket.accept();
-                System.out.println("Connected to " + server.getInetAddress());
+//                System.out.println("Connected to " + server.getInetAddress());
 
                 ObjectInputStream receiver = new ObjectInputStream(server.getInputStream());
                 ObjectOutputStream send = new ObjectOutputStream(server.getOutputStream());
@@ -92,11 +90,12 @@ public class Server {
                     String uname = receiver.readUTF();
                     String pass = receiver.readUTF();
                     // func check username and database
-                    boolean chekuser = checkUserDetails(uname, pass);
+                    boolean chekuser = CheckUserDetails(uname, pass);
                     if (chekuser == true) {
                         send.writeBoolean(true);
                         send.writeObject(UserPermission(uname));
-
+                    } else {
+                        send.writeBoolean(false);
                     }
                     send.flush();
                 }
@@ -104,13 +103,11 @@ public class Server {
                 if (request.equals("AuthToken")) {
                     String uname = receiver.readUTF();
                     // Generate an authentication token for the user
-                    send.writeObject(generateAuthToken(uname));
+                    send.writeObject(GenerateAuthToken(uname));
                     send.flush();
                 }
                 // Create Billboard Information
                 if (request.equals("CreateBillboard")) {
-//                    String[] billboardData = (String[]) receiver.readObject();
-//                    CreateBillboard(billboardData);
                     CreateBillboard(receiver, send);
                 }
                 // Schedule Billboards
@@ -123,40 +120,39 @@ public class Server {
                     String username = receiver.readUTF();
                     String token = receiver.readUTF();
 
-                    System.out.println(username);
-                    System.out.println(token);
-                    System.out.println("Accessing data");
+                    // System.out.println(username);
+                    // System.out.println(token);
+                    // System.out.println("Accessing data");
 
-                    if (checkTokenIsValid(username, token)) {
+                    if (CheckTokenIsValid(username, token)) {
                         send.writeObject(RequestScheduling());
-                        System.out.println("Sending data");
+                        // System.out.println("Sending data");
                         send.flush();
                     } else {
-                        System.out.println("Token wasn't valid");
+                        // System.out.println("Token wasn't valid");
                     }
                 }
 
                 if(request.equals("GetScheduledBillboard"))
                 {
-                    System.out.println("Getting selected billboard");
+                    // System.out.println("Getting selected billboard");
                     String min = receiver.readUTF();
                     String max = receiver.readUTF();
                     String table = receiver.readUTF();
-                    System.out.println("Got all information");
+                    // System.out.println("Got all information");
 
                     GetScheduledBillboard(send, min, max, table);
                 }
 
                 if(request.equals("CreateSchedule"))
                 {
-                    System.out.println("Creating new schedule ...");
-                    createNewSchedule(receiver, send);
-
+//                    System.out.println("Creating new schedule ...");
+                    CreateNewSchedule(receiver, send);
                 }
 
                 if(request.equals("GetBillboardFromID"))
                 {
-                    send.writeUTF(getBillboardName(receiver.readUTF()));
+                    send.writeUTF(GetBillboardName(receiver.readUTF()));
                     send.flush();
                 }
 
@@ -168,9 +164,7 @@ public class Server {
                 if (request.equals("GetBillboard")) {
                     try {
                         GetBillboardInfo(receiver, send);
-                    } catch (ParserConfigurationException e) {
-                        e.printStackTrace();
-                    } catch (SAXException e) {
+                    } catch (ParserConfigurationException | SAXException e) {
                         e.printStackTrace();
                     }
                 }
@@ -178,148 +172,131 @@ public class Server {
                     DeleteBillboard(receiver, send);
                 }
 
-                // Edit user
-                if (request.equals("EditUser")) {
-                    System.out.println("EDIT USER");
-//                    for admin use
-                    String check = receiver.readUTF();
-                    if (check == "findUsername") {
-                        System.out.println("findUsername");
-
-//                        send.writeObject(getAllUsernames());
-//                        send.flush();
-                    }
-                }
-
                 // Changes user's password
                 if (request.equals("changePassword")) {
-                    System.out.println("request: Password...");
+//                    System.out.println("request: Password...");
                     String username = receiver.readUTF();
                     String password = receiver.readUTF();
                     String loggedInUser = receiver.readUTF();
                     String token = receiver.readUTF();
 
-                    if (checkTokenIsValid(loggedInUser, token)) {
-                        System.out.println("Changing Password...");
-                        changeUserPassword(username, password);
-                        System.out.println("Changed Password...");
-                    } else {
-                        System.out.println("Token wasn't valid");
+                    if (CheckTokenIsValid(loggedInUser, token)) {
+//                        System.out.println("Changing Password...");
+                        ChangeUserPassword(username, password);
+//                        System.out.println("Changed Password...");
                     }
+                    //else {
+//                        System.out.println("Token wasn't valid");
+                    //}
                     send.flush();
                 }
 
                 // Viewer Request Billboards
                 if (request.equals("ViewerRequest")) {
-                    viewerRequest(send);
+                    ViewerRequest(send);
                 }
 
                 // Get a list of users in the database
                 if (request.equals("getUsers")) {
-                    send.writeObject(getAllUsernames());
+                    send.writeObject(GetAllUsernames());
                     send.flush();
                 }
 
                 // Retrieve information on a user for editing their details
                 if (request.equals("getUserInfo")) {
-                    System.out.println("request: user details...");
                     String username = receiver.readUTF();
                     String loggedInUser = receiver.readUTF();
                     String token = receiver.readUTF();
 
-                    if (checkTokenIsValid(loggedInUser, token)) {
-                        System.out.println("Retrieving user info...");
-                        send.writeObject(getUserInfo(username));
-                        System.out.println("Retrieved user info");
-                    } else {
-                        System.out.println("Token wasn't valid");
+                    if (CheckTokenIsValid(loggedInUser, token)) {
+                        send.writeObject(GetUserInfo(username));
                     }
+//                    else {
+//                        System.out.println("Token wasn't valid");
+//                    }
                     send.flush();
                 }
 
                 // Update information on a user for editing their details
                 if (request.equals("updateUserInfo")) {
-                    System.out.println("request: update user details...");
+//                    System.out.println("request: update user details...");
                     String username = receiver.readUTF();
                     String firstName = receiver.readUTF();
                     String lastName = receiver.readUTF();
                     String loggedInUser = receiver.readUTF();
                     String token = receiver.readUTF();
 
-                    if (checkTokenIsValid(loggedInUser, token)) {
-                        System.out.println("Updating user info...");
-                        updateUserInfo(username, firstName, lastName);
-                        System.out.println("Updated user info");
-                    } else {
-                        System.out.println("Token wasn't valid");
+                    if (CheckTokenIsValid(loggedInUser, token)) {
+//                        System.out.println("Updating user info...");
+                        UpdateUserInfo(username, firstName, lastName);
+//                        System.out.println("Updated user info");
                     }
+//                    else {
+//                        System.out.println("Token wasn't valid");
+//                    }
                     send.flush();
                 }
 
                 // Delete a user
                 if (request.equals("deleteUser")) {
-                    System.out.println("request: delete user details...");
+//                    System.out.println("request: delete user details...");
                     String username = receiver.readUTF();
                     String loggedInUser = receiver.readUTF();
                     String token = receiver.readUTF();
 
-                    if (checkTokenIsValid(loggedInUser, token)) {
-                        System.out.println("Deleting user'" + username + "'...");
-                        deleteUser(username);
-                        System.out.println("Deleted user");
-                    } else {
-                        System.out.println("Token wasn't valid");
+                    if (CheckTokenIsValid(loggedInUser, token)) {
+//                        System.out.println("Deleting user'" + username + "'...");
+                        DeleteUser(username);
+//                        System.out.println("Deleted user");
                     }
+//                    else {
+//                        System.out.println("Token wasn't valid");
+//                    }
                     send.flush();
                 }
 
                 // Get a user's permissions
                 if (request.equals("getUserPermissions")) {
-                    System.out.println("request: get user permissions...");
+//                    System.out.println("request: get user permissions...");
                     String username = receiver.readUTF();
                     String loggedInUser = receiver.readUTF();
                     String token = receiver.readUTF();
 
-                    if (checkTokenIsValid(loggedInUser, token)) {
-                        System.out.println("Retrieving user permissions...");
-                        boolean[] userPermissions = getUserPermissions(username);
-                        send.writeBoolean(userPermissions[0]);
-                        send.writeBoolean(userPermissions[1]);
-                        send.writeBoolean(userPermissions[2]);
-                        send.writeBoolean(userPermissions[3]);
-                        System.out.println("Retrieved user permissions");
+                    if (CheckTokenIsValid(loggedInUser, token)) {
+//                        System.out.println("Retrieving user permissions...");
+                        boolean[] userPermissions = GetUserPermissions(username);
+                        send.writeObject(userPermissions);
                     } else {
-                        System.out.println("Token wasn't valid");
+//                        System.out.println("Token wasn't valid");
                     }
                     send.flush();
                 }
 
                 // Update a user's permissions
                 if (request.equals("updatePermissions")) {
-                    System.out.println("request: update user permissions...");
-                    boolean createBillboardPermission = receiver.readBoolean();
-                    boolean editBillboardPermission = receiver.readBoolean();
-                    boolean scheduleBillboardPermission = receiver.readBoolean();
-                    boolean editUserPermission = receiver.readBoolean();
+//                    System.out.println("request: update user permissions...");
+//                    boolean createBillboardPermission = receiver.readBoolean();
+//                    boolean editBillboardPermission = receiver.readBoolean();
+//                    boolean scheduleBillboardPermission = receiver.readBoolean();
+//                    boolean editUserPermission = receiver.readBoolean();
+                    boolean[] permissions = (boolean[]) receiver.readObject();
                     String username = receiver.readUTF();
                     String loggedInUser = receiver.readUTF();
                     String token = receiver.readUTF();
 
-                    boolean[] permissions = {createBillboardPermission, editBillboardPermission, scheduleBillboardPermission, editUserPermission};
-
-                    if (checkTokenIsValid(loggedInUser, token)) {
-                        System.out.println("Updating user permissions...");
-                        updateUserPermissions(permissions, username);
-                        System.out.println("Updated user permissions");
+                    if (CheckTokenIsValid(loggedInUser, token)) {
+//                        System.out.println("Updating user permissions...");
+                        UpdateUserPermissions(permissions, username);
+//                        System.out.println("Updated user permissions");
                     } else {
-                        System.out.println("Token wasn't valid");
+//                        System.out.println("Token wasn't valid");
                     }
                     send.flush();
                 }
 
                 // Create a new user
                 if (request.equals("createNewUser")) {
-                    System.out.println("request: create new user...");
+//                    System.out.println("request: create new user...");
                     String username = receiver.readUTF();
                     String firstName = receiver.readUTF();
                     String lastName = receiver.readUTF();
@@ -334,18 +311,20 @@ public class Server {
                     String[] userData = {username, firstName, lastName, password};
                     boolean[] permissions = {createBillboardPermission, editBillboardPermission, scheduleBillboardPermission, editUserPermission};
 
-                    if (checkTokenIsValid(loggedInUser, token)) {
-                        System.out.println("Creating new user...");
-                        createNewUser(userData, permissions);
-                        System.out.println("Created new user");
+                    if (CheckTokenIsValid(loggedInUser, token)) {
+//                        System.out.println("Creating new user...");
+                        CreateNewUser(userData, permissions);
+//                        System.out.println("Created new user");
                     } else {
-                        System.out.println("Token wasn't valid");
+//                        System.out.println("Token wasn't valid");
                     }
                     send.flush();
                 }
 
                 if (request.equals("Logout")) {
-                    logout(receiver,send);
+                    String username = receiver.readUTF(); // Get username from client
+                    Logout(username);
+                    send.flush();
                 }
 
 
@@ -372,7 +351,7 @@ public class Server {
      * @throws NoSuchAlgorithmException
      * @throws IOException
      */
-    static boolean checkUserDetails(String uName, String pass) throws SQLException, InvalidKeySpecException, NoSuchAlgorithmException, IOException {
+    static boolean CheckUserDetails(String uName, String pass) throws SQLException, InvalidKeySpecException, NoSuchAlgorithmException, IOException {
         String query = "SELECT * FROM `users` WHERE `user` = \"" + uName + "\";";
 
         Statement st = ServerInit.conn.createStatement();
@@ -380,7 +359,7 @@ public class Server {
         ResultSet rs = st.executeQuery(query);
         // If no user name is found
         if (!rs.isBeforeFirst()) {
-            System.out.println("No MATCH");
+//            System.out.println("No MATCH");
             return false;
         } else {
             rs.next();
@@ -389,24 +368,10 @@ public class Server {
             String storedPass = rs.getString("pass");
 
             // Compare the entered password by the user with the salt+hash for the user and check if it matches
-            if (check(pass, storedPass)) {
+            if (Check(pass, storedPass)) {
                 return true;
             } else return false;
         }
-//          DEBUGGING USE \/
-//            while (rs.next()) {
-//                int id = rs.getInt("idUsers");
-//                String username = rs.getString("user");
-//                String password = rs.getString("pass");
-//                int idPermissions = rs.getInt("idPermissions");
-//                String firstName = rs.getString("fName");
-//                String lastName = rs.getString("lName");
-//
-//                // print the results
-//                System.out.format("%s, %s, %s, %s, %s, %s\n",
-//                        id, username, password, idPermissions, firstName, lastName);
-//            }
-//              DEBUGGING USE /\
     }
 
     // Returns a hash of the entered password for a new user
@@ -422,7 +387,7 @@ public class Server {
      * @throws NoSuchAlgorithmException
      * @throws IOException
      */
-    static String plaintextToHashedPassword(String password) throws InvalidKeySpecException, NoSuchAlgorithmException, IOException {
+    static String PlaintextToHashedPassword(String password) throws InvalidKeySpecException, NoSuchAlgorithmException, IOException {
         String hashedPassword = null;
         try {
             // Create MessageDigest instance for MD5
@@ -460,8 +425,8 @@ public class Server {
      * @throws NoSuchAlgorithmException
      * @throws IOException
      */
-    public static String addSaltToHashedPassword(String password) throws InvalidKeySpecException, NoSuchAlgorithmException, IOException {
-        String hashedPasswordSalted = getSaltedHash(password);
+    public static String AddSaltToHashedPassword(String password) throws InvalidKeySpecException, NoSuchAlgorithmException, IOException {
+        String hashedPasswordSalted = GetSaltedHash(password);
         return hashedPasswordSalted;
     }
 
@@ -477,12 +442,12 @@ public class Server {
      * @throws InvalidKeySpecException
      * @throws NoSuchAlgorithmException
      */
-    public static String getSaltedHash(String password) throws IOException, InvalidKeySpecException, NoSuchAlgorithmException {
+    public static String GetSaltedHash(String password) throws IOException, InvalidKeySpecException, NoSuchAlgorithmException {
         byte[] salt = SecureRandom.getInstance("SHA1PRNG").generateSeed(32);
         // store the salt with the password
-        System.out.println(Base64.getEncoder().encodeToString(salt) + "$" + hash(password, salt));
+//        System.out.println(Base64.getEncoder().encodeToString(salt) + "$" + Hash(password, salt));
 
-        return Base64.getEncoder().encodeToString(salt) + "$" + hash(password, salt);
+        return Base64.getEncoder().encodeToString(salt) + "$" + Hash(password, salt);
     }
 
     //Checks the hashed password entered by the user corresponds to a stored salted hash of the password
@@ -493,7 +458,6 @@ public class Server {
      * an array via the $ separating the salt and the hash). Then encodes the supplied password
      * from the user to see if it matches the hash of the stored password.
      *
-     * @see hash
      * @param password      Password entered by user.
      * @param stored        Stored password from database.
      * @return hashed password
@@ -502,13 +466,13 @@ public class Server {
      * @throws NoSuchAlgorithmException
      * @throws IllegalStateException        Incorrect format for hashed and salted passwords.
      */
-    public static boolean check(String password, String stored) throws IOException, InvalidKeySpecException, NoSuchAlgorithmException {
+    public static boolean Check(String password, String stored) throws IOException, InvalidKeySpecException, NoSuchAlgorithmException {
         String[] saltAndHash = stored.split("\\$");
         if (saltAndHash.length != 2) {
             throw new IllegalStateException(
                     "The stored password must have the form 'salt$hash'");
         }
-        String hashOfInput = hash(password, Base64.getDecoder().decode(saltAndHash[0]));
+        String hashOfInput = Hash(password, Base64.getDecoder().decode(saltAndHash[0]));
         return hashOfInput.equals(saltAndHash[1]);
     }
 
@@ -522,11 +486,11 @@ public class Server {
      * @param password      Password user entered
      * @param salt          Salt from stored password
      * @return hashed password
-     * @throws InvalidKeySpecException
-     * @throws NoSuchAlgorithmException
+     * @exception InvalidKeySpecException     If the character key is invalid character for UTF-8
+     * @exception NoSuchAlgorithmException    If cryptographic algorithm is not available.
      * @throws IllegalArgumentException     Password input was empty or null.
      */
-    private static String hash(String password, byte[] salt) throws InvalidKeySpecException, NoSuchAlgorithmException {
+    private static String Hash(String password, byte[] salt) throws InvalidKeySpecException, NoSuchAlgorithmException {
         if (password == null || password.length() == 0)
             throw new IllegalArgumentException("Empty passwords are not supported.");
         SecretKeyFactory f = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
@@ -544,7 +508,7 @@ public class Server {
      * @param username      User to generate a token for
      * @return token
      */
-    static String generateAuthToken(String username) {
+    static String GenerateAuthToken(String username) {
         // Below creates the auth token for the user
         SecureRandom secureRandom = new SecureRandom();
         Base64.Encoder base64Encoder = Base64.getUrlEncoder();
@@ -562,11 +526,12 @@ public class Server {
         String expiry = String.valueOf(expiryDate);
 
         Date dateOfExpiry = new Date(expiryDate);
-
-        System.out.println("Username: " + username);
-        System.out.println("AuthToken: " + token);
-        System.out.println("Expiry: " + dateOfExpiry);
-
+        boolean DEBUG = false;
+        if (DEBUG) {
+            System.out.println("Username: " + username);
+            System.out.println("AuthToken: " + token);
+            System.out.println("Expiry: " + dateOfExpiry);
+        }
         usersAuthenticated.put(username, new String[]{token, expiry});
 
         return token;
@@ -581,7 +546,7 @@ public class Server {
      * @return true         If the token is still valid.
      * @return false        If the token is not valid.
      */
-    static boolean checkTokenIsValid(String username, String token) {
+    static boolean CheckTokenIsValid(String username, String token) {
         // Check that a user has been given an auth token
         if (usersAuthenticated.containsKey(username)) {
 
@@ -601,7 +566,7 @@ public class Server {
 
                 // Check that the token hasn't expired yet and is still valid
                 if (expiry > currentTime) {
-                    System.out.println("Not yet expired");
+//                    System.out.println("Not yet expired");
                     return true;
                 } else {
                     return false;
@@ -622,8 +587,8 @@ public class Server {
      * @return All users in object
      * @throws SQLException
      */
-    private static ArrayList<String> getAllUsernames() throws SQLException {
-        System.out.println("Getting usernames...");
+    private static ArrayList<String> GetAllUsernames() throws SQLException {
+//        System.out.println("Getting usernames...");
         ArrayList<String> listOfUsers = new ArrayList<>();
         String query = "SELECT user FROM users";
 
@@ -632,7 +597,7 @@ public class Server {
         ResultSet rs = st.executeQuery(query);
         // If no user are found in database
         if (!rs.isBeforeFirst()) {
-            System.out.println("No user in database"); // Debug use
+//            System.out.println("No user in database"); // Debug use
 //            return "No User in database";
         } else {
             while (rs.next()) {
@@ -641,13 +606,13 @@ public class Server {
             }
         }
 
-        System.out.println(listOfUsers);
+//        System.out.println(listOfUsers);
 
         return listOfUsers;
     }
 
-    private static String[] getUserInfo(String username) throws SQLException {
-        System.out.println("Getting user info...");
+    private static String[] GetUserInfo(String username) throws SQLException {
+//        System.out.println("Getting user info...");
         String[] userInfo = new String[2];
         String query = "SELECT fName, lName FROM users WHERE user = '" + username + "'";
 
@@ -656,7 +621,7 @@ public class Server {
         ResultSet rs = st.executeQuery(query);
         // If no user are found in database
         if (!rs.isBeforeFirst()) {
-            System.out.println("No user in database"); // Debug use
+//            System.out.println("No user in database"); // Debug use
 //            return "No User in database";
         } else {
             while (rs.next()) {
@@ -667,54 +632,54 @@ public class Server {
             }
         }
 
-        System.out.println(userInfo[0]);
-        System.out.println(userInfo[1]);
+//        System.out.println(userInfo[0]);
+//        System.out.println(userInfo[1]);
 
         return userInfo;
     }
 
-    private static void updateUserInfo(String username, String firstName, String lastName) throws SQLException {
-        System.out.println("Updating user info...");
+    private static void UpdateUserInfo(String username, String firstName, String lastName) throws SQLException {
+//        System.out.println("Updating user info...");
 
         String query = "UPDATE users SET fName = '" + firstName + "', lName = '" + lastName + "' WHERE user = '" + username + "'";
-        System.out.println(query);
+//        System.out.println(query);
         Statement st = ServerInit.conn.createStatement();
         st.executeQuery("USE `cab302`;");
         st.executeQuery(query);
     }
 
-    private static void deleteUser(String username) throws SQLException {
+    private static void DeleteUser(String username) throws SQLException {
 
         String query = "DELETE FROM users WHERE user = '" + username + "'";
-        System.out.println(query);
+//        System.out.println(query);
         Statement st = ServerInit.conn.createStatement();
         st.executeQuery("USE `cab302`;");
         st.executeQuery(query);
     }
 
-    private static void changeUserPassword(String username, String password)
+    private static void ChangeUserPassword(String username, String password)
             throws InvalidKeySpecException, NoSuchAlgorithmException, IOException, SQLException {
-        String saltHashedPassword = addSaltToHashedPassword(password);
+        String saltHashedPassword = AddSaltToHashedPassword(password);
 
         String query = "UPDATE users SET pass = '" + saltHashedPassword + "' WHERE user = '" + username + "'";
-        System.out.println(query);
+//        System.out.println(query);
         Statement st = ServerInit.conn.createStatement();
         st.executeQuery("USE `cab302`;");
         st.executeQuery(query);
     }
 
-    private static boolean[] getUserPermissions(String username) throws SQLException {
+    private static boolean[] GetUserPermissions(String username) throws SQLException {
 
         boolean[] userPermissions = new boolean[4];
 
         String query = "SELECT createBillboard, editAllBillboard, scheduleBillboard, editUser FROM users WHERE user = '" + username + "'";
-        System.out.println(query);
+//        System.out.println(query);
         Statement st = ServerInit.conn.createStatement();
         st.executeQuery("USE `cab302`;");
         ResultSet rs = st.executeQuery(query);
 
         if (!rs.isBeforeFirst()) {
-            System.out.println("No user in database"); // Debug use
+//            System.out.println("No user in database"); // Debug use
 //            return "No User in database";
         } else {
             while (rs.next()) {
@@ -731,18 +696,18 @@ public class Server {
             }
         }
 
-        for (boolean b : userPermissions) {
-            System.out.println(b);
-        }
+//        for (boolean b : userPermissions) {
+//            System.out.println(b);
+//        }
 
         return userPermissions;
     }
 
-    private static void updateUserPermissions(boolean[] permissions, String username) throws SQLException {
+    private static void UpdateUserPermissions(boolean[] permissions, String username) throws SQLException {
 
-        for (boolean b : permissions) {
-            System.out.println(b);
-        }
+//        for (boolean b : permissions) {
+//            System.out.println(b);
+//        }
 
         int[] updatedPermissions = new int[4];
 
@@ -759,9 +724,9 @@ public class Server {
         st.executeQuery(query);
     }
 
-    private static void createNewUser(String[] userData, boolean[] permissions) throws SQLException, InvalidKeySpecException, NoSuchAlgorithmException, IOException {
+    private static void CreateNewUser(String[] userData, boolean[] permissions) throws SQLException, InvalidKeySpecException, NoSuchAlgorithmException, IOException {
 
-        String saltHashedPassword = addSaltToHashedPassword(userData[3]);
+        String saltHashedPassword = AddSaltToHashedPassword(userData[3]);
 
         for (boolean b : permissions) {
             System.out.println(b);
@@ -799,7 +764,7 @@ public class Server {
         ResultSet rs = st.executeQuery(query);
         // If no user are found in database
         if (!rs.isBeforeFirst()) {
-            System.out.println("No user in database"); // Debug use
+//            System.out.println("No user in database"); // Debug use
 //            return "No User in database";
         } else {
             int i = 1;
@@ -808,29 +773,6 @@ public class Server {
         }
         return -1;
     }
-
-//    static boolean CreateBillboard(String[] billboardData) throws ParseException {
-//
-//        // If the billboard information was sent correctly, data will be parsed
-//        if (billboardData[0] != "" && billboardData[4] != "") {
-//
-//            String title = billboardData[0];
-//            int userId = Integer.parseInt(billboardData[1]);
-//            Date currentTime = new Date();
-//            Date timeModified = new Date();
-//            String fileLocation = billboardData[4];
-//
-//            // Use this for edit billboard
-//            // Date timeModified = new SimpleDateFormat("dd/MM/yyyy").parse(billboardData[3]);
-//
-//            // Add code to be storing the billboard information to the database
-//
-//            return true;
-//        }
-//
-//        // Returns false as no required data was sent
-//        return false;
-//    }
 
     /**
      * Calls createBillboard class from the control panel and creates a XML file with all the
@@ -850,17 +792,13 @@ public class Server {
         String username = receiver.readUTF();
         String token = receiver.readUTF();
         int userId = GetUserID(username);
-        if (checkTokenIsValid(username, token) && userId != -1) {
-            System.out.println("true");
+        if (CheckTokenIsValid(username, token) && userId != -1) {
             send.write(1);
             send.flush();
 
             Billboard billboard = (Billboard) receiver.readObject();
-
             billboard.PrintBillboardInformation();
             String fileLocation = CustomXMFile.CreateFileContents(billboard);
-            System.out.println(fileLocation);
-
 //            Check if the file already exists in database
             String query = "SELECT idBillboards FROM billboards WHERE billboardName = '" + billboard.getTitle() + "';";
             Statement st = ServerInit.conn.createStatement();
@@ -874,7 +812,6 @@ public class Server {
 
             } else {
                 rs.next();
-                System.out.println(rs.getInt("idBillboards"));
                 query = "UPDATE `billboards` SET `userId` = " + userId + ", `dateModify` = current_timestamp() WHERE `idBillboards` = " + rs.getInt("idBillboards") + "";
                 st.execute(query);
             }
@@ -884,7 +821,7 @@ public class Server {
         } else {
             send.writeInt(0);
             send.flush();
-            System.out.println("Don't have access to create billboard");
+//            System.out.println("Don't have access to create billboard");
             return false;
         }
     }
@@ -901,11 +838,9 @@ public class Server {
      * @throws SQLException
      */
     private static ArrayList<String[]> RequestScheduling() throws SQLException {
-        System.out.println("Nice");
         // Before request, check that the user's token is valid
-        if (true){
-            System.out.println("Token is valid. Begin requesting currently scheduled billboards...");
-
+        if (true) {
+//            System.out.println("Token is valid. Begin requesting currently scheduled billboards...");
             String query = "SELECT * FROM schedules";
             Statement st = ServerInit.conn.createStatement();
             st.executeQuery("USE `cab302`;");
@@ -913,13 +848,13 @@ public class Server {
 
             // checks if there is any data in the database
             if (!rs.isBeforeFirst()) {
-                System.out.println("There is currently no scheduled billboards"); // Debug use
+//                System.out.println("There is currently no scheduled billboards"); // Debug use
 //            return "No User in database";
             } else {
                 // Contains the schedules in the database
                 ArrayList<String[]> schedules = new ArrayList<>();
 
-                System.out.println("Retrieving list of Schedules from database...");
+//                System.out.println("Retrieving list of Schedules from database...");
 
                 while (rs.next()) {
                     String id = rs.getString("idSchedules");
@@ -933,8 +868,8 @@ public class Server {
                     String[] schedule = {id, weekday, duration, startTime, recurring, billId, userId};
                     schedules.add(schedule);
                 }
-                System.out.println("Successfully retrieved list of scheduled billboards");
-                System.out.println("Sending list of Schedules to controller...");
+//                System.out.println("Successfully retrieved list of scheduled billboards");
+//                System.out.println("Sending list of Schedules to controller...");
 
                 // Send the schedules to the control panel
                 return schedules;
@@ -955,7 +890,7 @@ public class Server {
         if (!rs.isBeforeFirst()) {
             send.write(-1);
             send.flush();
-            System.out.println("There is no billboards to be displayed"); // Debug use
+//            System.out.println("There is no billboards to be displayed"); // Debug use
 //            return "No User in database";
         } else {
             send.write(1);
@@ -963,7 +898,7 @@ public class Server {
             // Contains the schedules in the database
             ArrayList<String[]> billboardList = new ArrayList<>();
 
-            System.out.println("Retrieving list of Schedules from database...");
+//            System.out.println("Retrieving list of Schedules from database...");
 
             while (rs.next()) {
                 String id = rs.getString("idBillboards");
@@ -981,7 +916,7 @@ public class Server {
         }
     }
 
-    public static void viewerRequest(ObjectOutputStream send) throws IOException, ClassNotFoundException, SQLException
+    public static void ViewerRequest(ObjectOutputStream send) throws IOException, ClassNotFoundException, SQLException
     {
         String query1 = "SET @du = 0, @st = 0, @et = 0;";
         String query2 = "SELECT duration, startTime\n" +
@@ -1011,14 +946,15 @@ public class Server {
         if (!rs.isBeforeFirst()) {
             send.write(-1);
             send.flush();
-            System.out.println("There is no billboards to be displayed"); // Debug use
+//            System.out.println("There is no billboards to be displayed"); // Debug use
         } else {
             send.write(1);
             send.flush();
             // Contains the schedules in the database
             List<Object> billboardImages = new ArrayList<>();
 
-            System.out.println("Retrieving list of Schedules from database...");
+//            System.out.println("Retrieving list of Schedules from database...");
+
             while (rs.next()) {
                 String fileLocation = rs.getString("fileLocation");
                 billboardImages.add(fileLocation);
@@ -1029,7 +965,7 @@ public class Server {
     }
 
     private static String CheckIfBillboardIsScheduled(int billboardID, boolean scheduled) {
-        if (scheduled == false) {
+        if (!scheduled) {
             return  "SELECT * FROM billboards " +
                     "LEFT JOIN schedules ON schedules.idBillboard = billboards.idBillboards " +
                     "LEFT JOIN users ON billboards.userId = users.idUsers " +
@@ -1113,7 +1049,7 @@ public class Server {
                     Billboard billboard = ReadXMLFile(new File(fileLocation), name);
                     send.writeObject(billboard);
                 } else {
-                    System.out.println("There is no billboards to be displayed");
+//                    System.out.println("There is no billboards to be displayed");
                     send.writeInt(-1);
                 }
                 send.flush();
@@ -1186,7 +1122,7 @@ public class Server {
         st.executeQuery("USE `cab302`;");
         ResultSet rs = st.executeQuery(query);
         if (!rs.isBeforeFirst()) {
-            System.out.println("There is no user");
+//            System.out.println("There is no user");
         } else {
             rs.next();
 //            Check to see if the 'Create Billboard' permission is ON or OFF
@@ -1217,14 +1153,14 @@ public class Server {
         return permission;
     }
 
-    private static String getBillboardId(ArrayList<String> data) throws SQLException {
+    private static String GetBillboardId(ArrayList<String> data) throws SQLException {
         String getBillboard = "SELECT `idBillboards` FROM `billboards` WHERE `billboardName` = '"+data.get(0)+"';";
         Statement st = ServerInit.conn.createStatement();
         st.executeQuery("USE `cab302`;");
         ResultSet rs = st.executeQuery(getBillboard);
         if(!rs.isBeforeFirst())
         {
-            System.out.println("No billboard data");
+//            System.out.println("No billboard data");
             return "";
         }
         rs.next();
@@ -1232,7 +1168,7 @@ public class Server {
         return billid;
     }
 
-    private static String getBillboardName(String id) throws SQLException {
+    private static String GetBillboardName(String id) throws SQLException {
         String getBillboard = "SELECT `billboardName` FROM `billboards` WHERE `idBillboards` = '"+id+"';";
         Statement st = ServerInit.conn.createStatement();
         st.executeQuery("USE `cab302`;");
@@ -1247,7 +1183,7 @@ public class Server {
         return billid;
     }
 
-    private static String getUserId(ArrayList<String> data) throws SQLException {
+    private static String GetUserId(ArrayList<String> data) throws SQLException {
         String user = "";
         for(String username : usersAuthenticated.keySet())
         {
@@ -1259,7 +1195,7 @@ public class Server {
         ResultSet rs2 = st2.executeQuery(getUser);
         if(!rs2.isBeforeFirst())
         {
-            System.out.println("No user data");
+//            System.out.println("No user data");
             return "";
         }
         rs2.next();
@@ -1267,7 +1203,7 @@ public class Server {
         return userid;
     }
 
-    private static Calendar formatTime(ArrayList<String> data)
+    private static Calendar FormatTime(ArrayList<String> data)
     {
         Calendar c = Calendar.getInstance();
         String hoursClean = data.get(2).split(" ")[0].replace("h", "");
@@ -1279,16 +1215,13 @@ public class Server {
         c.set(Calendar.MINUTE, min);
         return c;
     }
-    private static void createNewSchedule(ObjectInputStream receiver, ObjectOutputStream send) throws SQLException, IOException, ClassNotFoundException {
+    private static void CreateNewSchedule(ObjectInputStream receiver, ObjectOutputStream send) throws SQLException, IOException, ClassNotFoundException {
         receiver.read();
         ArrayList<String> data = (ArrayList<String>) receiver.readObject();
 
-        String billid = getBillboardId(data);
-        String userid = getUserId(data);
-        String date = formatTime(data).getTime().toString().split(" ")[3];
-
-        System.out.println(billid);
-
+        String billid = GetBillboardId(data);
+        String userid = GetUserId(data);
+        String date = FormatTime(data).getTime().toString().split(" ")[3];
         int recurring = 0;
         if(data.get(4).equals("Daily"))
         {
@@ -1302,14 +1235,14 @@ public class Server {
 
         String query = "INSERT INTO schedules (`weekday`, `duration`, `startTime`, `recurring`, `idBillboard`, `userId`) " +
                 "VALUES ('"+data.get(1)+"', '"+data.get(3)+"','"+date+"', '"+recurring+"','"+billid+"', '"+userid+"');";
-        System.out.println(query);
+//        System.out.println(query);
         Statement st = ServerInit.conn.createStatement();
         st.executeQuery("USE `cab302`;");
         st.executeQuery(query);
     }
 
-    private static void logout(ObjectInputStream receiver, ObjectOutputStream send) throws IOException {
-        boolean DEBUGGING = false;
+    static void Logout(String userToRemove) throws IOException {
+        boolean DEBUGGING = false; // Change this to see if the session token is removed from server
         if (DEBUGGING) {
             System.out.println("Before Logout");
             for (String username : usersAuthenticated.keySet()) {
@@ -1317,8 +1250,7 @@ public class Server {
                 System.out.println("Username: " + username + " Value: " + value);
             }
         }
-        String Username = receiver.readUTF(); // Get username from client
-        usersAuthenticated.remove(Username);  // Remove session token from list
+        usersAuthenticated.remove(userToRemove);  // Remove session token from list
         if (DEBUGGING) {
             System.out.println("After Logout");
             for (String username : usersAuthenticated.keySet()) {

@@ -1,12 +1,12 @@
 package controlpanel;
 
 import resources.Billboard;
+import resources.GetPropertyValues;
 import resources.UserPermission;
 
 import java.awt.*;
 import javax.swing.*;
 import java.io.*;
-import java.lang.reflect.Array;
 import java.net.*;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -16,7 +16,7 @@ import java.util.Arrays;
 import java.util.Base64;
 
 /**
- * The controller class is the main abstract class that contains
+ * The Controller class is the main abstract class that contains
  * the main logic and rendering for the control panel. This includes
  * methods for modifying data in the database and in server memory:
  * <ul>
@@ -32,7 +32,7 @@ import java.util.Base64;
  * @since       JDK13
  */
 
-public class controller {
+public class Controller {
 
     public static boolean loginSuccessful = false;
     static String loggedInUser;
@@ -46,30 +46,21 @@ public class controller {
      *
      *  @return Returns client socket if it's able to read server.config
      *          or does not encounter an error
-     *  @exception throws IOexception
      */
     // Attempts to make a connection to the server
-    public static Socket connectionToServer() throws IOException {
+    public static Socket ConnectionToServer(){
         try {
             // Gathers the information from server.config file
             resources.GetPropertyValues properties = new resources.GetPropertyValues();
-            properties.readPropertyFile();
+            properties.ReadPropertyFile();
 
-            // Create a socket connect
-            Socket client = new Socket(properties.serverName,  properties.port);
-
-            // If the server connection was made
-            return client;
+            // Create a socket connect If the server connection was made
+            return new Socket(properties.serverName, GetPropertyValues.port);
         } catch (IOException e) {
-            e.printStackTrace();
-            // Developer message
-            System.out.println("Server connection doesn't exist.");
 
-            // User pop up window
-            DialogWindow.showErrorPane("Server is offline", "Error");
-
-            Socket client = new Socket();
-            return client;
+            // Alert the user that the server is offline. Produce a pop up window
+            DialogWindow.ShowErrorPane("Server is offline", "Error");
+            return new Socket();
         }
     }
 
@@ -82,10 +73,10 @@ public class controller {
      *
      * @param billboard          Object class Billboard
      */
-    static void createBillboard(Billboard billboard) throws IOException {
+    static void CreateBillboard(Billboard billboard) throws IOException {
 
         // Initializing connections
-        Socket client = connectionToServer();                   // User socket connection
+        Socket client = ConnectionToServer();                   // User socket connection
         OutputStream outputStream = client.getOutputStream();   // Server output to user
         InputStream inputStream = client.getInputStream();      // User input to server
 
@@ -103,12 +94,11 @@ public class controller {
         if (val == 1) {
             send.writeObject(billboard);
             send.flush(); // Must be done before switching to reading state
-//            System.out.println(receiver.readUTF());
             if (receiver.read() ==  1) {
-                DialogWindow.showInformationPane("Billboard finished creating.", "Completion of Billboard");
+                DialogWindow.ShowInformationPane("Billboard finished creating.", "Completion of Billboard");
             }
         } else {
-            DialogWindow.showErrorPane("Sorry you don't have permission to edit", "Error Can't Make Billboard");
+            DialogWindow.ShowErrorPane("Sorry you don't have permission to edit", "Error Can't Make Billboard");
         }
 //      End connections
         send.close();
@@ -117,51 +107,20 @@ public class controller {
     }
 
     /**
-     *  Editing an existing user on the server.
-     *
-     * @param client    Current socket to server
-     * @param username  Username of the client to edit
-     * @param password
-     * @param fName
-     * @param lName
-     */
-    static void editUser(Socket client, String username, String password, String fName, String lName) throws IOException {
-
-        OutputStream outputStream = client.getOutputStream();
-        InputStream inputStream = client.getInputStream();
-
-        ObjectOutputStream send = new ObjectOutputStream(outputStream);
-        ObjectInputStream receiver = new ObjectInputStream(inputStream);
-
-//        send.writeUTF("Hello");
-//
-//        send.flush(); // Must be done before switching to reading state
-//        System.out.println(receiver.readUTF());
-
-//      End connections
-        send.close();
-        receiver.close();
-        client.close();
-    }
-    /**
-     *  Authorization of user login based on stored user information in the database / or memory.
+     *  Authorization of user Login based on stored user information in the database / or memory.
      *
      * @param username          Users username.
      * @param password          Users password.
-     * @return loginSuccessful  Global class variable determining if the user login was successful or not.
+     * @return loginSuccessful  Global class variable determining if the user Login was successful or not.
      * @exception               IOException                 If failure in code input or output operations.
      * @exception               ClassNotFoundException      If unable to find defined CLass.
-     * @exception               InvalidKeySpecException
+     * @exception               InvalidKeySpecException     If the character key is invalid character for UTF-8
      * @exception               NoSuchAlgorithmException    If cryptographic algorithm is not available.
      *
      */
-    static boolean authenticateUserLogin(String username, String password) throws IOException, ClassNotFoundException, InvalidKeySpecException, NoSuchAlgorithmException {
-        System.out.println("user: " + username); // Debugging use
-        System.out.println("Password: " + password); // Debugging use
-
-        String hashedPassword = plaintextToHashedPassword(password);
-
-        Socket client = connectionToServer();
+    static boolean AuthenticateUserLogin(String username, String password) throws IOException, ClassNotFoundException, InvalidKeySpecException, NoSuchAlgorithmException {
+        String hashedPassword = PlaintextToHashedPassword(password);
+        Socket client = ConnectionToServer();
 
         // Checking to see if the socket is currently connected to our server.
         if (client.isConnected()) {
@@ -181,19 +140,19 @@ public class controller {
 
 
             // If the server send back a true or false message decides what to do.
-            if (receiver.readBoolean()) {
-                System.out.println("correct username and password"); // DEBUG CODE
-                loginSuccessful = true;
+            loginSuccessful = receiver.readBoolean();
+            if (loginSuccessful) {
+//                loginSuccessful = true;
                 loggedInUser = username;
                 boolean[] temp = (boolean[]) receiver.readObject();
                 permission.SetUserPermission(temp);
-                getAuthToken();
+                GetAuthToken();
+                Login.passwordText.setText("");
+                ListBillboards();
             } else {
                 // Alert the user that they have incorrectly entered they username or password with
                 // a pop up window.
-                System.out.println("wrong username or password"); // DEBUG CODE
-                // IMPLEMENT AN ERROR MESSAGE FOR USER
-                DialogWindow.showErrorPane("Incorrect Login Information", "Error");
+                DialogWindow.ShowErrorPane("Incorrect Login Information", "Error");
                 loginSuccessful = false;
             }
 
@@ -202,7 +161,7 @@ public class controller {
             receiver.close();
             client.close();
 
-            password = new String(); // Used to clear the password string (Not very secure though)
+            password = ""; // Used to clear the password string (Not very secure though)
 
         }
         return loginSuccessful;
@@ -213,10 +172,10 @@ public class controller {
      *
      * @param password          Password to encrypt
      * @return                  Returns the MD5 hashed password in a string.
-     * @exception               InvalidKeySpecException
+     * @exception               InvalidKeySpecException     If the character key is invalid character for UTF-8
      * @exception               NoSuchAlgorithmException    If cryptographic algorithm is not available.
      */
-    static String plaintextToHashedPassword(String password) throws InvalidKeySpecException, NoSuchAlgorithmException {
+    static String PlaintextToHashedPassword(String password) throws InvalidKeySpecException, NoSuchAlgorithmException {
         String hashedPassword = null;
         try {
             // Create MessageDigest instance for MD5
@@ -246,21 +205,21 @@ public class controller {
         return hashedPassword;
     }
 
-    static String hashNewPassword(String newPassword) throws InvalidKeySpecException, NoSuchAlgorithmException {
+    static String HashNewPassword(String newPassword) throws InvalidKeySpecException, NoSuchAlgorithmException {
 
-        String newPasswordHashed = plaintextToHashedPassword(newPassword);
+        String newPasswordHashed = PlaintextToHashedPassword(newPassword);
 
-        System.out.println("hashing new password...");
-        System.out.println(newPasswordHashed);
+//        System.out.println("hashing new password...");
+//        System.out.println(newPasswordHashed);
 
         return newPasswordHashed;
     }
 
-    static void changePassword(String username, String password) throws IOException, InvalidKeySpecException, NoSuchAlgorithmException {
+    static void ChangePassword(String username, String password) throws IOException, InvalidKeySpecException, NoSuchAlgorithmException {
 
-        Socket client = connectionToServer();
+        Socket client = ConnectionToServer();
 
-        // connects to the server with information and attempts to get the auth token for the user after successful login
+        // connects to the server with information and attempts to get the auth token for the user after successful Login
         if (client.isConnected()) {
 
             OutputStream outputStream = client.getOutputStream();
@@ -269,10 +228,10 @@ public class controller {
             ObjectOutputStream send = new ObjectOutputStream(outputStream);
             ObjectInputStream receiver = new ObjectInputStream(inputStream);
 
-            String newPassword = hashNewPassword(password);
+            String newPassword = HashNewPassword(password);
 
-            System.out.println("Sending new password to server");
-            System.out.println(username);
+//            System.out.println("Sending new password to server");
+//            System.out.println(username);
 
             send.writeUTF("changePassword");
             send.writeUTF(username);
@@ -280,7 +239,6 @@ public class controller {
             send.writeUTF(loggedInUser);
             send.writeUTF(token);
             send.flush(); // Must be done before switching to reading state
-
 
 //      End connections
             send.close();
@@ -296,10 +254,10 @@ public class controller {
      * @exception IOException               If failure in code input or output operations.
      * @exception ClassNotFoundException    If unable to find defined CLass.
      */
-    public static void getAuthToken() throws IOException, ClassNotFoundException {
-        Socket client = connectionToServer();
+    public static void GetAuthToken() throws IOException, ClassNotFoundException {
+        Socket client = ConnectionToServer();
 
-        // connects to the server with information and attempts to get the auth token for the user after successful login
+        // connects to the server with information and attempts to get the auth token for the user after successful Login
         if (client.isConnected()) {
 
             OutputStream outputStream = client.getOutputStream();
@@ -314,7 +272,57 @@ public class controller {
 
             // Store the auth token for the user
             token = (String) receiver.readObject();
-            System.out.println(token);
+//            System.out.println(token);
+
+//      End connections
+            send.close();
+            receiver.close();
+            client.close();
+        }
+    }
+
+    /**
+     * Connects to server and stores the current listings.
+     * - Todo database connectivity?
+     *
+     * @throws IOException
+     * @throws ClassNotFoundException
+     */
+    private static void RequestBillboardScheduling() throws IOException, ClassNotFoundException {
+
+        Socket client = ConnectionToServer();
+
+        // connects to the server with information and attempts to get the auth token for the user after successful Login
+        if (client.isConnected()) {
+            OutputStream outputStream = client.getOutputStream();
+            InputStream inputStream = client.getInputStream();
+
+            ObjectOutputStream send = new ObjectOutputStream(outputStream);
+            ObjectInputStream receiver = new ObjectInputStream(inputStream);
+
+            send.writeUTF("RequestScheduleBillboards");
+
+            send.writeUTF(loggedInUser);
+            send.writeUTF(token);
+            send.flush();
+
+            // Store the current schedule listings
+            schedules = (ArrayList<String[]>) receiver.readObject();
+
+            if (schedules != null) {
+                int scheduleCounter = 1;
+                for(String[] schedule : schedules){
+//                    System.out.println("\nScheduled billboard " + scheduleCounter + ":");
+//                    System.out.println("Day: " + schedule[1]);
+//                    System.out.println("Duration: " + schedule[2]);
+//                    System.out.println("Start Time:  " + schedule[3]);
+
+                    scheduleCounter++;
+                }
+            } else {
+                DialogWindow.ShowInformationPane("There is currently no scheduled billboards", "No billboard scheduled");
+//                System.out.println("There is currently no scheduled billboards");
+            }
 
 //      End connections
             send.close();
@@ -327,8 +335,8 @@ public class controller {
      *  Modifies visibility state of login.window to false and -renables nav bar-
      *
      */
-    public static void hideLoginScreen() {
-        login.window.setVisible(false);
+    public static void HideLoginScreen() {
+        Login.window.setVisible(false);
         ControlPanelFrameHandler.bar.setVisible(true);
     }
 
@@ -337,7 +345,7 @@ public class controller {
      *
      * @param component     Component needing toggle show / hide functionality.
      */
-    public static void toggleVisibility(JComponent component)
+    public static void ToggleVisibility(JComponent component)
     {
         // isVisible() returns a bool
         // true = is currently opened
@@ -353,57 +361,55 @@ public class controller {
     }
 
 
-    public static void showCreateBillboard(){
-        toggleVisibility(createBillboards.window);
+    public static void ShowCreateBillboard(){
+        ToggleVisibility(CreateBillboards.window);
     }
-    public static void showListBillboard(){
-        toggleVisibility(listBillboards.window);
+    public static void ShowListBillboard(){
+        ToggleVisibility(ListBillboards.window);
     }
 
     /**
      *  Toggle switch to show or hide Schedule window via modifying isVisible state
      */
-    public static void showSchedule() throws IOException, ClassNotFoundException {
-        scheduleBillboards.reload(scheduleBillboards.tableCalendar);
-        toggleVisibility(scheduleBillboards.window);
+    public static void ShowSchedule() throws IOException, ClassNotFoundException {
+        ScheduleBillboards.reload(ScheduleBillboards.tableCalendar);
+        ToggleVisibility(ScheduleBillboards.window);
     }
     /**
      *  Toggle switch to show or hide edit user window via modifying isVisible state
      */
-    public static void showEditUser() {
-        toggleVisibility(usersPage.window);
+    public static void ShowEditUser() {
+        ToggleVisibility(UsersPage.window);
     }
 
     /**
      *  Toggle switch to show or hide admin preferences via modifying isVisible state
      */
-    public static void showAdminPreferences() {
-        if (controller.permission.GetUserPermission("EditUser")) {
-            toggleVisibility(usersPage.adminWindow);
+    public static void ShowAdminPreferences() {
+        if (Controller.permission.GetUserPermission("EditUser")) {
+            ToggleVisibility(UsersPage.adminWindow);
         } else {
             DialogWindow.NoAccessTo("Admin options");
         }
     }
 
     /**
-     *  Toggle switch to show or hide user preferences via modifying isVisible state
+     *  Toggle switch to show or hide help screen via modifying isVisible state
      */
-    public static void ShowUserPreferences() {
-        //toggleVisibility(usersPage.userWindow);
+    public static void ShowHelpScreen() {
+        ToggleVisibility(HelpPage.window);
     }
 
     /**
      *  Toggle switch to show or hide help screen via modifying isVisible state
      */
-    public static void showHelpScreen() {
-        toggleVisibility(HelpPage.window);
+    public static void ShowCreateSchedule(){
+        ToggleVisibility(CreateSchedule.window);
     }
-
-    public static void showCreateSchedule(){toggleVisibility(createSchedule.window);}
 
     /**
      * Create base64 image from users selected file
-     * @see createBillboards
+     * @see CreateBillboards
      *
      * @param file      File to be converted to base64.
      * @return          Converted base64 image from user selected file.
@@ -416,20 +422,21 @@ public class controller {
             imageInFile.read(imageData);
             base64Image = Base64.getEncoder().encodeToString(imageData);
         } catch (FileNotFoundException e) {
-            System.out.println("Image not found" + e);
+            DialogWindow.ShowErrorPane("Image could not be found.", "Error Image Missing");
+//            System.out.println("Image not found" + e);
         } catch (IOException ioe) {
-            System.out.println("Exception while reading the Image " + ioe);
+            DialogWindow.ShowErrorPane("Error while the image was being converted.", "Error Converting Image");
+//            System.out.println("Exception while reading the Image " + ioe);
         }
         return base64Image;
     }
 
     /**
      * Logs the current user out of their session.
-     * Todo modify code to actually log the user out to the login page
+     * Sends a message to the server to remove
      */
-    public static void Logout() throws IOException, ClassNotFoundException {
-        ControlPanelFrameHandler.LogoutWindow();
-        Socket client = connectionToServer();
+    public static void Logout() throws IOException {
+        Socket client = ConnectionToServer();
         //  Checks if the sever is online
         if (client.isConnected()) {
             OutputStream outputStream = client.getOutputStream();
@@ -446,16 +453,18 @@ public class controller {
             receiver.close();
             client.close();
         }
-//        Clear local client stored information
+//        Resetting the application for the user on the client-side
         loggedInUser = "";
+        Login.usernameText.setText("");
         loginSuccessful = false;
         boolean[] falsePermission = {false, false, false, false};
         permission.SetUserPermission(falsePermission);
         token = "";
+        ControlPanelFrameHandler.LogoutWindow();
     }
 
     public static String[][] ListBillboards() throws IOException, ClassNotFoundException {
-        Socket client = connectionToServer();
+        Socket client = ConnectionToServer();
         ArrayList<String[]> billboardArrayList;
         String[][] billboardList = new String[][]{
                 {"", "", "", "", "", ""},
@@ -495,9 +504,10 @@ public class controller {
                         counter++;
                     }
                 }
-            }else {
-                System.out.println("No data");
             }
+//            else {
+//                System.out.println("No data");
+//            }
 //      End connections
             send.close();
             receiver.close();
@@ -508,7 +518,7 @@ public class controller {
 
     public static void EditSelectedBillboard(String billboardId) throws IOException, ClassNotFoundException {
         int id = Integer.parseInt(billboardId);
-        Socket client = connectionToServer();
+        Socket client = ConnectionToServer();
         if (client.isConnected()) {
             OutputStream outputStream = client.getOutputStream();
             InputStream inputStream = client.getInputStream();
@@ -524,23 +534,23 @@ public class controller {
             int val = receiver.readInt();
             if (val == 1) {
                 Billboard billboard = (Billboard) receiver.readObject();
-                createBillboards.input1.setText(billboard.getTitle());
-                createBillboards.input2.setText(billboard.getMessageText());
-                createBillboards.informationColourInput.setText(billboard.getInformationText());
-                createBillboards.textDisplayColour.setBackground(Color.decode(billboard.getMessageColour()));
-                createBillboards.informationTextColor.setBackground(Color.decode(billboard.getInformationColour()));
-                createBillboards.backgroundDisplayColour.setBackground(Color.decode(billboard.getBackgroundColour()));
-                createBillboards.window.toFront();
-                showCreateBillboard();
+                CreateBillboards.input1.setText(billboard.getTitle());
+                CreateBillboards.input2.setText(billboard.getMessageText());
+                CreateBillboards.informationColourInput.setText(billboard.getInformationText());
+                CreateBillboards.textDisplayColour.setBackground(Color.decode(billboard.getMessageColour()));
+                CreateBillboards.informationTextColor.setBackground(Color.decode(billboard.getInformationColour()));
+                CreateBillboards.backgroundDisplayColour.setBackground(Color.decode(billboard.getBackgroundColour()));
+                CreateBillboards.window.setVisible(true);
+                CreateBillboards.window.toFront();
 
             }
-            if (val == -1) {
+            else if (val == -1) {
                 DialogWindow.NoAccessTo("to edit this billboard");
             }
 
             else {
 //                Display POP ERROR MESSAGE
-                DialogWindow.showErrorPane("Please refresh the billboard list", "Error: Could NOT find billboard");
+                DialogWindow.ShowErrorPane("Please refresh the billboard list", "Error: Could NOT find billboard");
             }
 
             send.close();
@@ -551,7 +561,7 @@ public class controller {
 
     public static void DeleteBillboard(String billboardId) throws IOException {
         int id = Integer.parseInt(billboardId);
-        Socket client = connectionToServer();
+        Socket client = ConnectionToServer();
         if (client.isConnected()) {
             OutputStream outputStream = client.getOutputStream();
             InputStream inputStream = client.getInputStream();
@@ -566,7 +576,7 @@ public class controller {
             int val = receiver.readInt();
             if (val == 1) {
                 String billboardName = receiver.readUTF();
-                int yesOrNo = DialogWindow.showYesNoPane("Are you sure you want to delete billboard: " +
+                int yesOrNo = DialogWindow.ShowYesNoPane("Are you sure you want to delete billboard: " +
                         billboardName + "?", "Alert Deleting Billboard");
                 send.write(yesOrNo);
                 send.flush();
@@ -575,7 +585,7 @@ public class controller {
                 if (val == 0) {
                     DialogWindow.NoAccessTo("to delete this billboard");
                 } else if (val == -1) {
-                    DialogWindow.showErrorPane("Please refresh the billboard list",
+                    DialogWindow.ShowErrorPane("Please refresh the billboard list",
                             "Error: Could NOT find billboard"
                     );
                 }
@@ -612,16 +622,14 @@ public class controller {
         return output;
     }
 
-    public static String[][] listSchedule() throws IOException, ClassNotFoundException {
-        System.out.println(loggedInUser);
+    public static String[][] ListSchedule() throws IOException, ClassNotFoundException {
         if(loggedInUser == null) return new String[][]{};
-        Socket client = connectionToServer();           // Get user connection
+        Socket client = ConnectionToServer();           // Get user connection
 
         ArrayList<String[]> scheduled;         // Create billboard array list
 
         if(!client.isConnected() || loggedInUser == null)
         {
-            System.out.println("No data");
             client.close();
             return new String[][]{};
         }
@@ -633,22 +641,19 @@ public class controller {
         ObjectOutputStream send = new ObjectOutputStream(outputStream);
         ObjectInputStream receiver = new ObjectInputStream(inputStream);
 
-        System.out.println("Connecting to server");
-
         send.writeUTF("RequestScheduleBillboards");
         send.writeUTF(loggedInUser);
         send.writeUTF(token);
         send.flush();
 
         int val = receiver.read();
-        System.out.println(val);
         ArrayList<String[]> list = (ArrayList<String[]>) receiver.readObject();
         scheduled =  list;
         if(val == 1)
         {
-            System.out.println(scheduled);
+//            System.out.println(scheduled);
             String[][] test = MListToMArray(scheduled);
-            System.out.println(Arrays.toString(test));
+//            System.out.println(Arrays.toString(test));
         }
         // End connections
         send.close();
@@ -657,8 +662,9 @@ public class controller {
         return new String[][]{};
     }
 
+
     public static String GetBillboardFromID(String id) throws IOException, ClassNotFoundException {
-        Socket client = connectionToServer();
+        Socket client = ConnectionToServer();
         if(!client.isConnected()) return new String();
         OutputStream outputStream = client.getOutputStream();
         InputStream inputStream = client.getInputStream();
@@ -679,7 +685,7 @@ public class controller {
     }
 
     public static ArrayList<String> GetBillBoardFromTimes(String min, String max, String table) throws IOException, ClassNotFoundException {
-        Socket client = connectionToServer();
+        Socket client = ConnectionToServer();
         OutputStream outputStream = client.getOutputStream();
         InputStream inputStream = client.getInputStream();
 
@@ -711,8 +717,8 @@ public class controller {
         return temp;
     }
 
-    public static void createNewSchedule(ArrayList<String> vals) throws IOException {
-        Socket client = connectionToServer();
+    public static void CreateNewSchedule(ArrayList<String> vals) throws IOException {
+        Socket client = ConnectionToServer();
         if(!client.isConnected()) return;
         OutputStream outputStream = client.getOutputStream();
         InputStream inputStream = client.getInputStream();
@@ -720,17 +726,15 @@ public class controller {
         ObjectOutputStream send = new ObjectOutputStream(outputStream);
         ObjectInputStream receiver = new ObjectInputStream(inputStream);
 
-        System.out.println("Creating new schedule");
+//        System.out.println("Creating new schedule");
         send.writeUTF("CreateSchedule");
         send.writeObject(vals);
         send.flush();
-
-
     }
 
     public static ArrayList<String[]> RequestScheduleBillboards() throws IOException, ClassNotFoundException {
         if(loggedInUser == null) return new ArrayList<>();
-        Socket client = connectionToServer();
+        Socket client = ConnectionToServer();
         if(!client.isConnected()) return new ArrayList<String[]>();
         OutputStream outputStream = client.getOutputStream();
         InputStream inputStream = client.getInputStream();
@@ -755,14 +759,14 @@ public class controller {
 
     }
 
-    static ArrayList<String> getListOfUsers() throws IOException, ClassNotFoundException {
+    static ArrayList<String> GetListOfUsers() throws IOException, ClassNotFoundException {
 
         ArrayList<String> listOfUsers = new ArrayList<>();
 
-        Socket client = connectionToServer();
+        Socket client = ConnectionToServer();
 
         // connects to the server with information and attempts to get the auth token
-        // for the user after successful login
+        // for the user after successful Login
         if (client.isConnected()) {
             OutputStream outputStream = client.getOutputStream();
             InputStream inputStream = client.getInputStream();
@@ -784,14 +788,14 @@ public class controller {
         return listOfUsers;
     }
 
-    static String[] getUserInfo(String username) throws IOException, ClassNotFoundException {
+    static String[] GetUserInfo(String username) throws IOException, ClassNotFoundException {
 
         String[] userInfo = new String[2];
 
-        Socket client = connectionToServer();
+        Socket client = ConnectionToServer();
 
         // connects to the server with information and attempts to get the auth token
-        // for the user after successful login
+        // for the user after successful Login
         if (client.isConnected()) {
             OutputStream outputStream = client.getOutputStream();
             InputStream inputStream = client.getInputStream();
@@ -816,17 +820,17 @@ public class controller {
         return userInfo;
     }
 
-    static String[] updateUserInfo(String firstName, String lastName) {
+    static String[] UpdateUserInfo(String firstName, String lastName) {
         String[] updatedUserInfo = { firstName, lastName };
         return updatedUserInfo;
     }
 
-    static void updateUserDetails(String username, String firstName, String lastName) throws IOException {
+    static void UpdateUserDetails(String username, String firstName, String lastName) throws IOException {
 
-        Socket client = connectionToServer();
+        Socket client = ConnectionToServer();
 
         // connects to the server with information and attempts to get the auth token
-        // for the user after successful login
+        // for the user after successful Login
         if (client.isConnected()) {
             OutputStream outputStream = client.getOutputStream();
             InputStream inputStream = client.getInputStream();
@@ -834,7 +838,7 @@ public class controller {
             ObjectOutputStream send = new ObjectOutputStream(outputStream);
             ObjectInputStream receiver = new ObjectInputStream(inputStream);
 
-            String[] updatedUserInfo = updateUserInfo(firstName, lastName);
+            String[] updatedUserInfo = UpdateUserInfo(firstName, lastName);
 
             send.writeUTF("updateUserInfo");
             send.writeUTF(username);
@@ -851,7 +855,7 @@ public class controller {
         }
     }
 
-    static boolean deleteUser(ArrayList<String> userList, String username) {
+    static boolean DeleteUser(ArrayList<String> userList, String username) {
         boolean wasUserInList = false;
 
         ArrayList<String> currentUserList = userList;
@@ -865,7 +869,7 @@ public class controller {
             // Ensure that the dialog doesn't attempt to show up for the unit test
             if (!loggedInUser.equals("ThisIsATestUser")) {
                 // Display POP ERROR MESSAGE
-                DialogWindow.showErrorPane("Cannot delete yourself. Please select a user that isn't yourself.",
+                DialogWindow.ShowErrorPane("Cannot delete yourself. Please select a user that isn't yourself.",
                         "Error: Attempted to delete self");
             }
         }
@@ -873,15 +877,15 @@ public class controller {
         return wasUserInList;
     }
 
-    static void deleteUserFromDB(ArrayList<String> userList, String username) throws IOException {
+    static void DeleteUserFromDB(ArrayList<String> userList, String username) throws IOException {
 
         // If the user does exist in the list of users pulled from the database, send
         // delete request to the server
-        if (deleteUser(userList, username)) {
-            Socket client = connectionToServer();
-            System.out.println("Sending request to server to delete user");
+        if (DeleteUser(userList, username)) {
+            Socket client = ConnectionToServer();
+//            System.out.println("Sending request to server to delete user");
             // connects to the server with information and attempts to get the auth token
-            // for the user after successful login
+            // for the user after successful Login
             if (client.isConnected()) {
                 OutputStream outputStream = client.getOutputStream();
                 InputStream inputStream = client.getInputStream();
@@ -903,14 +907,14 @@ public class controller {
         }
     }
 
-    static boolean[] getUserPermissions(String username) throws IOException, ClassNotFoundException {
+    static boolean[] GetUserPermissions(String username) throws IOException, ClassNotFoundException {
 
         boolean[] userPermissions = new boolean[4];
 
-        Socket client = connectionToServer();
+        Socket client = ConnectionToServer();
 
         // connects to the server with information and attempts to get the auth token
-        // for the user after successful login
+        // for the user after successful Login
         if (client.isConnected()) {
             OutputStream outputStream = client.getOutputStream();
             InputStream inputStream = client.getInputStream();
@@ -925,10 +929,7 @@ public class controller {
             send.flush();
 
             // Store the list of permissions for the user
-            userPermissions[0] = receiver.readBoolean();
-            userPermissions[1] = receiver.readBoolean();
-            userPermissions[2] = receiver.readBoolean();
-            userPermissions[3] = receiver.readBoolean();
+            userPermissions = (boolean[]) receiver.readObject();
 
             // End connections
             send.close();
@@ -938,30 +939,30 @@ public class controller {
         return userPermissions;
     }
 
-    static boolean[] updateUserPermissions(boolean[] currentPermissions, boolean[] updatedPermissions, String username) {
+    static boolean[] UpdateUserPermissions(boolean[] currentPermissions, boolean[] updatedPermissions, String username) {
         boolean[] newPermissionsForUser = currentPermissions;
 
         if (!username.equals(loggedInUser)) {
             newPermissionsForUser = updatedPermissions;
         } else if (!loggedInUser.equals("ThisIsATestUser")) {
             // Display POP ERROR MESSAGE
-            DialogWindow.showErrorPane("Cannot change own permissions. Please select a user that isn't yourself.",
+            DialogWindow.ShowErrorPane("Cannot change own permissions. Please select a user that isn't yourself.",
                     "Error: Attempted to update own permissions");
         }
 
         return newPermissionsForUser;
     }
 
-    static void updateUserPermissionsToDB(boolean[] currentPermissions, boolean[] updatedPermissions, String username) throws IOException {
-        System.out.println(username);
-        boolean[] newPermissionsForUser = updateUserPermissions(currentPermissions, updatedPermissions, username);
+    static void UpdateUserPermissionsToDB(boolean[] currentPermissions, boolean[] updatedPermissions, String username) throws IOException {
+//        System.out.println(username);
+        boolean[] newPermissionsForUser = UpdateUserPermissions(currentPermissions, updatedPermissions, username);
 
         // If the permissions of a user that are being updated is not the user attempting to change their own, send the request to the server
         if (!Arrays.equals(newPermissionsForUser, currentPermissions)) {
-            Socket client = connectionToServer();
-            System.out.println("Sending request to server to update user permissions for user: " + username);
+            Socket client = ConnectionToServer();
+//            System.out.println("Sending request to server to update user permissions for user: " + username);
             // connects to the server with information and attempts to get the auth token
-            // for the user after successful login
+            // for the user after successful Login
             if (client.isConnected()) {
                 OutputStream outputStream = client.getOutputStream();
                 InputStream inputStream = client.getInputStream();
@@ -969,15 +970,17 @@ public class controller {
                 ObjectOutputStream send = new ObjectOutputStream(outputStream);
                 ObjectInputStream receiver = new ObjectInputStream(inputStream);
 
-                for (boolean b : newPermissionsForUser) {
-                    System.out.println(b);
-                }
+//                for (boolean b : newPermissionsForUser) {
+//                    System.out.println(b);
+//                }
 
                 send.writeUTF("updatePermissions");
-                send.writeBoolean(newPermissionsForUser[0]);
-                send.writeBoolean(newPermissionsForUser[1]);
-                send.writeBoolean(newPermissionsForUser[2]);
-                send.writeBoolean(newPermissionsForUser[3]);
+
+                send.writeObject(newPermissionsForUser);
+//                send.writeBoolean(newPermissionsForUser[0]);
+//                send.writeBoolean(newPermissionsForUser[1]);
+//                send.writeBoolean(newPermissionsForUser[2]);
+//                send.writeBoolean(newPermissionsForUser[3]);
                 send.writeUTF(username);
                 send.writeUTF(loggedInUser);
                 send.writeUTF(token);
@@ -991,7 +994,7 @@ public class controller {
         }
     }
 
-    static boolean createNewUser(String[] userData, ArrayList<String> listOfUsers) throws IOException, InvalidKeySpecException, NoSuchAlgorithmException, ClassNotFoundException {
+    static boolean CreateNewUser(String[] userData, ArrayList<String> listOfUsers) throws IOException, InvalidKeySpecException, NoSuchAlgorithmException, ClassNotFoundException {
         // We assume the data entered had no missing fields until we find a field that was either null or empty
         boolean wasAllUserDataEnteredCorrect = true;
 
@@ -1002,13 +1005,13 @@ public class controller {
 
                     // Display the GUI error if the above condition is not a result of the unit test
                     if (!userData[0].equals("ThisIsATestUser")) {
-                        DialogWindow.showErrorPane("Attempted to create a user with empty fields. Please ensure you fill every field and try again.",
+                        DialogWindow.ShowErrorPane("Attempted to create a user with empty fields. Please ensure you fill every field and try again.",
                                 "Error: Attempted to create user with missing fields");
                         break;
                     }
                 }
             }
-            userData[3] = plaintextToHashedPassword(userData[3]);
+            userData[3] = PlaintextToHashedPassword(userData[3]);
         }
          else {
             // Username already exists
@@ -1016,21 +1019,21 @@ public class controller {
 
             // Display the GUI error if the above condition is not a result of the unit test
             if (!userData[0].equals("ThisIsATestUser")) {
-                DialogWindow.showErrorPane("Attempted to create a user with a username that already exists. Please choose a different username and try again.",
+                DialogWindow.ShowErrorPane("Attempted to create a user with a username that already exists. Please choose a different username and try again.",
                         "Error: Attempted to create user with a username that already exists");
             }
         }
         return wasAllUserDataEnteredCorrect;
     }
 
-    static void createNewUserToDB(String[] userData, boolean[] userPermissions) throws IOException, InvalidKeySpecException, NoSuchAlgorithmException, ClassNotFoundException {
+    static void CreateNewUserToDB(String[] userData, boolean[] userPermissions) throws IOException, InvalidKeySpecException, NoSuchAlgorithmException, ClassNotFoundException {
 
         // If data had no missing fields, submit the user creation details to the server
-        if (createNewUser(userData, getListOfUsers())) {
-            Socket client = connectionToServer();
+        if (CreateNewUser(userData, GetListOfUsers())) {
+            Socket client = ConnectionToServer();
 
             // connects to the server with information and attempts to get the auth token
-            // for the user after successful login
+            // for the user after successful Login
             if (client.isConnected()) {
                 OutputStream outputStream = client.getOutputStream();
                 InputStream inputStream = client.getInputStream();
@@ -1057,5 +1060,5 @@ public class controller {
                 client.close();
             }
         }
-        }
+    }
 }
