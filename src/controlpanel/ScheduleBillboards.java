@@ -115,7 +115,6 @@ public class ScheduleBillboards {
         formatText(titleLabel, true);
         titlePanel.add(titleLabel);
 
-        String[][] Data = Controller.ListSchedule();
 //      Calendar setup
 
         tableBillboard.setModel(tableCalendar);

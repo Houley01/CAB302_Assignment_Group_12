@@ -12,7 +12,6 @@ import java.io.IOException;
  * Small window that queries the user if they need help.
  * They have the option of either viewing the <i>Java Doc</i> or <i>System Overview</i>.
  *
- * Todo update buttons to target Java doc and system overview document
  */
 public class HelpPage {
     static JInternalFrame window = new JInternalFrame("Help Page", false, false,true);
@@ -58,7 +57,7 @@ public class HelpPage {
             @Override
             public void actionPerformed(ActionEvent e) {
                 try {
-                    Desktop.getDesktop().open(new File("billboardsExamples/16.png")); // WORD DOCUMENT/PDF
+                    Desktop.getDesktop().open(new File("CAB302 Group 12 Report.pdf"));
                 } catch (IOException ioException) {
                     ioException.printStackTrace();
                 }

@@ -9,6 +9,7 @@ import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.Result;
 import java.io.*;
 import java.net.*;
 import java.security.MessageDigest;
@@ -917,13 +918,29 @@ public class Server {
 
     public static void ViewerRequest(ObjectOutputStream send) throws IOException, ClassNotFoundException, SQLException
     {
-        String query = "SELECT billboardName, fileLocation, startTime, recurring FROM billboards \n" +
+        String query1 = "SET @du = 0, @st = 0, @et = 0;";
+        String query2 = "SELECT duration, startTime\n" +
+                "DATA INTO @du, @st\n" +
+                "FROM schedules \n" +
+                "WHERE (schedules.weekday = DAYNAME(current_date)) \n" +
+                "AND (CURRENT_TIME > startTime);";
+        String query3 = "SELECT ADDTIME(@st, SEC_TO_TIME(@du * 60))\n" +
+                "DATA INTO @et;";
+        String query4 = "SELECT billboardName, fileLocation, recurring\n" +
+                "FROM billboards\n" +
                 "LEFT JOIN schedules ON schedules.idBillboard = billboards.idBillboards\n" +
-                "WHERE (schedules.weekday = DAYNAME(current_date)) AND (current_time < startTime)\n" +
-                "order by startTime desc;";
+                "WHERE (schedules.weekday = DAYNAME(current_date)) \n" +
+                "AND (CURRENT_TIME > startTime)\n" +
+                "AND (@et > CURRENT_TIME)\n" +
+                "ORDER BY startTime DESC;";
+
         Statement st = ServerInit.conn.createStatement();
         st.executeQuery("USE `cab302`;");
-        ResultSet rs = st.executeQuery(query);
+        st.executeQuery(query1);
+        st.executeQuery(query2);
+        st.executeQuery(query3);
+
+        ResultSet rs = st.executeQuery(query4);
 
         // checks if there is any data in the database
         if (!rs.isBeforeFirst()) {
