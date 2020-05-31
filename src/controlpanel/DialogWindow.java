@@ -24,6 +24,19 @@ public class DialogWindow {
     }
 
     /**
+     * Developer defined successes
+     *
+     * @param message   Success message to inform user of a successful request to the server.
+     * @param title     Title of window pane.
+     */
+    static protected void showSuccessPane(String message, String title) {
+        JOptionPane pane = new JOptionPane(message, JOptionPane.INFORMATION_MESSAGE);
+        JDialog dialog = pane.createDialog(title);
+        dialog.setAlwaysOnTop(true);
+        dialog.setVisible(true);
+    }
+
+    /**
      *  Information pane for showing user basic information.
      *
      * @param message   Message to inform user(s) of.
@@ -104,29 +117,31 @@ public class DialogWindow {
 
         String selectedUser = GetListOfUsers();
         boolean[] userPermissions = Controller.GetUserPermissions(selectedUser);
-        JOptionPane pane = new JOptionPane("Select User Permissions", JOptionPane.PLAIN_MESSAGE);
-        JPanel window2 = new JPanel();
-        JDialog dialog = pane.createDialog("User Permissions");
-        dialog.setSize(new Dimension(400, 200));
-        JCheckBox billboardPermissions = new JCheckBox("Create Billboard", userPermissions[0]);
-        JCheckBox editBillboardPermissions = new JCheckBox("Edit Billboards", userPermissions[1]);
-        JCheckBox schedulePermissions = new JCheckBox("Schedule Billboards", userPermissions[2]);
-        JCheckBox editUserPermissions = new JCheckBox("Edit User Permissions", userPermissions[3]);
+        if (!Controller.loggedInUser.equals("")) {
+            JOptionPane pane = new JOptionPane("Select User Permissions", JOptionPane.PLAIN_MESSAGE);
+            JPanel window2 = new JPanel();
+            JDialog dialog = pane.createDialog("User Permissions");
+            dialog.setSize(new Dimension(400, 200));
+            JCheckBox billboardPermissions = new JCheckBox("Create Billboard", userPermissions[0]);
+            JCheckBox editBillboardPermissions = new JCheckBox("Edit Billboards", userPermissions[1]);
+            JCheckBox schedulePermissions = new JCheckBox("Schedule Billboards", userPermissions[2]);
+            JCheckBox editUserPermissions = new JCheckBox("Edit User Permissions", userPermissions[3]);
 
-        pane.setLayout(new GridLayout(3,1));
-        pane.add(window2);
-        window2.setLayout(new GridLayout(2,2));
-        window2.add(billboardPermissions);
-        window2.add(editBillboardPermissions);
-        window2.add(schedulePermissions);
-        window2.add(editUserPermissions);
+            pane.setLayout(new GridLayout(3,1));
+            pane.add(window2);
+            window2.setLayout(new GridLayout(2,2));
+            window2.add(billboardPermissions);
+            window2.add(editBillboardPermissions);
+            window2.add(schedulePermissions);
+            window2.add(editUserPermissions);
 
-        dialog.setAlwaysOnTop(true);
-        dialog.setVisible(true);
+            dialog.setAlwaysOnTop(true);
+            dialog.setVisible(true);
 
-        boolean[] updatedPermissions = {billboardPermissions.isSelected(), editBillboardPermissions.isSelected(), schedulePermissions.isSelected(), editUserPermissions.isSelected()};
+            boolean[] updatedPermissions = {billboardPermissions.isSelected(), editBillboardPermissions.isSelected(), schedulePermissions.isSelected(), editUserPermissions.isSelected()};
 
-        Controller.UpdateUserPermissionsToDB(userPermissions, updatedPermissions, selectedUser);
+            Controller.UpdateUserPermissionsToDB(userPermissions, updatedPermissions, selectedUser);
+        }
     }
 
 
@@ -141,11 +156,13 @@ public class DialogWindow {
 
         String[] userInfo = Controller.GetUserInfo(selectedUser);
 
-        JFrame editFirstName = new JFrame();
-        Object changeFirstName = JOptionPane.showInputDialog(editFirstName, "Update First Name:", userInfo[0]);
-        JFrame editLastName = new JFrame();
-        Object changeLastName = JOptionPane.showInputDialog(editLastName, "Update Last Name:", userInfo[1]);
-        Controller.UpdateUserDetails(selectedUser, (String) changeFirstName, (String) changeLastName);
+        if (!Controller.loggedInUser.equals("")) {
+            JFrame editFirstName = new JFrame();
+            Object changeFirstName = JOptionPane.showInputDialog(editFirstName, "Update First Name:", userInfo[0]);
+            JFrame editLastName = new JFrame();
+            Object changeLastName = JOptionPane.showInputDialog(editLastName, "Update Last Name:", userInfo[1]);
+            Controller.UpdateUserDetails(selectedUser, (String) changeFirstName, (String) changeLastName);
+        }
 
 
     }

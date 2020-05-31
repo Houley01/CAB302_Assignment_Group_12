@@ -160,7 +160,7 @@ public class CreateBillboards {
                     try {
                         Billboard temp = new Billboard(title, messageText, messageColour, image, testImageOrURL, informationText, informationColour, backgroundColour);
                         Controller.CreateBillboard(temp);
-                    } catch (IOException ioException) {
+                    } catch (IOException | ClassNotFoundException ioException) {
                         ioException.printStackTrace();
                     }
 

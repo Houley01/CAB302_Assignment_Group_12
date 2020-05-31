@@ -73,7 +73,7 @@ public class Controller {
      *
      * @param billboard          Object class Billboard
      */
-    static void CreateBillboard(Billboard billboard) throws IOException {
+    static void CreateBillboard(Billboard billboard) throws IOException, ClassNotFoundException {
 
         // Initializing connections
         Socket client = ConnectionToServer();                   // User socket connection
@@ -90,16 +90,20 @@ public class Controller {
         send.writeUTF(token);
         send.flush();
 
-        int val = receiver.read();
-        if (val == 1) {
-            send.writeObject(billboard);
-            send.flush(); // Must be done before switching to reading state
-            if (receiver.read() ==  1) {
-                DialogWindow.ShowInformationPane("Billboard finished creating.", "Completion of Billboard");
+        if (WasRequestSuccessful(receiver.readBoolean(), receiver.readUTF())) {
+            int val = receiver.read();
+            if (val == 1) {
+                send.writeObject(billboard);
+                send.flush(); // Must be done before switching to reading state
+//            System.out.println(receiver.readUTF());
+                if (receiver.read() ==  1) {
+                    DialogWindow.ShowInformationPane("Billboard finished creating.", "Completion of Billboard");
+                }
+            } else {
+                DialogWindow.ShowErrorPane("Sorry you don't have permission to edit", "Error Can't Make Billboard");
             }
-        } else {
-            DialogWindow.ShowErrorPane("Sorry you don't have permission to edit", "Error Can't Make Billboard");
         }
+
 //      End connections
         send.close();
         receiver.close();
@@ -107,7 +111,7 @@ public class Controller {
     }
 
     /**
-     *  Authorization of user Login based on stored user information in the database / or memory.
+     *  Authorization of user login based on stored user information in the database / or memory.
      *
      * @param username          Users username.
      * @param password          Users password.
@@ -215,7 +219,7 @@ public class Controller {
         return newPasswordHashed;
     }
 
-    static void ChangePassword(String username, String password) throws IOException, InvalidKeySpecException, NoSuchAlgorithmException {
+    static void ChangePassword(String username, String password) throws IOException, InvalidKeySpecException, NoSuchAlgorithmException, ClassNotFoundException  {
 
         Socket client = ConnectionToServer();
 
@@ -239,6 +243,9 @@ public class Controller {
             send.writeUTF(loggedInUser);
             send.writeUTF(token);
             send.flush(); // Must be done before switching to reading state
+
+            WasRequestSuccessful(receiver.readBoolean(), receiver.readUTF());
+
 
 //      End connections
             send.close();
@@ -529,7 +536,9 @@ public class Controller {
             send.writeUTF("GetBillboard");
             send.write(id);
             send.writeUTF(loggedInUser);
+            send.writeUTF(token);
             send.flush();
+
 
             int val = receiver.readInt();
             if (val == 1) {
@@ -559,7 +568,7 @@ public class Controller {
         }
     }
 
-    public static void DeleteBillboard(String billboardId) throws IOException {
+    public static void DeleteBillboard(String billboardId) throws IOException, ClassNotFoundException {
         int id = Integer.parseInt(billboardId);
         Socket client = ConnectionToServer();
         if (client.isConnected()) {
@@ -571,23 +580,27 @@ public class Controller {
 
             send.writeUTF("DeleteBillboard");
             send.write(id);
+            send.writeUTF(loggedInUser);
+            send.writeUTF(token);
             send.flush();
 
-            int val = receiver.readInt();
-            if (val == 1) {
-                String billboardName = receiver.readUTF();
-                int yesOrNo = DialogWindow.ShowYesNoPane("Are you sure you want to delete billboard: " +
-                        billboardName + "?", "Alert Deleting Billboard");
-                send.write(yesOrNo);
-                send.flush();
-            } else {
+            if (WasRequestSuccessful(receiver.readBoolean(), receiver.readUTF())) {
+                int val = receiver.readInt();
+                if (val == 1) {
+                    String billboardName = receiver.readUTF();
+                    int yesOrNo = DialogWindow.ShowYesNoPane("Are you sure you want to delete billboard: " +
+                            billboardName + "?", "Alert Deleting Billboard");
+                    send.write(yesOrNo);
+                    send.flush();
+                } else {
 //                Display POP ERROR MESSAGE
-                if (val == 0) {
-                    DialogWindow.NoAccessTo("to delete this billboard");
-                } else if (val == -1) {
-                    DialogWindow.ShowErrorPane("Please refresh the billboard list",
-                            "Error: Could NOT find billboard"
-                    );
+                    if (val == 0) {
+                        DialogWindow.NoAccessTo("to delete this billboard");
+                    } else if (val == -1) {
+                        DialogWindow.ShowErrorPane("Please refresh the billboard list",
+                                "Error: Could NOT find billboard"
+                        );
+                    }
                 }
             }
 
@@ -717,7 +730,7 @@ public class Controller {
         return temp;
     }
 
-    public static void CreateNewSchedule(ArrayList<String> vals) throws IOException {
+    public static void CreateNewSchedule(ArrayList<String> vals) throws IOException, ClassNotFoundException {
         Socket client = ConnectionToServer();
         if(!client.isConnected()) return;
         OutputStream outputStream = client.getOutputStream();
@@ -728,8 +741,11 @@ public class Controller {
 
 //        System.out.println("Creating new schedule");
         send.writeUTF("CreateSchedule");
+        send.writeUTF(loggedInUser);
+        send.writeUTF(token);
         send.writeObject(vals);
         send.flush();
+        WasRequestSuccessful(receiver.readBoolean(), receiver.readUTF());
     }
 
     public static ArrayList<String[]> RequestScheduleBillboards() throws IOException, ClassNotFoundException {
@@ -749,8 +765,10 @@ public class Controller {
         send.writeUTF(token);
         send.flush();
 
+        ArrayList<String[]> temp;
+
         receiver.read();
-        ArrayList<String[]> temp = (ArrayList<String[]>) receiver.readObject();
+        temp = (ArrayList<String[]>) receiver.readObject();
         send.close();
         receiver.close();
         client.close();
@@ -809,8 +827,11 @@ public class Controller {
             send.writeUTF(token);
             send.flush();
 
-            // Store the current list of users
-            userInfo = (String[]) receiver.readObject();
+            if (WasRequestSuccessful(receiver.readBoolean(), receiver.readUTF())) {
+                // Store the current list of users
+                userInfo = (String[]) receiver.readObject();
+            }
+
 
             // End connections
             send.close();
@@ -825,7 +846,7 @@ public class Controller {
         return updatedUserInfo;
     }
 
-    static void UpdateUserDetails(String username, String firstName, String lastName) throws IOException {
+    static void UpdateUserDetails(String username, String firstName, String lastName) throws IOException, ClassNotFoundException {
 
         Socket client = ConnectionToServer();
 
@@ -847,6 +868,8 @@ public class Controller {
             send.writeUTF(loggedInUser);
             send.writeUTF(token);
             send.flush();
+
+            WasRequestSuccessful(receiver.readBoolean(), receiver.readUTF());
 
             // End connections
             send.close();
@@ -877,7 +900,7 @@ public class Controller {
         return wasUserInList;
     }
 
-    static void DeleteUserFromDB(ArrayList<String> userList, String username) throws IOException {
+    static void DeleteUserFromDB(ArrayList<String> userList, String username) throws IOException, ClassNotFoundException {
 
         // If the user does exist in the list of users pulled from the database, send
         // delete request to the server
@@ -898,6 +921,8 @@ public class Controller {
                 send.writeUTF(loggedInUser);
                 send.writeUTF(token);
                 send.flush();
+
+                WasRequestSuccessful(receiver.readBoolean(), receiver.readUTF());
 
                 // End connections
                 send.close();
@@ -928,8 +953,13 @@ public class Controller {
             send.writeUTF(token);
             send.flush();
 
-            // Store the list of permissions for the user
-            userPermissions = (boolean[]) receiver.readObject();
+            if (WasRequestSuccessful(receiver.readBoolean(), receiver.readUTF())) {
+                // Store the list of permissions for the user
+                userPermissions[0] = receiver.readBoolean();
+                userPermissions[1] = receiver.readBoolean();
+                userPermissions[2] = receiver.readBoolean();
+                userPermissions[3] = receiver.readBoolean();
+            }
 
             // End connections
             send.close();
@@ -953,7 +983,7 @@ public class Controller {
         return newPermissionsForUser;
     }
 
-    static void UpdateUserPermissionsToDB(boolean[] currentPermissions, boolean[] updatedPermissions, String username) throws IOException {
+    static void UpdateUserPermissionsToDB(boolean[] currentPermissions, boolean[] updatedPermissions, String username) throws IOException, ClassNotFoundException{
 //        System.out.println(username);
         boolean[] newPermissionsForUser = UpdateUserPermissions(currentPermissions, updatedPermissions, username);
 
@@ -985,6 +1015,8 @@ public class Controller {
                 send.writeUTF(loggedInUser);
                 send.writeUTF(token);
                 send.flush();
+
+                WasRequestSuccessful(receiver.readBoolean(), receiver.readUTF());
 
                 // End connections
                 send.close();
@@ -1054,6 +1086,8 @@ public class Controller {
                 send.writeUTF(token);
                 send.flush();
 
+                WasRequestSuccessful(receiver.readBoolean(), receiver.readUTF());
+
                 // End connections
                 send.close();
                 receiver.close();
@@ -1061,4 +1095,15 @@ public class Controller {
             }
         }
     }
+        static boolean WasRequestSuccessful(boolean request, String message) throws IOException, ClassNotFoundException {
+            if (request) {
+                DialogWindow.showSuccessPane("Request for " + message + " was successful.",
+                        "Success");
+            } else {
+                DialogWindow.ShowErrorPane("Request was not successful due to an invalid authentication token. You will now be logged out.",
+                        "Error: Invalid request");
+                Logout();
+            }
+            return request;
+        }
 }
