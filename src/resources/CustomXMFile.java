@@ -152,7 +152,15 @@ public class CustomXMFile {
 //                System.out.println(element.getTextContent());
                 messageText = element.getTextContent();
 //                System.out.println(element.getAttributes().getNamedItem("colour").getNodeValue());
-                messageColour = element.getAttributes().getNamedItem("colour").getNodeValue();
+                Node temp = element.getAttributes().getNamedItem("colour");
+                if(temp != null)
+                {
+                    messageColour = element.getAttributes().getNamedItem("colour").getNodeValue() ;
+                }
+                else
+                {
+                    messageColour = "#000000";
+                }
             }
         }
 
@@ -190,7 +198,15 @@ public class CustomXMFile {
 //                System.out.println(element.getTextContent());
                 informationText = element.getTextContent();
 //                System.out.println(element.getAttributes().getNamedItem("colour").getNodeValue());
-                informationColour = element.getAttributes().getNamedItem("colour").getNodeValue();
+                Node temp = element.getAttributes().getNamedItem("colour");
+                if(temp != null)
+                {
+                    informationColour = element.getAttributes().getNamedItem("colour").getNodeValue();
+                }
+                else
+                {
+                    informationColour = "#ffffff";
+                }
             }
         }
 

@@ -150,6 +150,8 @@ public class viewer extends TimerTask {
                                                                                   // will be present when we split the string.
             String fileName = file.replace(".xml", "");        // Java didn't like split here so we just
                                                                                   // delete the extension.
+            System.out.println(fileLocation);
+            System.out.println(fileName);
             Billboard billboard = ReadXMLFile(new File(fileLocation), fileName);  // ReadXML returns a Billboard class
 
             // Closing streams and socket
@@ -177,15 +179,15 @@ public class viewer extends TimerTask {
      * @param <Int>     (Required for size)
      * @return          Formatted Java label
      */
-    private static <Int> JLabel formatText(String colour, Int size, String text)
+    private static <Int> JLabel formatText(String colour, Int size, String text, boolean title)
     {
+        String html = "<html><body style='text-align: center;width: %1spx'>%1s";
+        int width = title ? (int) (w / 1.25) : w/2;
         Color color = Color.decode(colour);                                     // Colour of the text.
-        JLabel label = new JLabel(text);                                        // Creating the label.
+        JLabel label = new JLabel(String.format(html, width, text));             // Creating the label.
         label.setForeground(color);                                             // Setting text colour.
         label.setFont(new Font("SansSerif", Font.BOLD, (Integer) size)); // Setting font and size.
         label.setBounds(0,0,w,h);
-        label.setAlignmentX(.5f);
-        label.setAlignmentY(.5f);
         return label;                                                           // Returning the label.
     }
 
@@ -276,14 +278,19 @@ public class viewer extends TimerTask {
         Color bgColour = Color.decode("#333333");                                                                       // Default color
         removeFrameData();
 
-        JPanel panel = new JPanel();                                                                                    // Panel init
-        listeners(frame);                                                                                               // Init the listeners
+        GridBagConstraints c = new GridBagConstraints();
 
-        LayoutManager overlay = new OverlayLayout(panel);                                                               // Set the layout to overlay.
-                                                                                                                        // easiest solution to allow text
-                                                                                                                        // on top of images.
-        panel.setLayout(overlay);                                                                                       // Applying overlay layout
-        ArrayList<JComponent> jcomp = new ArrayList<>();                                                                // List to add JFrame components
+        JPanel panel = new JPanel();                                                                                    // Panel init
+        JPanel messagePanel = new JPanel();
+        JPanel imagePanel = new JPanel();
+        JPanel infoPanel = new JPanel();
+
+        panel.setSize(w, h);
+
+        panel.setLayout(new GridBagLayout());
+
+
+        listeners(frame);                                                                                               // Init the listeners
 
         /*
         * If the preview is true pretend the sever is online
@@ -291,62 +298,83 @@ public class viewer extends TimerTask {
         if (preview) {
             online = true;
         }
-
         /**
          * If not online.
          */
         if(!online)                                                                                                     // If the server is not online
         {
-            JLabel offlineMessage = formatText("#fc0335", w/30, "Server is offline please wait..."); // Non-interactable error message
-            jcomp.add(offlineMessage);
+            JLabel offlineMessage = formatText("#fc0335", w/30, "Server is offline please wait...", true); // Non-interactable error message
+            messagePanel.add(offlineMessage);
         }
         /**
          * If no data was given from the billboard.
          */
         else if(currBill == null)                                                                                       // If there is no billboard data.
         {
-            JLabel noBillboard = formatText("#fc0335", w/30, "There are currently no billboards to display.");
-            jcomp.add(noBillboard);
+            JLabel noBillboard = formatText("#fc0335", w/30, "There are currently no billboards to display.",true);
+            messagePanel.add(noBillboard);
         }
         /**
          * Else we assume we have data and the server is online.
          */
         else // Online
         {
-            bgColour = Color.decode(currBill.getBackgroundColour());                                                    // AWT readable colour
-            JLabel message = formatText(currBill.getMessageColour(), w / 30, currBill.getMessageText());           // Creating text for the message
-            JLabel info = formatText(currBill.getInformationColour(), w / 50, currBill.getInformationText());      // Creating the info text
+            bgColour = Color.decode(currBill.getBackgroundColour().isEmpty() ?
+                    "#333333" : currBill.getBackgroundColour());                                                        // AWT readable colour
+            System.out.println(currBill.getMessageText());
+            JLabel message = !currBill.getMessageText().isEmpty() || currBill.getMessageText() != "" ?
+                    formatText(currBill.getMessageColour(), w / 40, currBill.getMessageText(),true)
+                    : formatText("#000000", w/40, "", false);                                    // Creating text for the message
+            JLabel info = !currBill.getInformationText().isEmpty() || currBill.getInformationText() != "" ?
+                    formatText(currBill.getInformationColour(), w / 70, currBill.getInformationText(),false)
+                    : formatText("#000000", w/70, "", false);
 
             info.setVerticalTextPosition(JLabel.BOTTOM);
 
-            info.setBorder(new EmptyBorder(w/10, 10, 10, 10));
-
-            jcomp.add(message);
-            jcomp.add(info);
+            messagePanel.add(message);
+            infoPanel.add(info);
 
             Image image = imageCalc(currBill);
             if(image != null)
             {
-                image = image.getScaledInstance(-1, h, Image.SCALE_SMOOTH);                                      // By far the easiest solution to
+                if(image.getHeight(null) > h/5 && image.getWidth(null) > w)
+                {
+                    System.out.println("BIG");
+                    image = image.getScaledInstance(w/5, -1, Image.SCALE_SMOOTH);                                  // By far the easiest solution to
                                                                                                                         // stretch an image to the screen while maintaining
                                                                                                                         // aspect ratio.
+                }
 
                 JLabel scaled = new JLabel(new ImageIcon(image));
                 scaled.setAlignmentX(.5f);
                 scaled.setAlignmentY(.5f);
-                jcomp.add(scaled);
+                scaled.setHorizontalAlignment(JLabel.CENTER);
+                scaled.setVerticalAlignment(JLabel.CENTER);
+                imagePanel.add(scaled);
             }
         }
 
-        /**
-         * Loop to add JPanel components into the content panel.
-         */
-        for(JComponent item : jcomp)
-        {
-            panel.add(item);
-        }
+        c.gridx = 0;
+        c.gridy = 0;
+        c.gridwidth = 3;
+        c.ipady = h/10;
+        c.anchor = GridBagConstraints.CENTER;
 
-        panel.setBackground(bgColour);                                       // Background colour
+        messagePanel.setBackground(bgColour);
+        panel.add(messagePanel, c);
+
+        c.ipady = h/5;
+        c.gridy++;
+        imagePanel.setBackground(bgColour);
+        panel.add(imagePanel, c);
+
+        c.ipady = h/10;
+        c.gridy++;
+        infoPanel.setBackground(bgColour);
+        panel.add(infoPanel, c);
+
+        panel.setBackground(bgColour);
+        frame.getContentPane().setBackground(bgColour);                                       // Background colour
         frame.setSize(w, h);                                                 // Update frame to match screen size.
         frame.getContentPane().add(panel);                                   // place the panel centred
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);                // exit the app when closed

@@ -53,6 +53,8 @@ public class createSchedule {
         }
 
         JComboBox billboards = new JComboBox(temp);
+
+
         panel.add(new JLabel(label));
         panel.add(billboards);
         return panel;
