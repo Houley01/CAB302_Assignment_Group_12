@@ -249,13 +249,15 @@ public class scheduleBillboards {
     }
 
     /**
+     * Function that grabs the available information from the current cell (Table name and time) and attempts to
+     * search in the allotted time - an hour to see if there's a database entry.
      *
-     * @param table
-     * @param min
-     * @param max
-     * @throws ParseException
-     * @throws IOException
-     * @throws ClassNotFoundException
+     * @param table                     String for the table name.
+     * @param min                       String of the minimum amount of time to search from
+     * @param max                       String of the maximum amount of time to search from.
+     * @throws ParseException           Signals that an error has been reached unexpectedly while parsing.
+     * @throws IOException              Signals that an I/O exception of some sort has occurred.
+     * @throws ClassNotFoundException   Signals that a particular class is not found at runtime.
      */
     private static void cellCreatedAt(String table, String min, String max) throws ParseException, IOException, ClassNotFoundException {
         min = FormatReadableTime(min);
@@ -267,7 +269,7 @@ public class scheduleBillboards {
     /**
      * Since the database stores the days as Strings of the actual day
      * we can modify
-     * @return
+     * @return  Hash map of days.
      */
     private static HashMap<String, Integer> daysInWeek()
     {
@@ -288,7 +290,7 @@ public class scheduleBillboards {
      * @param outer     Outer for loop.
      * @param inner     Inner for loop.
      * @param master    Data to parse.
-     * @return
+     * @return          Billboard name of the current position or empty.
      */
     private static String PositionData(int outer, int inner, ArrayList<String[]> master) throws IOException, ClassNotFoundException {
         for(String[] data : master)
@@ -327,9 +329,9 @@ public class scheduleBillboards {
      *
      * So for the sake of myself, my Sunday 1am commits and my sanity. I am not doing this. God why did I agree
      * to build this system in less than 3 days. - Brendan
-     * @return
-     * @throws IOException
-     * @throws ClassNotFoundException
+     * @return Table model to construct a table from.
+     * @throws IOException              Signals that an I/O exception of some sort has occurred.
+     * @throws ClassNotFoundException   Signals that a particular class is not found at runtime.
      */
     private static DefaultTableModel buildTable() throws IOException, ClassNotFoundException {
         /**
@@ -377,8 +379,8 @@ public class scheduleBillboards {
     /**
      * Reloads the table by deleting the entire table and re-rendering it.
      * @param model Table model
-     * @throws IOException
-     * @throws ClassNotFoundException
+     * @throws IOException              Signals that an I/O exception of some sort has occurred.
+     * @throws ClassNotFoundException   Signals that a particular class is not found at runtime.
      */
     public static void reload(DefaultTableModel model) throws IOException, ClassNotFoundException {
         model.setRowCount(0);

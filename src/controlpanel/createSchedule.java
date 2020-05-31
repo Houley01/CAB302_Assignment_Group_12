@@ -40,8 +40,8 @@ public class createSchedule {
      * Display billboards in a comboBox
      * @param label Input label
      * @return Jpanel component.
-     * @throws IOException
-     * @throws ClassNotFoundException
+     * @throws IOException              Signals that an I/O exception of some sort has occurred.
+     * @throws ClassNotFoundException   Signals that a particular class is not found at runtime.
      */
     private static JPanel billboard(String label) throws IOException, ClassNotFoundException {
         JPanel panel = inputField();
@@ -158,10 +158,11 @@ public class createSchedule {
 
 
     /**
-     * Main
-     * @return
-     * @throws IOException
-     * @throws ClassNotFoundException
+     * Create schedule contains the the settings and construction of the window.
+     * Contains listeners to create a new schedule in the database.
+     * @return                          JInternalFrame for the controlPanelFrameHandler
+     * @throws IOException              Signals that an I/O exception of some sort has occurred.
+     * @throws ClassNotFoundException   Signals that a particular class is not found at runtime.
      */
     public static JInternalFrame createSchedule() throws IOException, ClassNotFoundException {
         window.setSize(600, 500);
@@ -270,7 +271,7 @@ public class createSchedule {
      * if inputs the user has to enter a value for are empty
      * and or invalid. E.g. negative duration.
      * @return  True if all inputs are valiid.
-     * @return  False if an input is invalid.
+     *          False if an input is invalid.
      */
     private static boolean validate()
     {
