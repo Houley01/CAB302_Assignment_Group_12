@@ -93,7 +93,8 @@ public class Server {
                     if (chekuser == true) {
                         send.writeBoolean(true);
                         send.writeObject(UserPermission(uname));
-
+                    } else {
+                        send.writeBoolean(false);
                     }
                     send.flush();
                 }
@@ -108,27 +109,50 @@ public class Server {
                 if (request.equals("CreateBillboard")) {
                     CreateBillboard(receiver, send);
                 }
-
-// NOTE:: BEN IS WORKING HERE
                 // Schedule Billboards
                 if (request.equals("ScheduleBillboards")) {
 
                 }
 
                 if (request.equals("RequestScheduleBillboards")) {
-//                    System.out.println("Requested schedule billboards");
-//                    String username = receiver.readUTF();
-//                    String token = receiver.readUTF();
-//                    System.out.println("Accessing data");
-                    send.writeObject(RequestScheduling());
-//                    System.out.println("Sending data");
-                    send.flush();
+                    System.out.println("Requested schedule billboards");
+                    String username = receiver.readUTF();
+                    String token = receiver.readUTF();
+
+                    // System.out.println(username);
+                    // System.out.println(token);
+                    // System.out.println("Accessing data");
+
+                    if (CheckTokenIsValid(username, token)) {
+                        send.writeObject(RequestScheduling());
+                        // System.out.println("Sending data");
+                        send.flush();
+                    } else {
+                        // System.out.println("Token wasn't valid");
+                    }
+                }
+
+                if(request.equals("GetScheduledBillboard"))
+                {
+                    // System.out.println("Getting selected billboard");
+                    String min = receiver.readUTF();
+                    String max = receiver.readUTF();
+                    String table = receiver.readUTF();
+                    // System.out.println("Got all information");
+
+                    GetScheduledBillboard(send, min, max, table);
                 }
 
                 if(request.equals("CreateSchedule"))
                 {
 //                    System.out.println("Creating new schedule ...");
                     CreateNewSchedule(receiver, send);
+                }
+
+                if(request.equals("GetBillboardFromID"))
+                {
+                    send.writeUTF(GetBillboardName(receiver.readUTF()));
+                    send.flush();
                 }
 
                 // List Billboards
@@ -816,8 +840,7 @@ public class Server {
         // Before request, check that the user's token is valid
         if (true) {
 //            System.out.println("Token is valid. Begin requesting currently scheduled billboards...");
-
-            String query = "SELECT idSchedules, weekday, duration, startTime, userId FROM schedules";
+            String query = "SELECT * FROM schedules";
             Statement st = ServerInit.conn.createStatement();
             st.executeQuery("USE `cab302`;");
             ResultSet rs = st.executeQuery(query);
@@ -837,9 +860,11 @@ public class Server {
                     String weekday = rs.getString("weekday");
                     String duration = rs.getString("duration");
                     String startTime = rs.getString("startTime");
+                    String recurring = rs.getString("recurring");
+                    String billId = rs.getString("idBillboard");
                     String userId = rs.getString("userId");
 
-                    String[] schedule = {id, weekday, duration, startTime, userId};
+                    String[] schedule = {id, weekday, duration, startTime, recurring, billId, userId};
                     schedules.add(schedule);
                 }
 //                System.out.println("Successfully retrieved list of scheduled billboards");
@@ -892,9 +917,10 @@ public class Server {
 
     public static void ViewerRequest(ObjectOutputStream send) throws IOException, ClassNotFoundException, SQLException
     {
-        String query = "SELECT idBillboards, billboardName, users.fName, users.lName, dateMade, " +
-                "dateModify, fileLocation FROM billboards LEFT JOIN users ON billboards.userId = users.idUsers " +
-                "order by billboards.idBillboards;";
+        String query = "SELECT billboardName, fileLocation, startTime, recurring FROM billboards \n" +
+                "LEFT JOIN schedules ON schedules.idBillboard = billboards.idBillboards\n" +
+                "WHERE (schedules.weekday = DAYNAME(current_date)) AND (current_time < startTime)\n" +
+                "order by startTime desc;";
         Statement st = ServerInit.conn.createStatement();
         st.executeQuery("USE `cab302`;");
         ResultSet rs = st.executeQuery(query);
@@ -908,7 +934,7 @@ public class Server {
             send.write(1);
             send.flush();
             // Contains the schedules in the database
-            List<String> billboardImages = new ArrayList<>();
+            List<Object> billboardImages = new ArrayList<>();
 
 //            System.out.println("Retrieving list of Schedules from database...");
 
@@ -933,8 +959,36 @@ public class Server {
                     "LEFT JOIN users ON billboards.userId = users.idUsers " +
                     "WHERE (schedules.idBillboard IS NOT NULL) AND (billboards.idBillboards = " + billboardID + ");";
         }
-    }    
+    }
 
+    private static void GetScheduledBillboard(ObjectOutputStream send, String min, String max, String billName) throws SQLException, IOException {
+        String query = "SELECT * FROM schedules\n" +
+                "LEFT JOIN billboards ON schedules.idBillboard = billboards.idBillboards\n" +
+                "LEFT JOIN users ON schedules.userId = users.idUsers\n" +
+                "WHERE startTime > '"+min+"' AND startTime < '"+max+"' AND billboardName = '"+billName+"';";
+        Statement st = ServerInit.conn.createStatement();
+        st.executeQuery("USE `cab302`;");
+        ResultSet rs = st.executeQuery(query);
+        if(rs.isBeforeFirst())
+        {
+            rs.next();
+
+            ArrayList<String> output = new ArrayList<>();
+
+
+            output.add(rs.getString("billboardName"));
+            output.add(rs.getString("startTime"));
+            output.add(rs.getString("weekday"));
+            output.add(rs.getString("user"));
+            output.add(rs.getString("duration"));
+            send.writeObject(output);
+            System.out.println("Sending information...");
+            send.flush();
+        }
+        else{
+            send.writeInt(-1);
+        }
+    }
 
     private static void GetBillboardInfo(ObjectInputStream receiver, ObjectOutputStream send) throws IOException, SQLException, ParserConfigurationException, SAXException, ParserConfigurationException, SAXException {
         int billboardID = receiver.read();
@@ -1097,6 +1151,21 @@ public class Server {
         return billid;
     }
 
+    private static String GetBillboardName(String id) throws SQLException {
+        String getBillboard = "SELECT `billboardName` FROM `billboards` WHERE `idBillboards` = '"+id+"';";
+        Statement st = ServerInit.conn.createStatement();
+        st.executeQuery("USE `cab302`;");
+        ResultSet rs = st.executeQuery(getBillboard);
+        if(!rs.isBeforeFirst())
+        {
+            System.out.println("No billboard data");
+            return "";
+        }
+        rs.next();
+        String billid = rs.getString("billboardName");
+        return billid;
+    }
+
     private static String GetUserId(ArrayList<String> data) throws SQLException {
         String user = "";
         for(String username : usersAuthenticated.keySet())
@@ -1129,7 +1198,6 @@ public class Server {
         c.set(Calendar.MINUTE, min);
         return c;
     }
-
     private static void CreateNewSchedule(ObjectInputStream receiver, ObjectOutputStream send) throws SQLException, IOException, ClassNotFoundException {
         receiver.read();
         ArrayList<String> data = (ArrayList<String>) receiver.readObject();

@@ -140,8 +140,9 @@ public class Controller {
 
 
             // If the server send back a true or false message decides what to do.
-            if (receiver.readBoolean()) {
-                loginSuccessful = true;
+            loginSuccessful = receiver.readBoolean();
+            if (loginSuccessful) {
+//                loginSuccessful = true;
                 loggedInUser = username;
                 boolean[] temp = (boolean[]) receiver.readObject();
                 permission.SetUserPermission(temp);
@@ -331,7 +332,7 @@ public class Controller {
     }
 
     /**
-     *  Modifies visibility state of Login.window to false and -renables nav bar-
+     *  Modifies visibility state of login.window to false and -renables nav bar-
      *
      */
     public static void HideLoginScreen() {
@@ -371,6 +372,7 @@ public class Controller {
      *  Toggle switch to show or hide Schedule window via modifying isVisible state
      */
     public static void ShowSchedule() throws IOException, ClassNotFoundException {
+        ScheduleBillboards.reload(ScheduleBillboards.tableCalendar);
         ToggleVisibility(ScheduleBillboards.window);
     }
     /**
@@ -538,8 +540,8 @@ public class Controller {
                 CreateBillboards.textDisplayColour.setBackground(Color.decode(billboard.getMessageColour()));
                 CreateBillboards.informationTextColor.setBackground(Color.decode(billboard.getInformationColour()));
                 CreateBillboards.backgroundDisplayColour.setBackground(Color.decode(billboard.getBackgroundColour()));
+                CreateBillboards.window.setVisible(true);
                 CreateBillboards.window.toFront();
-                ShowCreateBillboard();
 
             }
             else if (val == -1) {
@@ -621,13 +623,14 @@ public class Controller {
     }
 
     public static String[][] ListSchedule() throws IOException, ClassNotFoundException {
+        if(loggedInUser == null) return new String[][]{};
         Socket client = ConnectionToServer();           // Get user connection
 
         ArrayList<String[]> scheduled;         // Create billboard array list
 
-
-        if(!client.isConnected())
+        if(!client.isConnected() || loggedInUser == null)
         {
+            client.close();
             return new String[][]{};
         }
 
@@ -639,6 +642,8 @@ public class Controller {
         ObjectInputStream receiver = new ObjectInputStream(inputStream);
 
         send.writeUTF("RequestScheduleBillboards");
+        send.writeUTF(loggedInUser);
+        send.writeUTF(token);
         send.flush();
 
         int val = receiver.read();
@@ -657,6 +662,61 @@ public class Controller {
         return new String[][]{};
     }
 
+
+    public static String GetBillboardFromID(String id) throws IOException, ClassNotFoundException {
+        Socket client = ConnectionToServer();
+        if(!client.isConnected()) return new String();
+        OutputStream outputStream = client.getOutputStream();
+        InputStream inputStream = client.getInputStream();
+
+        ObjectOutputStream send = new ObjectOutputStream(outputStream);
+        ObjectInputStream receiver = new ObjectInputStream(inputStream);
+
+        send.writeUTF("GetBillboardFromID");
+        send.writeUTF(id);
+        send.flush();
+
+        String temp = receiver.readUTF();
+
+        send.close();
+        receiver.close();
+        client.close();
+        return temp;
+    }
+
+    public static ArrayList<String> GetBillBoardFromTimes(String min, String max, String table) throws IOException, ClassNotFoundException {
+        Socket client = ConnectionToServer();
+        OutputStream outputStream = client.getOutputStream();
+        InputStream inputStream = client.getInputStream();
+
+        ObjectOutputStream send = new ObjectOutputStream(outputStream);
+        ObjectInputStream receiver = new ObjectInputStream(inputStream);
+
+        System.out.println("Creating new schedule");
+        send.writeUTF("GetScheduledBillboard");
+        send.writeUTF(min);
+        send.writeUTF(max);
+        send.writeUTF(table);
+        send.flush();
+
+        ArrayList<String> temp = new ArrayList<>();
+
+        receiver.read();
+        try
+        {
+            temp = (ArrayList<String>) receiver.readObject();
+        }catch(Exception e)
+        {
+            e.printStackTrace();
+        }
+        System.out.println(temp);
+        send.close();
+        receiver.close();
+        client.close();
+
+        return temp;
+    }
+
     public static void CreateNewSchedule(ArrayList<String> vals) throws IOException {
         Socket client = ConnectionToServer();
         if(!client.isConnected()) return;
@@ -670,6 +730,33 @@ public class Controller {
         send.writeUTF("CreateSchedule");
         send.writeObject(vals);
         send.flush();
+    }
+
+    public static ArrayList<String[]> RequestScheduleBillboards() throws IOException, ClassNotFoundException {
+        if(loggedInUser == null) return new ArrayList<>();
+        Socket client = ConnectionToServer();
+        if(!client.isConnected()) return new ArrayList<String[]>();
+        OutputStream outputStream = client.getOutputStream();
+        InputStream inputStream = client.getInputStream();
+
+        ObjectOutputStream send = new ObjectOutputStream(outputStream);
+        ObjectInputStream receiver = new ObjectInputStream(inputStream);
+
+
+        System.out.println("Requesting new schedule");
+        send.writeUTF("RequestScheduleBillboards");
+        send.writeUTF(loggedInUser);
+        send.writeUTF(token);
+        send.flush();
+
+        receiver.read();
+        ArrayList<String[]> temp = (ArrayList<String[]>) receiver.readObject();
+        send.close();
+        receiver.close();
+        client.close();
+
+        return temp;
+
     }
 
     static ArrayList<String> GetListOfUsers() throws IOException, ClassNotFoundException {

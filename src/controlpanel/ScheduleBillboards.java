@@ -5,7 +5,14 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.IOException;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Scheduling billboards. Logic is similar to listing billboards as the billboard data
@@ -13,15 +20,30 @@ import java.io.IOException;
  */
 public class ScheduleBillboards {
     static JInternalFrame window = new JInternalFrame( "Schedule Billboards", false, false, true);
+    /**
+     * Table master, used for when we interact with the table e.g. clicking to grab info
+     */
     private static JTable tableBillboard = new JTable();
+    /**
+     * Table model to build the table with. Calls buildTable();
+     */
+    public static DefaultTableModel tableCalendar;
+    static {
+        try {
+            tableCalendar = buildTable();
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
 
 
     /**
      * Seeing the JLabel create everywhere started to get a little annoying so this function
      * creates a Jlabel component so the code 'looks' cleaner. Doesn't really add any functionality
      * outside making the code less of a mess to look at.
-     * @param input
-     * @return
+     * @param input input to create a label from.
+     * @return      JLabel.
      */
     private static JLabel createLabel(String input)
     {
@@ -32,7 +54,7 @@ public class ScheduleBillboards {
      * Helper function to downsize the "look" of complexity in the main function.
      * @param comp  Component (we return this with the formatted text).
      * @param title If the text requires the Title font styling.
-     * @return
+     * @return      Formatted text
      */
     private static JLabel formatText(JLabel comp, boolean title)
     {
@@ -42,7 +64,11 @@ public class ScheduleBillboards {
         return comp;
     }
 
-
+    /**
+     * Setups the JFrame settings to be 600 pixel wide and 400 pixels high and sets the location
+     * in the middle of the control panel.
+     * @param frame Frame to apply settings too.
+     */
     private static void windowSettings(JInternalFrame frame)
     {
         frame.setSize(600, 400);
@@ -92,7 +118,6 @@ public class ScheduleBillboards {
         String[][] Data = Controller.ListSchedule();
 //      Calendar setup
 
-        DefaultTableModel tableCalendar = buildTable();
         tableBillboard.setModel(tableCalendar);
         tableBillboard.getTableHeader().setReorderingAllowed(false);
         JScrollPane calendar = new JScrollPane(tableBillboard);
@@ -103,8 +128,6 @@ public class ScheduleBillboards {
         JPanel buttons = new JPanel();
 
         JButton createButton =  new JButton("Create new Scheduling");
-        JButton editButton =    new JButton("Edit Scheduling");      // We'll be "editing" the schedule dynamically
-        JButton deleteButton =  new JButton("Delete Scheduling");
         JButton refreshButton =  new JButton("Refresh Scheduling");
 
         createButton.addActionListener(new ActionListener() {
@@ -114,17 +137,46 @@ public class ScheduleBillboards {
             }
         });
 
-        editButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
 
+        tableBillboard.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                Point point = e.getPoint();
+                int row = tableBillboard.rowAtPoint(point);
+                int column = tableBillboard.columnAtPoint(point);
+                if(e.getClickCount() == 1 && row != -1 && column != -1)
+                {
+                    if(tableBillboard.getValueAt(row, column) != null && tableBillboard.getValueAt(row, column) != "")
+                    {
+                        int minCount = row-1 < 1 ? tableBillboard.getRowCount()-1 : row-1;          // Cell time - 1
+                        String max = (String) tableBillboard.getValueAt(row, 0);            // max = current cell
+                        String min = (String) tableBillboard.getValueAt(minCount, 0);       // min = cell - 1
+                        String cell = (String) tableBillboard.getValueAt(row, column);              // Billboard name
+
+                        try {
+                            CellCreatedAt(cell, min,max);
+                        } catch (ParseException ex) {
+                            ex.printStackTrace();
+                        } catch (IOException ex) {
+                            ex.printStackTrace();
+                        } catch (ClassNotFoundException ex) {
+                            ex.printStackTrace();
+                        }
+                    }
+                }
             }
         });
 
         refreshButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                reload(tableCalendar);
+                try {
+                    reload(tableCalendar);
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                } catch (ClassNotFoundException ex) {
+                    ex.printStackTrace();
+                }
             }
         });
 
@@ -132,8 +184,6 @@ public class ScheduleBillboards {
         // but I can't be screwed moving it into arrays to
         // add dynamically. - Brendan
         buttons.add(createButton);
-        buttons.add(editButton);
-        buttons.add(deleteButton);
         buttons.add(refreshButton);
 
         window.add(titlePanel);
@@ -143,37 +193,153 @@ public class ScheduleBillboards {
     }
 
     /**
-     * Builds table
-     * @return table model
+     * Reads the time from the table 01pm, 01am 12pm and converts it into
+     * 24 hour time format with SQL readable time: 24:00:00.
+     *
+     * @param time  Time string to format.
+     * @return      String in HH:MM:SS format.
      */
-    private static DefaultTableModel buildTable()
+    private static String FormatReadableTime(String time)
     {
+        Pattern p = Pattern.compile("am");
+        Pattern p2 = Pattern.compile("pm");
+        Matcher am = p.matcher(time);
+        Matcher pm = p2.matcher(time);
+        if(am.find())
+        {
+            time = time.replace("^0", "");
+            time = time.replace("am", ":00:00");
+            time = time.replaceAll("12:00", "24:00");
+        }
+        if(pm.find())
+        {
+            time = time.replace("pm", "");
+            time = time.replace("^0", "");
+            if(Integer.parseInt(time) == 12) time = "0";
+            time = String.valueOf(Integer.parseInt(time)+12)+":00:00";
+        }
+        return time;
+    }
+
+    /**
+     * Shows some basic information in a dialog pane.
+     * @param info  Data from DB query.
+     */
+    private static void ShowInfoPane(ArrayList<String> info) {
+
+        String message =    info.get(0)+" was created by "+
+                            info.get(3)+" is to start displaying at " +
+                            info.get(1) + " on " +
+                            info.get(2) + " for " + info.get(4) + " Minutes";
+
+        JOptionPane pane = new JOptionPane(message, JOptionPane.INFORMATION_MESSAGE);
+        JDialog dialog = pane.createDialog("Information on:"+info.get(0));
+        dialog.setAlwaysOnTop(true);
+        dialog.setVisible(true);
+    }
+
+    /**
+     * Function that grabs the available information from the current cell (Table name and time) and attempts to
+     * search in the allotted time - an hour to see if there's a database entry.
+     *
+     * @param table                     String for the table name.
+     * @param min                       String of the minimum amount of time to search from
+     * @param max                       String of the maximum amount of time to search from.
+     * @throws ParseException           Signals that an error has been reached unexpectedly while parsing.
+     * @throws IOException              Signals that an I/O exception of some sort has occurred.
+     * @throws ClassNotFoundException   Signals that a particular class is not found at runtime.
+     */
+    private static void CellCreatedAt(String table, String min, String max) throws ParseException, IOException, ClassNotFoundException {
+        min = FormatReadableTime(min);
+        max = FormatReadableTime(max);
+        ArrayList<String> temp = Controller.GetBillBoardFromTimes(min, max, table);
+        ShowInfoPane(temp);
+    }
+
+    /**
+     * Since the database stores the days as Strings of the actual day
+     * we can modify
+     * @return  Hash map of days.
+     */
+    private static HashMap<String, Integer> daysInWeek()
+    {
+        HashMap<String, Integer> days = new HashMap<String, Integer>();
+        days.put("Monday", 1);
+        days.put("Tuesday", 2);
+        days.put("Wednesday", 3);
+        days.put("Thursday", 4);
+        days.put("Friday", 5);
+        days.put("Saturday", 6);
+        days.put("Sunday", 7);
+        return days;
+    }
+
+    /**
+     * This is called 2 for loops (24 * 8) so no loops please. I have broke this rule I have set myself and I
+     * have nothing to gain from it other than sanity. - Brendan
+     * @param outer     Outer for loop.
+     * @param inner     Inner for loop.
+     * @param master    Data to parse.
+     * @return          Billboard name of the current position or empty.
+     */
+    private static String PositionData(int outer, int inner, ArrayList<String[]> master) throws IOException, ClassNotFoundException {
+        for(String[] data : master)
+        {
+            int hour = Integer.parseInt(data[3].split(":")[0]);
+            int day = daysInWeek().get(data[1]);
+
+            int calculatedDuration = hour + (Integer.parseInt(data[2]) / 60);
+
+            if((hour <= outer && calculatedDuration >= outer))
+            {
+                if(day == inner)
+                {
+                    if(!(data[6].isEmpty()))
+                    {
+                        return Controller.GetBillboardFromID(data[6]);
+                    }
+                }
+            }
+        }
+        return "";
+    }
+
+
+    /**
+     * The code builds a 24 * 7 table (168 cells) calculate and renders which cell should contain what data.
+     * Unfortunately I did not have the foresight for days that had extended durations e.g. days that render
+     * a time table at 23H and extend for 2 hours which would make it 1H the following day. This is because
+     * the way the table generates is ;eft to right going down. This makes sense in a logical sense since the
+     * program would have to create a cell at 1x1 then 2x1, 3x1, 4x1 and so forth. The problem arises when
+     * this roll over happens and we're doing our calculations and rendering at the same time. For instance
+     * 1x23 wants to roll over to 2x1. This is for all intents and purposes very dumb to implement as we'll
+     * have 4 or 5 for loops running at the same time. Having 3 nested for loops is bad enough and if we try
+     * to linearly calculate the position of each cell and then render each cell separately it it'll take a
+     * noticeable amount of time. Too much time.
+     *
+     * So for the sake of myself, my Sunday 1am commits and my sanity. I am not doing this. God why did I agree
+     * to build this system in less than 3 days. - Brendan
+     * @return Table model to construct a table from.
+     * @throws IOException              Signals that an I/O exception of some sort has occurred.
+     * @throws ClassNotFoundException   Signals that a particular class is not found at runtime.
+     */
+    private static DefaultTableModel buildTable() throws IOException, ClassNotFoundException {
         /**
          * Table heading for the 3D matrix
          */
-        String[] columnHeading = {"Time", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"};
-        /**
-         * 3D matrix array set up? So, 0x0 = 8:30am but 1x1 would be Monday at 9:00am.
-         * So the program needs to be able to grab the start date time / date and
-         * end date / time and calculate how lon that would take so for example:
-         * If a program started at Monday at 9am but ended on tuesday at 9am it would
-         * look something like this
-         * -Time- |-Mon-|-Tue-|  ...
-         * "8am"  |  1  |  1  |  ...
-         * "9am"  |  1  |  0  |  ...
-         * "10am" |  1  |  0  |  ...
-         * "11am" |  1  |  0  |  ...
-         * "..."  |  1  |  0  |  ...
-         * 1's would be where we replace the empty string with the table name. We'll
-         * use the table name since it'll be easier for the end user to read but will
-         * be a longer SQL query.
-         *
-         * Todo figure out how to implement the logic above. - Help
-         */
+        String[] columnHeading = {"Time", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
         String[][] rowData = new String[24][columnHeading.length];
 
+        ArrayList<String[]> temp = Controller.RequestScheduleBillboards();
+
+        /**
+         * ROWS
+         */
         for(int outer = 0; outer < 24; outer++)                                 // TIME 1 am ... 12am (24 hour format)
         {
+            /**
+             * COLUMNS
+             */
             for(int inner = 0; inner < columnHeading.length; inner++)           // Column position (0 to 6) per day
             {
                 // If inner is 0 it has to be the time column
@@ -185,10 +351,12 @@ public class ScheduleBillboards {
                     String hours = time < 10 ? "0"+String.valueOf(time) : String.valueOf(time);     // String conversion + formatting
                     rowData[outer][inner] = hours + am_or_pm;                                       // Appending to array
                 }
-                // Empty data for now
                 else
                 {
-                    rowData[outer][inner] = "";
+                    if(temp != null)
+                    {
+                        rowData[outer][inner] = PositionData(outer, inner, temp);
+                    }
                 }
             }
         }
@@ -197,8 +365,14 @@ public class ScheduleBillboards {
         DefaultTableModel tableCalendar = new DefaultTableModel(rowData, columnHeading);
         return tableCalendar;
     }
-    private static void reload(DefaultTableModel model)
-    {
+
+    /**
+     * Reloads the table by deleting the entire table and re-rendering it.
+     * @param model Table model
+     * @throws IOException              Signals that an I/O exception of some sort has occurred.
+     * @throws ClassNotFoundException   Signals that a particular class is not found at runtime.
+     */
+    public static void reload(DefaultTableModel model) throws IOException, ClassNotFoundException {
         model.setRowCount(0);
         tableBillboard.setModel(buildTable());
     }

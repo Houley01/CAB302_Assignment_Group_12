@@ -33,8 +33,8 @@ public class CreateSchedule {
      * Display billboards in a comboBox
      * @param label Input label
      * @return Jpanel component.
-     * @throws IOException
-     * @throws ClassNotFoundException
+     * @throws IOException              Signals that an I/O exception of some sort has occurred.
+     * @throws ClassNotFoundException   Signals that a particular class is not found at runtime.
      */
     private static JPanel billboard(String label) throws IOException, ClassNotFoundException {
         JPanel panel = inputField();
@@ -71,6 +71,7 @@ public class CreateSchedule {
     /**
      * Time format for input was found
      * <a href="https://stackoverflow.com/questions/2234726/jformattedtextfield-input-time-duration-value">here</a>.
+     * Creates a formatted text input to Hours and minutes so we force some user input.
      * @author  nanda
      * @return  input time field.
      */
@@ -86,6 +87,11 @@ public class CreateSchedule {
         return panel;
     }
 
+    /**
+     * Creates a simple Java swing input text field.
+     * @param label     Label for the input.
+     * @return          Returns JPanel object.
+     */
     private static JPanel simpleInput(String label)
     {
         JPanel panel = inputField();
@@ -98,6 +104,13 @@ public class CreateSchedule {
         return panel;
     }
 
+    /**
+     * Creates a recurring input. Includes a listener to check
+     * to see if minutes was selected and setting visbility of
+     * Duration Mins.
+     * @param label     Label for the input.
+     * @return          JPanel object.
+     */
     private static JPanel recurring(String label)
     {
         JPanel panel = inputField();
@@ -120,6 +133,11 @@ public class CreateSchedule {
         return panel;
     }
 
+    /**
+     * Input for how long the duration should last in minutes.
+     * @param label Label for input.
+     * @return      JPanel Object.
+     */
     private static JPanel durationMinutes(String label)
     {
         JPanel panel = inputField();
@@ -133,10 +151,11 @@ public class CreateSchedule {
 
 
     /**
-     * Main
-     * @return
-     * @throws IOException
-     * @throws ClassNotFoundException
+     * Create schedule contains the the settings and construction of the window.
+     * Contains listeners to create a new schedule in the database.
+     * @return                          JInternalFrame for the controlPanelFrameHandler
+     * @throws IOException              Signals that an I/O exception of some sort has occurred.
+     * @throws ClassNotFoundException   Signals that a particular class is not found at runtime.
      */
     public static JInternalFrame createSchedule() throws IOException, ClassNotFoundException {
         window.setSize(600, 500);
@@ -211,6 +230,11 @@ public class CreateSchedule {
         return window;
     }
 
+    /**
+     * Gets the value of all listed inputs and compiles them into a array string
+     * that we can access. (Is much easier than grabbing them manually
+     * @return  Array string with input values.
+     */
     private static  ArrayList<String> getValues(){
         ArrayList<String> values = new ArrayList<>();
         for(JComponent panels : comp)
@@ -235,6 +259,13 @@ public class CreateSchedule {
         return values;
     }
 
+    /**
+     * Check to see if the inputs are valid. Checks to see
+     * if inputs the user has to enter a value for are empty
+     * and or invalid. E.g. negative duration.
+     * @return  True if all inputs are valiid.
+     *          False if an input is invalid.
+     */
     private static boolean validate()
     {
         ArrayList<String> values = getValues();
