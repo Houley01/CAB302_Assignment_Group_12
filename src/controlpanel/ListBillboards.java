@@ -7,13 +7,20 @@ import java.awt.event.*;
 import java.io.IOException;
 
 
-public class listBillboards extends JFrame {
+public class ListBillboards extends JFrame {
     static JInternalFrame window = new JInternalFrame( "List Billboards", false, false, true);
     static JTable tableBillboard = new JTable();
     static DefaultTableModel model;
+
+    /**
+     * @since JDK13
+     * @return window       JFrame object containing configurations and elements created.
+     * @throws IOException
+     * @throws ClassNotFoundException
+     */
     public static JInternalFrame listBillboards() throws IOException, ClassNotFoundException {
         window.setSize(600, 300);
-        window.setLocation((controlPanel.WINDOWWIDTH/2) - 300, (controlPanel.WINDOWHEIGHT/2) - 200);
+        window.setLocation((ControlPanel.WINDOWWIDTH/2) - 300, (ControlPanel.WINDOWHEIGHT/2) - 200);
         window.setLayout(new GridLayout(4,1));
 
 //        Heading
@@ -21,10 +28,10 @@ public class listBillboards extends JFrame {
         JLabel titleLabel = new JLabel("List Billboards");
         titleLabel.setVerticalTextPosition(JLabel.TOP);
         titleLabel.setHorizontalAlignment(JLabel.LEFT);
-        titleLabel.setFont(controlPanel.titleFont);
+        titleLabel.setFont(ControlPanel.titleFont);
         titlePanel.add(titleLabel);
 
-        DefaultTableModel model = BuildTable();
+        model = BuildTable();
 
         tableBillboard.setModel(model);
 //        Stops the columns from being reordered
@@ -54,8 +61,8 @@ public class listBillboards extends JFrame {
         addButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                createBillboards.window.setVisible(true);
-                createBillboards.window.toFront();
+                CreateBillboards.window.setVisible(true);
+                CreateBillboards.window.toFront();
                 Reload(model);
             }
         });
@@ -64,15 +71,14 @@ public class listBillboards extends JFrame {
         editButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                System.out.println();
 //                Check to see if a row is selected
 //                if table returns back -1 means no row has been selected
                 if (tableBillboard.getSelectedRow() != -1 ) {
                     String billboardSelected = (String) tableBillboard.getValueAt(tableBillboard.getSelectedRow(), 0);
 //                    if the data in the column is equal to empty string "" then don't do the function
-                    if (billboardSelected.equals("") == false) {
+                    if (!billboardSelected.equals("")) {
                         try {
-                            controller.EditSelectedBillboard(billboardSelected);
+                            Controller.EditSelectedBillboard(billboardSelected);
                         } catch (IOException | ClassNotFoundException ioException) {
                             ioException.printStackTrace();
                         }
@@ -93,9 +99,9 @@ public class listBillboards extends JFrame {
                 if (tableBillboard.getSelectedRow() != -1 ) {
                     String billboardSelected = (String) tableBillboard.getValueAt(tableBillboard.getSelectedRow(), 0);
 //                    if the data in the column is equal to empty string "" then don't do the function
-                    if (billboardSelected.equals("") == false) {
+                    if (!billboardSelected.equals("")) {
                         try {
-                            controller.DeleteBillboard(billboardSelected);
+                            Controller.DeleteBillboard(billboardSelected);
                         } catch (IOException ioException) {
                             ioException.printStackTrace();
                         }
@@ -121,7 +127,7 @@ public class listBillboards extends JFrame {
     }
 
     public static DefaultTableModel BuildTable() throws IOException, ClassNotFoundException {
-        String[][] data = controller.ListBillboards(); // Get data from
+        String[][] data = Controller.ListBillboards(); // Get data from
         String[] columnHeading = {"ID", "Billboard Name", "Creator", "Date Made", "Date Modified", "File Location"};
        return new DefaultTableModel(data, columnHeading);
     }
@@ -130,10 +136,8 @@ public class listBillboards extends JFrame {
         try {
             model.setRowCount(0); // Removes all the row
             tableBillboard.setModel(BuildTable()); // Recreate the table model
-        } catch (IOException ioException) {
+        } catch (IOException | ClassNotFoundException ioException) {
             ioException.printStackTrace();
-        } catch (ClassNotFoundException classNotFoundException) {
-            classNotFoundException.printStackTrace();
         }
     }
 

@@ -1,29 +1,22 @@
 package controlpanel;
 
 
-import resources.Billboard;
-
 import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
 import javax.swing.text.DateFormatter;
 import javax.swing.text.DefaultFormatterFactory;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 
 /**
  * Create window for the Scheduling system. Should only display a couple of small windows to select options from.
  */
-public class createSchedule {
+public class CreateSchedule {
     static JInternalFrame window = new JInternalFrame( "New schedule.", false, false, true);
     private static Date currentTime = Calendar.getInstance().getTime();
     private static JPanel DurationMins = durationMinutes("Duration in minutes:");
@@ -45,7 +38,7 @@ public class createSchedule {
      */
     private static JPanel billboard(String label) throws IOException, ClassNotFoundException {
         JPanel panel = inputField();
-        String[][] billboard = controller.ListBillboards();
+        String[][] billboard = Controller.ListBillboards();
         String[] temp = new String[billboard.length];
         for(int outer = 0; outer < billboard.length; outer++)
         {
@@ -126,7 +119,7 @@ public class createSchedule {
         panel.add(new JLabel(label));
         panel.add(options);
 
-        System.out.println(options.getSelectedIndex());
+//        System.out.println(options.getSelectedIndex());
 
         options.addActionListener(new ActionListener() {
             @Override
@@ -166,7 +159,7 @@ public class createSchedule {
      */
     public static JInternalFrame createSchedule() throws IOException, ClassNotFoundException {
         window.setSize(600, 500);
-        window.setLocation((controlPanel.WINDOWWIDTH/2) - 300, (controlPanel.WINDOWHEIGHT/2) - 200);
+        window.setLocation((ControlPanel.WINDOWWIDTH/2) - 300, (ControlPanel.WINDOWHEIGHT/2) - 200);
         window.setLayout(new GridLayout(10,1));
         DurationMins.setVisible(false);
 
@@ -175,7 +168,7 @@ public class createSchedule {
         JLabel titleLabel = new JLabel("Create new schedule");
         titleLabel.setVerticalTextPosition(JLabel.TOP);
         titleLabel.setHorizontalAlignment(JLabel.LEFT);
-        titleLabel.setFont(controlPanel.titleFont);
+        titleLabel.setFont(ControlPanel.titleFont);
         titlePanel.add(titleLabel);
 
 
@@ -204,7 +197,7 @@ public class createSchedule {
                 if(validation)
                 {
                     try {
-                        controller.createNewSchedule(getValues());
+                        Controller.CreateNewSchedule(getValues());
                         window.setVisible(false);
                     } catch (IOException ex) {
                         ex.printStackTrace();
@@ -212,7 +205,7 @@ public class createSchedule {
                 }
                 else
                 {
-                    System.out.println("No");
+//                    System.out.println("No");
                 }
             }
         });
@@ -286,7 +279,7 @@ public class createSchedule {
          */
         if(values.get(3) == null || values.get(3).isEmpty())
         {
-            DialogWindow.showErrorPane(
+            DialogWindow.ShowErrorPane(
                     "You must enter a duration for the billboard.",
                     "Error"
             );
@@ -297,7 +290,7 @@ public class createSchedule {
 
         if(duration <= 0)
         {
-            DialogWindow.showErrorPane(
+            DialogWindow.ShowErrorPane(
                     "You cannot have a negative duration.",
                     "Error"
             );
@@ -310,7 +303,7 @@ public class createSchedule {
         {
             if(values.get(5) == null || values.get(5).isEmpty())
             {
-                DialogWindow.showErrorPane(
+                DialogWindow.ShowErrorPane(
                         "You cannot schedule the billboard to recur never again.",
                         "Error"
                 );
@@ -320,7 +313,7 @@ public class createSchedule {
 
             if(count <= 0)
             {
-                DialogWindow.showErrorPane(
+                DialogWindow.ShowErrorPane(
                         "You cannot recur at negative or no intervals",
                         "Error"
                 );
@@ -328,8 +321,8 @@ public class createSchedule {
 
             if(count > duration)
             {
-                DialogWindow.showErrorPane(
-                        "You cannot schedule the billboard more frequently than the time allotted.",
+                DialogWindow.ShowErrorPane(
+                        "You cannot schedule the billboard more frequently than the time alloted.",
                         "Error"
                 );
                 return false;

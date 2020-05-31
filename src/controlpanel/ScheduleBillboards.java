@@ -8,16 +8,9 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
-import java.lang.reflect.Array;
-import java.net.Socket;
-import java.text.DateFormat;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
-import java.util.logging.SimpleFormatter;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -25,10 +18,7 @@ import java.util.regex.Pattern;
  * Scheduling billboards. Logic is similar to listing billboards as the billboard data
  * is contained in a 3D array as well.
  */
-public class scheduleBillboards {
-    /**
-     * Scheduler window.
-     */
+public class ScheduleBillboards {
     static JInternalFrame window = new JInternalFrame( "Schedule Billboards", false, false, true);
     /**
      * Table master, used for when we interact with the table e.g. clicking to grab info
@@ -70,7 +60,7 @@ public class scheduleBillboards {
     {
         comp.setVerticalTextPosition(JLabel.TOP);
         comp.setHorizontalAlignment(JLabel.LEFT);
-        if(title) comp.setFont(controlPanel.titleFont);
+        if(title) comp.setFont(ControlPanel.titleFont);
         return comp;
     }
 
@@ -82,7 +72,7 @@ public class scheduleBillboards {
     private static void windowSettings(JInternalFrame frame)
     {
         frame.setSize(600, 400);
-        frame.setLocation((controlPanel.WINDOWWIDTH/2) - 400, (controlPanel.WINDOWHEIGHT/2) - 200);
+        frame.setLocation((ControlPanel.WINDOWWIDTH/2) - 400, (ControlPanel.WINDOWHEIGHT/2) - 200);
         frame.setLayout(new GridLayout(3,1));
     }
 
@@ -142,7 +132,7 @@ public class scheduleBillboards {
         createButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                controller.showCreateSchedule();
+                Controller.ShowCreateSchedule();
             }
         });
 
@@ -163,7 +153,7 @@ public class scheduleBillboards {
                         String cell = (String) tableBillboard.getValueAt(row, column);              // Billboard name
 
                         try {
-                            cellCreatedAt(cell, min,max);
+                            CellCreatedAt(cell, min,max);
                         } catch (ParseException ex) {
                             ex.printStackTrace();
                         } catch (IOException ex) {
@@ -258,10 +248,10 @@ public class scheduleBillboards {
      * @throws IOException              Signals that an I/O exception of some sort has occurred.
      * @throws ClassNotFoundException   Signals that a particular class is not found at runtime.
      */
-    private static void cellCreatedAt(String table, String min, String max) throws ParseException, IOException, ClassNotFoundException {
+    private static void CellCreatedAt(String table, String min, String max) throws ParseException, IOException, ClassNotFoundException {
         min = FormatReadableTime(min);
         max = FormatReadableTime(max);
-        ArrayList<String> temp = controller.GetBillBoardFromTimes(min, max, table);
+        ArrayList<String> temp = Controller.GetBillBoardFromTimes(min, max, table);
         ShowInfoPane(temp);
     }
 
@@ -305,7 +295,7 @@ public class scheduleBillboards {
                 {
                     if(!(data[6].isEmpty()))
                     {
-                        return controller.GetBillboardFromID(data[6]);
+                        return Controller.GetBillboardFromID(data[6]);
                     }
                 }
             }
@@ -339,7 +329,7 @@ public class scheduleBillboards {
         String[] columnHeading = {"Time", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
         String[][] rowData = new String[24][columnHeading.length];
 
-        ArrayList<String[]> temp = controller.RequestScheduleBillboards();
+        ArrayList<String[]> temp = Controller.RequestScheduleBillboards();
 
         /**
          * ROWS

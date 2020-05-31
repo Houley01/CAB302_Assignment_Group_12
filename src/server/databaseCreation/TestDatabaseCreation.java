@@ -9,7 +9,7 @@ public class TestDatabaseCreation {
 
     @Test
     public void testDatabaseExists() throws SQLException {
-        ServerInit.initaliseConnection();
-        databaseCreation.checkDatabaseExistence();
+        ServerInit.initialiseConnection();
+        DatabaseCreation.CheckDatabaseExistence();
     }
 }
