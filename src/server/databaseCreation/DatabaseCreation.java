@@ -59,7 +59,7 @@ public class DatabaseCreation {
 
     /**
      * Creates a database if the checker didn't detect a database.
-     * We read this from <code>src/server/resources/cab302_db_queries.sql</code>
+     * We read this from <code>src/resources/cab302_db_queries.sql</code>
      * to create the database.
      *
      * @throws SQLException
@@ -69,7 +69,7 @@ public class DatabaseCreation {
         Statement stmt = ServerInit.conn.createStatement();
 
         try {
-            File myObj = new File("src/server/resources/cab302_db_queries.sql");
+            File myObj = new File("src/resources/cab302_db_queries.sql");
             Scanner myReader = new Scanner(myObj);
             while (myReader.hasNextLine()) {
                 String data = myReader.nextLine();

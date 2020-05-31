@@ -705,7 +705,7 @@ public class Controller {
         ObjectOutputStream send = new ObjectOutputStream(outputStream);
         ObjectInputStream receiver = new ObjectInputStream(inputStream);
 
-        System.out.println("Creating new schedule");
+//        System.out.println("Creating new schedule");
         send.writeUTF("GetScheduledBillboard");
         send.writeUTF(min);
         send.writeUTF(max);
@@ -759,7 +759,7 @@ public class Controller {
         ObjectInputStream receiver = new ObjectInputStream(inputStream);
 
 
-        System.out.println("Requesting new schedule");
+//        System.out.println("Requesting new schedule");
         send.writeUTF("RequestScheduleBillboards");
         send.writeUTF(loggedInUser);
         send.writeUTF(token);

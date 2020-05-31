@@ -78,7 +78,7 @@ public class Server {
 
             while (true) {
                 Socket server = serverSocket.accept();
-//                System.out.println("Connected to " + server.getInetAddress());
+                System.out.println("Connected to " + server.getInetAddress()); // Record as log
 
                 ObjectInputStream receiver = new ObjectInputStream(server.getInputStream());
                 ObjectOutputStream send = new ObjectOutputStream(server.getOutputStream());
@@ -116,7 +116,7 @@ public class Server {
                 }
 
                 if (request.equals("RequestScheduleBillboards")) {
-                    System.out.println("Requested schedule billboards");
+//                    System.out.println("Requested schedule billboards");
                     String username = receiver.readUTF();
                     String token = receiver.readUTF();
 
@@ -1034,7 +1034,7 @@ public class Server {
             output.add(rs.getString("user"));
             output.add(rs.getString("duration"));
             send.writeObject(output);
-            System.out.println("Sending information...");
+//            System.out.println("Sending information...");
             send.flush();
         }
         else{
@@ -1229,7 +1229,7 @@ public class Server {
         ResultSet rs = st.executeQuery(getBillboard);
         if(!rs.isBeforeFirst())
         {
-            System.out.println("No billboard data");
+//            System.out.println("No billboard data");
             return "";
         }
         rs.next();
