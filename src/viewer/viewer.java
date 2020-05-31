@@ -270,7 +270,6 @@ public class viewer extends TimerTask {
      * but if the server did supply data and we have a valid socket connection we format
      * the billboard data and send it to the users GUI.
      * @param preview determine if the request was send from control panel
-     * @see //getBillboardInfo
      */
     public static void renderer(Billboard currBill, boolean preview) throws IOException
     {
