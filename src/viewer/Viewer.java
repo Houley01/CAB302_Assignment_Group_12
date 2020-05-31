@@ -50,7 +50,6 @@ public class Viewer extends TimerTask {
      * @throws IOException
      */
     public static Socket ConnectionToServer() throws IOException {
-        System.out.println("Attempting connection.");
         try {
             // Gathers the information from server.config file
             resources.GetPropertyValues properties = new resources.GetPropertyValues();
@@ -64,15 +63,13 @@ public class Viewer extends TimerTask {
             }
             catch (Exception e)
             {                                                                                                           // We can expect the server to be offline.
-//                System.out.println("Unable to connect to server.");                                                     // (we'll flood the console with error messages if we print stack trace)
+                e.printStackTrace();
             }
 
             // If the server connection was made
             return client;
         } catch (IOException e) { // If something goes horribly wrong
-//            e.printStackTrace();
             // Developer message
-//            System.out.println("Server connection doesn't exist.");
             Socket client = new Socket();
             return client;
         }
@@ -113,16 +110,9 @@ public class Viewer extends TimerTask {
             try
             {
                 output = (List<String>) receiver.readObject();                    // Putting server data into list.
-                for (String item : output) {
-                    System.out.println(item);
-                    System.out.println();
-                }
             }
             catch(Exception e)                                                    // We assume the server didn't give us any usable information
             {
-                // Debugging messages
-//                System.out.println("There was no billboard data retrieved from the database.");
-//                System.out.println("Check to see if the server is online, or if the billboards table has any populated data");
                 return null; // Return nothing
             }
 
@@ -136,8 +126,6 @@ public class Viewer extends TimerTask {
                                                                                   // will be present when we split the string.
             String fileName = file.replace(".xml", "");        // Java didn't like split here so we just
                                                                                   // delete the extension.
-            System.out.println(fileLocation);
-            System.out.println(fileName);
             Billboard billboard = ReadXMLFile(new File(fileLocation), fileName);  // ReadXML returns a Billboard class
 
             // Closing streams and socket
@@ -311,7 +299,6 @@ public class Viewer extends TimerTask {
         {
             bgColour = Color.decode(currBill.getBackgroundColour().isEmpty() ?
                     "#333333" : currBill.getBackgroundColour());                                                        // AWT readable colour
-            System.out.println(currBill.getMessageText());
             JLabel message = !currBill.getMessageText().isEmpty() || currBill.getMessageText() != "" ?
                     FormatText(currBill.getMessageColour(), w / 40, currBill.getMessageText(),true)
                     : FormatText("#000000", w/40, "", false);                                    // Creating text for the message
@@ -329,8 +316,7 @@ public class Viewer extends TimerTask {
             {
                 if(image.getHeight(null) > h/5 && image.getWidth(null) > w)
                 {
-                    System.out.println("BIG");
-                    image = image.getScaledInstance(w/5, -1, Image.SCALE_SMOOTH);                                  // By far the easiest solution to
+                    image = image.getScaledInstance(w/5, -1, Image.SCALE_SMOOTH);                         // By far the easiest solution to
                                                                                                                         // stretch an image to the screen while maintaining
                                                                                                                         // aspect ratio.
                 }
