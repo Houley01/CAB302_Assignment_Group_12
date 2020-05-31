@@ -12,6 +12,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Create window for the Scheduling system. Should only display a couple of small windows to select options from.
@@ -21,6 +22,9 @@ public class CreateSchedule {
     private static Date currentTime = Calendar.getInstance().getTime();
     private static JPanel DurationMins = durationMinutes("Duration in minutes:");
     private static ArrayList<JComponent> comp = new ArrayList<>(); // Add all the panels into a list so we can put a listener
+
+
+    public static DefaultComboBoxModel models = new DefaultComboBoxModel();
 
     public static JPanel inputField()
     {
@@ -38,19 +42,31 @@ public class CreateSchedule {
      */
     private static JPanel billboard(String label) throws IOException, ClassNotFoundException {
         JPanel panel = inputField();
-        String[][] billboard = Controller.ListBillboards();
-        String[] temp = new String[billboard.length];
-        for(int outer = 0; outer < billboard.length; outer++)
-        {
-            temp[outer] = billboard[outer][1];
-        }
+        ListBillboards.Reload(ListBillboards.model);
 
-        JComboBox billboards = new JComboBox(temp);
-
+        models = new DefaultComboBoxModel(); // create a ComboBoxModel
+        Reload(models);                     // Add data to the ComboBoxModel
+        JComboBox billboards = new JComboBox(models); // Create a JComboBox
 
         panel.add(new JLabel(label));
         panel.add(billboards);
         return panel;
+    }
+
+    /**
+     *
+     * @param models The Java DefaultComboBoxModel
+     * @throws IOException
+     * @throws ClassNotFoundException
+     */
+    public static void Reload(DefaultComboBoxModel models) throws IOException, ClassNotFoundException {
+        models.removeAllElements();
+        ListBillboards.Reload(ListBillboards.model);
+        String[][] billboard = Controller.ListBillboards();
+        for(int outer = 0; outer < billboard.length; outer++)
+        {
+            models.addElement(billboard[outer][1]);
+        }
     }
 
     /**

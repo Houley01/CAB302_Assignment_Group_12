@@ -132,7 +132,16 @@ public class ScheduleBillboards {
         createButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                Controller.ShowCreateSchedule();
+                if (Controller.permission.GetUserPermission("ScheduleBillboard")) {
+                    try {
+                        CreateSchedule.Reload(CreateSchedule.models);
+                    } catch (IOException | ClassNotFoundException ioException) {
+                        ioException.printStackTrace();
+                    }
+                    Controller.ShowCreateSchedule();
+                } else {
+                    DialogWindow.NoAccessTo("Scheduling Billboard");
+                }
             }
         });
 
