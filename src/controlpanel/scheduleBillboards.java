@@ -26,30 +26,34 @@ import java.util.regex.Pattern;
  * is contained in a 3D array as well.
  */
 public class scheduleBillboards {
+    /**
+     * Scheduler window.
+     */
     static JInternalFrame window = new JInternalFrame( "Schedule Billboards", false, false, true);
+    /**
+     * Table master, used for when we interact with the table e.g. clicking to grab info
+     */
     private static JTable tableBillboard = new JTable();
+    /**
+     * Table model to build the table with. Calls buildTable();
+     */
     public static DefaultTableModel tableCalendar;
     static {
         try {
             tableCalendar = buildTable();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
+        } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }
     }
 
-    private static boolean waitTillNext = false;
-    private static int nextDay = 0;
-    private static int previousCalc = 0;
 
 
     /**
      * Seeing the JLabel create everywhere started to get a little annoying so this function
      * creates a Jlabel component so the code 'looks' cleaner. Doesn't really add any functionality
      * outside making the code less of a mess to look at.
-     * @param input
-     * @return
+     * @param input input to create a label from.
+     * @return      JLabel.
      */
     private static JLabel createLabel(String input)
     {
@@ -60,7 +64,7 @@ public class scheduleBillboards {
      * Helper function to downsize the "look" of complexity in the main function.
      * @param comp  Component (we return this with the formatted text).
      * @param title If the text requires the Title font styling.
-     * @return
+     * @return      Formatted text
      */
     private static JLabel formatText(JLabel comp, boolean title)
     {
@@ -70,7 +74,11 @@ public class scheduleBillboards {
         return comp;
     }
 
-
+    /**
+     * Setups the JFrame settings to be 600 pixel wide and 400 pixels high and sets the location
+     * in the middle of the control panel.
+     * @param frame Frame to apply settings too.
+     */
     private static void windowSettings(JInternalFrame frame)
     {
         frame.setSize(600, 400);
@@ -150,10 +158,10 @@ public class scheduleBillboards {
                 {
                     if(tableBillboard.getValueAt(row, column) != null && tableBillboard.getValueAt(row, column) != "")
                     {
-                        int minCount = row-1 < 1 ? tableBillboard.getRowCount()-1 : row-1;
-                        String max = (String) tableBillboard.getValueAt(row, 0);
-                        String min = (String) tableBillboard.getValueAt(minCount, 0);
-                        String cell = (String) tableBillboard.getValueAt(row, column);
+                        int minCount = row-1 < 1 ? tableBillboard.getRowCount()-1 : row-1;          // Cell time - 1
+                        String max = (String) tableBillboard.getValueAt(row, 0);            // max = current cell
+                        String min = (String) tableBillboard.getValueAt(minCount, 0);       // min = cell - 1
+                        String cell = (String) tableBillboard.getValueAt(row, column);              // Billboard name
 
                         try {
                             cellCreatedAt(cell, min,max);
@@ -194,6 +202,13 @@ public class scheduleBillboards {
         return window;
     }
 
+    /**
+     * Reads the time from the table 01pm, 01am 12pm and converts it into
+     * 24 hour time format with SQL readable time: 24:00:00.
+     *
+     * @param time  Time string to format.
+     * @return      String in HH:MM:SS format.
+     */
     private static String FormatReadableTime(String time)
     {
         Pattern p = Pattern.compile("am");
@@ -216,6 +231,10 @@ public class scheduleBillboards {
         return time;
     }
 
+    /**
+     * Shows some basic information in a dialog pane.
+     * @param info  Data from DB query.
+     */
     private static void ShowInfoPane(ArrayList<String> info) {
 
         String message =    info.get(0)+" was created by "+
@@ -223,16 +242,25 @@ public class scheduleBillboards {
                             info.get(1) + " on " +
                             info.get(2) + " for " + info.get(4) + " Minutes";
 
-        JOptionPane pane = new JOptionPane(message, JOptionPane.ERROR_MESSAGE);
+        JOptionPane pane = new JOptionPane(message, JOptionPane.INFORMATION_MESSAGE);
         JDialog dialog = pane.createDialog("Information on:"+info.get(0));
         dialog.setAlwaysOnTop(true);
         dialog.setVisible(true);
     }
 
+    /**
+     *
+     * @param table
+     * @param min
+     * @param max
+     * @throws ParseException
+     * @throws IOException
+     * @throws ClassNotFoundException
+     */
     private static void cellCreatedAt(String table, String min, String max) throws ParseException, IOException, ClassNotFoundException {
         min = FormatReadableTime(min);
         max = FormatReadableTime(max);
-        ArrayList<String> temp = controller.GetBillBoardFromTimes(min, max);
+        ArrayList<String> temp = controller.GetBillBoardFromTimes(min, max, table);
         ShowInfoPane(temp);
     }
 
@@ -312,9 +340,6 @@ public class scheduleBillboards {
 
         ArrayList<String[]> temp = controller.RequestScheduleBillboards();
 
-        waitTillNext = false;
-        nextDay = 0;
-        previousCalc = 0;
         /**
          * ROWS
          */

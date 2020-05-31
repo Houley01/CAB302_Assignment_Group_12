@@ -678,7 +678,7 @@ public class controller {
         return temp;
     }
 
-    public static ArrayList<String> GetBillBoardFromTimes(String min, String max) throws IOException, ClassNotFoundException {
+    public static ArrayList<String> GetBillBoardFromTimes(String min, String max, String table) throws IOException, ClassNotFoundException {
         Socket client = connectionToServer();
         OutputStream outputStream = client.getOutputStream();
         InputStream inputStream = client.getInputStream();
@@ -690,6 +690,7 @@ public class controller {
         send.writeUTF("GetScheduledBillboard");
         send.writeUTF(min);
         send.writeUTF(max);
+        send.writeUTF(table);
         send.flush();
 
         ArrayList<String> temp = new ArrayList<>();

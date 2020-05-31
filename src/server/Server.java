@@ -140,9 +140,10 @@ public class Server {
                     System.out.println("Getting selected billboard");
                     String min = receiver.readUTF();
                     String max = receiver.readUTF();
+                    String table = receiver.readUTF();
                     System.out.println("Got all information");
 
-                    GetScheduledBillboard(send, min, max);
+                    GetScheduledBillboard(send, min, max, table);
                 }
 
                 if(request.equals("CreateSchedule"))
@@ -1024,11 +1025,11 @@ public class Server {
         }
     }
 
-    private static void GetScheduledBillboard(ObjectOutputStream send, String min, String max) throws SQLException, IOException {
+    private static void GetScheduledBillboard(ObjectOutputStream send, String min, String max, String billName) throws SQLException, IOException {
         String query = "SELECT * FROM schedules\n" +
                 "LEFT JOIN billboards ON schedules.idBillboard = billboards.idBillboards\n" +
                 "LEFT JOIN users ON schedules.userId = users.idUsers\n" +
-                "WHERE startTime > '"+min+"' AND startTime < '"+max+"';";
+                "WHERE startTime > '"+min+"' AND startTime < '"+max+"' AND billboardName = '"+billName+"';";
         Statement st = ServerInit.conn.createStatement();
         st.executeQuery("USE `cab302`;");
         ResultSet rs = st.executeQuery(query);
