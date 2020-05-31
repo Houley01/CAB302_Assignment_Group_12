@@ -127,6 +127,10 @@ public class viewer extends TimerTask {
             try
             {
                 output = (List<String>) receiver.readObject();                    // Putting server data into list.
+                for (String item : output) {
+                    System.out.println(item);
+                    System.out.println();
+                }
             }
             catch(Exception e)                                                    // We assume the server didn't give us any usable information
             {

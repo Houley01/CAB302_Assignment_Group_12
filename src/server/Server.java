@@ -981,9 +981,10 @@ public class Server {
 
     public static void viewerRequest(ObjectOutputStream send) throws IOException, ClassNotFoundException, SQLException
     {
-        String query = "SELECT idBillboards, billboardName, users.fName, users.lName, dateMade, " +
-                "dateModify, fileLocation FROM billboards LEFT JOIN users ON billboards.userId = users.idUsers " +
-                "order by billboards.idBillboards;";
+        String query = "SELECT billboardName, fileLocation, startTime, recurring FROM billboards \n" +
+                "LEFT JOIN schedules ON schedules.idBillboard = billboards.idBillboards\n" +
+                "WHERE (schedules.weekday = DAYNAME(current_date)) AND (current_time < startTime)\n" +
+                "order by startTime desc;";
         Statement st = ServerInit.conn.createStatement();
         st.executeQuery("USE `cab302`;");
         ResultSet rs = st.executeQuery(query);
@@ -997,10 +998,9 @@ public class Server {
             send.write(1);
             send.flush();
             // Contains the schedules in the database
-            List<String> billboardImages = new ArrayList<>();
+            List<Object> billboardImages = new ArrayList<>();
 
             System.out.println("Retrieving list of Schedules from database...");
-
             while (rs.next()) {
                 String fileLocation = rs.getString("fileLocation");
                 billboardImages.add(fileLocation);
