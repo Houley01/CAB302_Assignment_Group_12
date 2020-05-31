@@ -127,12 +127,12 @@ public class Server {
                     System.out.println("Accessing data");
 
                     if (checkTokenIsValid(username, token)) {
-                        send.writeObject(RequestScheduling());
                         System.out.println("Sending data");
-                        send.flush();
+                        send.writeObject(RequestScheduling());
                     } else {
                         System.out.println("Token wasn't valid");
                     }
+                    send.flush();
                 }
 
                 if(request.equals("GetScheduledBillboard"))
@@ -201,9 +201,12 @@ public class Server {
                         System.out.println("Changing Password...");
                         changeUserPassword(username, password);
                         System.out.println("Changed Password...");
+                        send.writeBoolean(true);
                     } else {
                         System.out.println("Token wasn't valid");
+                        send.writeBoolean(false);
                     }
+                    send.writeUTF("New Password");
                     send.flush();
                 }
 
@@ -227,10 +230,14 @@ public class Server {
 
                     if (checkTokenIsValid(loggedInUser, token)) {
                         System.out.println("Retrieving user info...");
+                        send.writeBoolean(true);
+                        send.writeUTF("User Information");
                         send.writeObject(getUserInfo(username));
                         System.out.println("Retrieved user info");
                     } else {
                         System.out.println("Token wasn't valid");
+                        send.writeBoolean(false);
+                        send.writeUTF("User Information");
                     }
                     send.flush();
                 }
@@ -248,9 +255,12 @@ public class Server {
                         System.out.println("Updating user info...");
                         updateUserInfo(username, firstName, lastName);
                         System.out.println("Updated user info");
+                        send.writeBoolean(true);
                     } else {
                         System.out.println("Token wasn't valid");
+                        send.writeBoolean(false);
                     }
+                    send.writeUTF("Update User Information");
                     send.flush();
                 }
 
@@ -265,9 +275,12 @@ public class Server {
                         System.out.println("Deleting user'" + username + "'...");
                         deleteUser(username);
                         System.out.println("Deleted user");
+                        send.writeBoolean(true);
                     } else {
                         System.out.println("Token wasn't valid");
+                        send.writeBoolean(false);
                     }
+                    send.writeUTF("Delete User");
                     send.flush();
                 }
 
@@ -281,6 +294,9 @@ public class Server {
                     if (checkTokenIsValid(loggedInUser, token)) {
                         System.out.println("Retrieving user permissions...");
                         boolean[] userPermissions = getUserPermissions(username);
+
+                        send.writeBoolean(true);
+                        send.writeUTF("Get User Permissions");
                         send.writeBoolean(userPermissions[0]);
                         send.writeBoolean(userPermissions[1]);
                         send.writeBoolean(userPermissions[2]);
@@ -288,6 +304,8 @@ public class Server {
                         System.out.println("Retrieved user permissions");
                     } else {
                         System.out.println("Token wasn't valid");
+                        send.writeBoolean(false);
+                        send.writeUTF("Get User Permissions");
                     }
                     send.flush();
                 }
@@ -309,9 +327,12 @@ public class Server {
                         System.out.println("Updating user permissions...");
                         updateUserPermissions(permissions, username);
                         System.out.println("Updated user permissions");
+                        send.writeBoolean(true);
                     } else {
                         System.out.println("Token wasn't valid");
+                        send.writeBoolean(false);
                     }
+                    send.writeUTF("Update User Permissions");
                     send.flush();
                 }
 
@@ -336,9 +357,12 @@ public class Server {
                         System.out.println("Creating new user...");
                         createNewUser(userData, permissions);
                         System.out.println("Created new user");
+                        send.writeBoolean(true);
                     } else {
                         System.out.println("Token wasn't valid");
+                        send.writeBoolean(false);
                     }
+                    send.writeUTF("Create User");
                     send.flush();
                 }
 
@@ -850,6 +874,8 @@ public class Server {
         int userId = GetUserID(username);
         if (checkTokenIsValid(username, token) && userId != -1) {
             System.out.println("true");
+            send.writeBoolean(true);
+            send.writeUTF("Create Billboard");
             send.write(1);
             send.flush();
 
@@ -880,6 +906,8 @@ public class Server {
             send.flush();
             return true;
         } else {
+            send.writeBoolean(false);
+            send.writeUTF("Create Billboard");
             send.writeInt(0);
             send.flush();
             System.out.println("Don't have access to create billboard");
@@ -1056,105 +1084,124 @@ public class Server {
     private static void GetBillboardInfo(ObjectInputStream receiver, ObjectOutputStream send) throws IOException, SQLException, ParserConfigurationException, SAXException, ParserConfigurationException, SAXException {
         int billboardID = receiver.read();
         String username = receiver.readUTF();
+        String token = receiver.readUTF();
 
-        //        Returns if the billboard is not scheduled
-        String query = CheckIfBillboardIsScheduled(billboardID, false);
-        //        Returns if the billboard is currently scheduled
-        Statement st = ServerInit.conn.createStatement();
-        st.executeQuery("USE `cab302`;");
-        ResultSet rs = st.executeQuery(query);
-//        If Data is found
-        if (rs.isBeforeFirst()) {
-            rs.next();
-            if (rs.getInt("createBillboard") == 1
-                            || rs.getInt("editAllBillboard") == 1) {
-                send.writeInt(1);
-                String name = rs.getString("billboardName");
-                String fileLocation = rs.getString("fileLocation");
-                Billboard billboard = ReadXMLFile(new File(fileLocation), name);
-                send.writeObject(billboard);
-                send.flush();
-            }
-            else {
-                send.writeInt(-1);
-            }
-
-//            IF the billboard is scheduled in the database
-        } else {
-            query = CheckIfBillboardIsScheduled(billboardID, true);
-            st = ServerInit.conn.createStatement();
+        if (checkTokenIsValid(username, token)) {
+            //        Returns if the billboard is not scheduled
+            String query = CheckIfBillboardIsScheduled(billboardID, false);
+            //        Returns if the billboard is currently scheduled
+            Statement st = ServerInit.conn.createStatement();
             st.executeQuery("USE `cab302`;");
-            rs = st.executeQuery(query);
-
+            ResultSet rs = st.executeQuery(query);
+//        If Data is found
             if (rs.isBeforeFirst()) {
                 rs.next();
-                if (rs.getInt("editAllBillboard") == 1) {
+                if (rs.getInt("createBillboard") == 1
+                        || rs.getInt("editAllBillboard") == 1) {
                     send.writeInt(1);
                     String name = rs.getString("billboardName");
                     String fileLocation = rs.getString("fileLocation");
                     Billboard billboard = ReadXMLFile(new File(fileLocation), name);
                     send.writeObject(billboard);
-                } else {
-                    System.out.println("There is no billboards to be displayed");
+                    send.flush();
+                }
+                else {
                     send.writeInt(-1);
                 }
-                send.flush();
+
+//            IF the billboard is scheduled in the database
+            } else {
+                query = CheckIfBillboardIsScheduled(billboardID, true);
+                st = ServerInit.conn.createStatement();
+                st.executeQuery("USE `cab302`;");
+                rs = st.executeQuery(query);
+
+                if (rs.isBeforeFirst()) {
+                    rs.next();
+                    if (rs.getInt("editAllBillboard") == 1) {
+                        send.writeInt(1);
+                        String name = rs.getString("billboardName");
+                        String fileLocation = rs.getString("fileLocation");
+                        Billboard billboard = ReadXMLFile(new File(fileLocation), name);
+                        send.writeObject(billboard);
+                    } else {
+                        System.out.println("There is no billboards to be displayed");
+                        send.writeInt(-1);
+                    }
+                    send.flush();
+                }
             }
+            send.flush();
         }
-        send.flush();
     }
 
     private static void DeleteBillboard(ObjectInputStream receiver, ObjectOutputStream send) throws IOException, SQLException {
         int billboardID = receiver.read();
+        String username = receiver.readUTF();
+        String token = receiver.readUTF();
 
-//        Returns if the billboard is not scheduled
-        String query = CheckIfBillboardIsScheduled(billboardID, false);
-        //        Returns if the billboard is currently scheduled
-        Statement st = ServerInit.conn.createStatement();
-        st.executeQuery("USE `cab302`;");
-        ResultSet rs = st.executeQuery(query);
-//        If Data is found
-        if (rs.isBeforeFirst()) {
-            rs.next();
-            if (rs.getInt("createBillboard") == 1 || rs.getInt("editAllBillboard") == 1) {
-                send.writeInt(1);
-                send.writeUTF(rs.getString("billboardName"));
-                send.flush();
-                if (receiver.read() == 0) {
-                    query = "DELETE FROM billboards WHERE idBillboards = " + billboardID + ";";
-                    st = ServerInit.conn.createStatement();
-                    st.executeQuery("USE `cab302`;");
-                    rs = st.executeQuery(query);
-                }
-            } else {
-                send.writeInt(0);
-            }
-
-//            IF the billboard is scheduled in the database
-        } else {
-            query = CheckIfBillboardIsScheduled(billboardID, true);
-            st = ServerInit.conn.createStatement();
+        if(checkTokenIsValid(username, token)) {
+            //        Returns if the billboard is not scheduled
+            String query = CheckIfBillboardIsScheduled(billboardID, false);
+            //        Returns if the billboard is currently scheduled
+            Statement st = ServerInit.conn.createStatement();
             st.executeQuery("USE `cab302`;");
-            rs = st.executeQuery(query);
-
+            ResultSet rs = st.executeQuery(query);
+//        If Data is found
             if (rs.isBeforeFirst()) {
                 rs.next();
-                if (rs.getInt("editAllBillboard") == 1) {
+                if (rs.getInt("createBillboard") == 1 || rs.getInt("editAllBillboard") == 1) {
+                    send.writeBoolean(true);
+                    send.writeUTF("Delete Billboard");
                     send.writeInt(1);
                     send.writeUTF(rs.getString("billboardName"));
                     send.flush();
                     if (receiver.read() == 0) {
-                        String deleteSchedule = "DELETE FROM schedules WHERE schedules.idBillboard = " + billboardID + ";";
                         query = "DELETE FROM billboards WHERE idBillboards = " + billboardID + ";";
                         st = ServerInit.conn.createStatement();
                         st.executeQuery("USE `cab302`;");
-                        st.executeQuery(deleteSchedule);
                         rs = st.executeQuery(query);
                     }
                 } else {
+                    send.writeBoolean(false);
+                    send.writeUTF("Delete Billboard");
                     send.writeInt(0);
                 }
+
+//            IF the billboard is scheduled in the database
+            } else {
+                query = CheckIfBillboardIsScheduled(billboardID, true);
+                st = ServerInit.conn.createStatement();
+                st.executeQuery("USE `cab302`;");
+                rs = st.executeQuery(query);
+
+                if (rs.isBeforeFirst()) {
+                    rs.next();
+                    if (rs.getInt("editAllBillboard") == 1) {
+                        send.writeBoolean(true);
+                        send.writeUTF("Delete Billboard");
+                        send.writeInt(1);
+                        send.writeUTF(rs.getString("billboardName"));
+                        send.flush();
+                        if (receiver.read() == 0) {
+                            String deleteSchedule = "DELETE FROM schedules WHERE schedules.idBillboard = " + billboardID + ";";
+                            query = "DELETE FROM billboards WHERE idBillboards = " + billboardID + ";";
+                            st = ServerInit.conn.createStatement();
+                            st.executeQuery("USE `cab302`;");
+                            st.executeQuery(deleteSchedule);
+                            rs = st.executeQuery(query);
+                        }
+                    } else {
+                        send.writeBoolean(false);
+                        send.writeUTF("Delete Billboard");
+                        send.writeInt(0);
+                    }
+                }
+                send.flush();
             }
+        } else {
+            send.writeBoolean(false);
+            send.writeUTF("Delete Billboard");
             send.flush();
         }
     }
@@ -1262,32 +1309,43 @@ public class Server {
         return c;
     }
     private static void createNewSchedule(ObjectInputStream receiver, ObjectOutputStream send) throws SQLException, IOException, ClassNotFoundException {
+        String username = receiver.readUTF();
+        String token = receiver.readUTF();
         receiver.read();
         ArrayList<String> data = (ArrayList<String>) receiver.readObject();
 
-        String billid = getBillboardId(data);
-        String userid = getUserId(data);
-        String date = formatTime(data).getTime().toString().split(" ")[3];
+        if (checkTokenIsValid(username, token)) {
+            String billid = getBillboardId(data);
+            String userid = getUserId(data);
+            String date = formatTime(data).getTime().toString().split(" ")[3];
 
-        System.out.println(billid);
+            System.out.println(billid);
 
-        int recurring = 0;
-        if(data.get(4).equals("Daily"))
-        {
-            recurring = 1440;
+            int recurring = 0;
+            if(data.get(4).equals("Daily"))
+            {
+                recurring = 1440;
+            }
+            else if(data.get(4).equals("Hourly"))
+            {
+                recurring = 60;
+            }
+
+
+            String query = "INSERT INTO schedules (`weekday`, `duration`, `startTime`, `recurring`, `idBillboard`, `userId`) " +
+                    "VALUES ('"+data.get(1)+"', '"+data.get(3)+"','"+date+"', '"+recurring+"','"+billid+"', '"+userid+"');";
+            System.out.println(query);
+            Statement st = ServerInit.conn.createStatement();
+            st.executeQuery("USE `cab302`;");
+            st.executeQuery(query);
+
+            send.writeBoolean(true);
+            send.writeUTF("Schedule Request");
         }
-        else if(data.get(4).equals("Hourly"))
-        {
-            recurring = 60;
-        }
+        send.writeBoolean(false);
+        send.writeUTF("Schedule Request");
 
-
-        String query = "INSERT INTO schedules (`weekday`, `duration`, `startTime`, `recurring`, `idBillboard`, `userId`) " +
-                "VALUES ('"+data.get(1)+"', '"+data.get(3)+"','"+date+"', '"+recurring+"','"+billid+"', '"+userid+"');";
-        System.out.println(query);
-        Statement st = ServerInit.conn.createStatement();
-        st.executeQuery("USE `cab302`;");
-        st.executeQuery(query);
+        send.flush();
     }
 
     private static void logout(ObjectInputStream receiver, ObjectOutputStream send) throws IOException {

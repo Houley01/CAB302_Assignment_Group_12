@@ -96,7 +96,7 @@ public class listBillboards extends JFrame {
                     if (billboardSelected.equals("") == false) {
                         try {
                             controller.DeleteBillboard(billboardSelected);
-                        } catch (IOException ioException) {
+                        } catch (IOException | ClassNotFoundException ioException) {
                             ioException.printStackTrace();
                         }
                     }

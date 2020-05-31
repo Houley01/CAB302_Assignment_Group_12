@@ -159,7 +159,7 @@ public class createBillboards {
                 try {
                 Billboard temp = new Billboard(title, messageText, messageColour, image, testImageOrURL, informationText, informationColour, backgroundColour);
                     controller.createBillboard(temp);
-                } catch (IOException ioException) {
+                } catch (IOException | ClassNotFoundException ioException) {
                     ioException.printStackTrace();
                 }
 

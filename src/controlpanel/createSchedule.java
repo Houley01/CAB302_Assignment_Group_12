@@ -187,7 +187,7 @@ public class createSchedule {
                     try {
                         controller.createNewSchedule(getValues());
                         window.setVisible(false);
-                    } catch (IOException ex) {
+                    } catch (IOException | ClassNotFoundException ex) {
                         ex.printStackTrace();
                     }
                 }

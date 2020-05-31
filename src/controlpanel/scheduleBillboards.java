@@ -117,7 +117,6 @@ public class scheduleBillboards {
         formatText(titleLabel, true);
         titlePanel.add(titleLabel);
 
-        String[][] Data = controller.listSchedule();
 //      Calendar setup
 
         tableBillboard.setModel(tableCalendar);
