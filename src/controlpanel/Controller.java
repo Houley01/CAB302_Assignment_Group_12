@@ -542,7 +542,7 @@ public class Controller {
                 ShowCreateBillboard();
 
             }
-            if (val == -1) {
+            else if (val == -1) {
                 DialogWindow.NoAccessTo("to edit this billboard");
             }
 

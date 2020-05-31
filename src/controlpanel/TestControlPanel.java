@@ -17,7 +17,7 @@ public class TestControlPanel {
     public void PasswordHashTest() throws InvalidKeySpecException, NoSuchAlgorithmException {
         String password = "password";
 
-        String hashedPassword = controller.plaintextToHashedPassword(password);
+        String hashedPassword = Controller.PlaintextToHashedPassword(password);
 
         assertEquals(true, !password.equals(hashedPassword));
 
@@ -28,7 +28,7 @@ public class TestControlPanel {
     public void PasswordChangeTest() throws InvalidKeySpecException, NoSuchAlgorithmException {
         String password = "password";
 
-        String hashedPassword = controller.hashNewPassword(password);
+        String hashedPassword = Controller.HashNewPassword(password);
 
         assertEquals(true, !password.equals(hashedPassword));
 
@@ -39,7 +39,7 @@ public class TestControlPanel {
     public void UpdateUserInfoTest() {
         String[] userDetails = {"John", "Smith"};
 
-        String[] updatedUserDetails = controller.updateUserInfo("Jack", "Doe");
+        String[] updatedUserDetails = Controller.UpdateUserInfo("Jack", "Doe");
 
         assertEquals(false, Arrays.equals(userDetails, updatedUserDetails));
 
@@ -53,7 +53,7 @@ public class TestControlPanel {
         listOfUsers.add("User Two");
         listOfUsers.add("User Three");
 
-        boolean wasUserInList = controller.deleteUser(listOfUsers, "User One");
+        boolean wasUserInList = Controller.DeleteUser(listOfUsers, "User One");
 
 
         assertEquals(true, wasUserInList);
@@ -68,7 +68,7 @@ public class TestControlPanel {
         listOfUsers.add("User Two");
         listOfUsers.add("User Three");
 
-        boolean wasUserInList = controller.deleteUser(listOfUsers, "User Four");
+        boolean wasUserInList = Controller.DeleteUser(listOfUsers, "User Four");
 
 
         assertEquals(false, wasUserInList);
@@ -78,7 +78,7 @@ public class TestControlPanel {
     // Checks that the user cannot delete themselves
     @Test
     public void DeleteUserSelfRemovalTest() {
-        controller con = new controller();
+        Controller con = new Controller();
         con.loggedInUser = "ThisIsATestUser";
         ArrayList<String> listOfUsers = new ArrayList<>();
         listOfUsers.add("User One");
@@ -86,7 +86,7 @@ public class TestControlPanel {
         listOfUsers.add("User Three");
         listOfUsers.add(con.loggedInUser);
 
-        boolean wasUserInList = controller.deleteUser(listOfUsers, "ThisIsATestUser");
+        boolean wasUserInList = Controller.DeleteUser(listOfUsers, "ThisIsATestUser");
 
 
         assertEquals(false, wasUserInList);
@@ -95,26 +95,26 @@ public class TestControlPanel {
 
     @Test
     public void UpdateUserPermissionsTest() {
-        controller con = new controller();
+        Controller con = new Controller();
         con.loggedInUser = "admin";
         boolean[] userPermissions = {false, true, true, false};
         boolean[] newUserPermissions = {true, true, true, true};
         String username = "test user";
 
-        boolean[] updatedUserPermissions = controller.updateUserPermissions(userPermissions, newUserPermissions, username);
+        boolean[] updatedUserPermissions = Controller.UpdateUserPermissions(userPermissions, newUserPermissions, username);
 
         assertEquals(false, Arrays.equals(userPermissions, updatedUserPermissions));
     }
 
     @Test
     public void UpdateUserPermissionsUnchangedTest() {
-        controller con = new controller();
+        Controller con = new Controller();
         con.loggedInUser = "admin";
         boolean[] userPermissions = {false, true, true, false};
         boolean[] newUserPermissions = {false, true, true, false};
         String username = "test user";
 
-        boolean[] updatedUserPermissions = controller.updateUserPermissions(userPermissions, newUserPermissions, username);
+        boolean[] updatedUserPermissions = Controller.UpdateUserPermissions(userPermissions, newUserPermissions, username);
 
         assertEquals(true, Arrays.equals(userPermissions, updatedUserPermissions));
     }
@@ -122,41 +122,41 @@ public class TestControlPanel {
     // Test shows that a user cannot change their own permissions
     @Test
     public void UpdateUserPermissionsSelfChangeTest() {
-        controller con = new controller();
+        Controller con = new Controller();
         con.loggedInUser = "ThisIsATestUser";
         boolean[] userPermissions = {false, true, true, false};
         boolean[] newUserPermissions = {true, true, true, true};
         String username = "ThisIsATestUser";
 
-        boolean[] updatedUserPermissions = controller.updateUserPermissions(userPermissions, newUserPermissions, username);
+        boolean[] updatedUserPermissions = Controller.UpdateUserPermissions(userPermissions, newUserPermissions, username);
 
         assertEquals(true, Arrays.equals(userPermissions, updatedUserPermissions));
     }
 
     @Test
     public void CreateNewUserAllCorrectTest() throws IOException, InvalidKeySpecException, NoSuchAlgorithmException, ClassNotFoundException {
-        controller con = new controller();
+        Controller con = new Controller();
         String[] userData = {"ThisIsATestUser", "Test", "User", "password"};
         ArrayList<String> listOfUsers = new ArrayList<>();
         listOfUsers.add("User One");
         listOfUsers.add("User Two");
         listOfUsers.add("User Three");
 
-        boolean wasAllUserDataEntered = con.createNewUser(userData, listOfUsers);
+        boolean wasAllUserDataEntered = con.CreateNewUser(userData, listOfUsers);
 
         assertEquals(true, wasAllUserDataEntered);
     }
 
     @Test
     public void CreateNewUserMissingFieldsTest() throws IOException, InvalidKeySpecException, NoSuchAlgorithmException, ClassNotFoundException {
-        controller con = new controller();
+        Controller con = new Controller();
         String[] userData = {"ThisIsATestUser", "", "User", "password"};
         ArrayList<String> listOfUsers = new ArrayList<>();
         listOfUsers.add("User One");
         listOfUsers.add("User Two");
         listOfUsers.add("User Three");
 
-        boolean wasAllUserDataEntered = con.createNewUser(userData, listOfUsers);
+        boolean wasAllUserDataEntered = con.CreateNewUser(userData, listOfUsers);
 
         assertEquals(false, wasAllUserDataEntered);
     }
@@ -164,7 +164,7 @@ public class TestControlPanel {
     // Test checks that the password is hashed before sent to the server
     @Test
     public void CreateNewUserPasswordHashedTest() throws IOException, InvalidKeySpecException, NoSuchAlgorithmException, ClassNotFoundException {
-        controller con = new controller();
+        Controller con = new Controller();
         String[] userData = {"ThisIsATestUser", "Test", "User", "password"};
         ArrayList<String> listOfUsers = new ArrayList<>();
         listOfUsers.add("User One");
@@ -174,7 +174,7 @@ public class TestControlPanel {
         // Password hashed before validating user data
         //System.out.println(userData[3]);
 
-        con.createNewUser(userData, listOfUsers);
+        con.CreateNewUser(userData, listOfUsers);
 
         // Password hashed after validated user data
         //System.out.println(userData[3]);
@@ -185,14 +185,14 @@ public class TestControlPanel {
     // Test checks that the username for the new user doesn't already exist
     @Test
     public void CreateNewUserUsernameDoesNotExistTest() throws IOException, InvalidKeySpecException, NoSuchAlgorithmException, ClassNotFoundException {
-        controller con = new controller();
+        Controller con = new Controller();
         String[] userData = {"ThisIsATestUser", "Test", "User", "password"};
         ArrayList<String> listOfUsers = new ArrayList<>();
         listOfUsers.add("User One");
         listOfUsers.add("User Two");
         listOfUsers.add("User Three");
 
-        boolean wasAllUserDataEntered = con.createNewUser(userData, listOfUsers);
+        boolean wasAllUserDataEntered = con.CreateNewUser(userData, listOfUsers);
 
         assertEquals(true, wasAllUserDataEntered);
     }
@@ -200,14 +200,14 @@ public class TestControlPanel {
     // Test checks that the username for the new user already exists
     @Test
     public void CreateNewUserUsernameAlreadyExistTest() throws IOException, InvalidKeySpecException, NoSuchAlgorithmException, ClassNotFoundException {
-        controller con = new controller();
+        Controller con = new Controller();
         String[] userData = {"ThisIsATestUser", "Test", "User", "password"};
         ArrayList<String> listOfUsers = new ArrayList<>();
         listOfUsers.add("ThisIsATestUser");
         listOfUsers.add("User Two");
         listOfUsers.add("User Three");
 
-        boolean wasAllUserDataEntered = con.createNewUser(userData, listOfUsers);
+        boolean wasAllUserDataEntered = con.CreateNewUser(userData, listOfUsers);
 
         assertEquals(false, wasAllUserDataEntered);
     }

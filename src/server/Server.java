@@ -3,7 +3,7 @@ package server;
 import org.xml.sax.SAXException;
 import resources.Billboard;
 import resources.CustomXMFile;
-import server.databaseCreation.databaseCreation;
+import server.databaseCreation.DatabaseCreation;
 import server.initialisation.ServerInit;
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
@@ -67,10 +67,10 @@ public class Server {
         resources.GetPropertyValues properties = new resources.GetPropertyValues();
         properties.readPropertyFile();
 
-        connectionInitiated = ServerInit.initaliseConnection();
+        connectionInitiated = ServerInit.initialiseConnection();
 
         if (connectionInitiated) {
-            databaseCreation.checkDatabaseExistence();
+            DatabaseCreation.CheckDatabaseExistence();
 
             // Reads the port number from the server.properties file
             ServerSocket serverSocket = new ServerSocket(properties.port);
@@ -130,7 +130,6 @@ public class Server {
 //                    System.out.println("Creating new schedule ...");
                     CreateNewSchedule(receiver, send);
                 }
-// NOTE:: BEN IS WORKING HERE
 
                 // List Billboards
                 if (request.equals("ListBillboards")) {
@@ -502,11 +501,12 @@ public class Server {
         String expiry = String.valueOf(expiryDate);
 
         Date dateOfExpiry = new Date(expiryDate);
-
-        System.out.println("Username: " + username);
-        System.out.println("AuthToken: " + token);
-        System.out.println("Expiry: " + dateOfExpiry);
-
+        boolean DEBUG = false;
+        if (DEBUG) {
+            System.out.println("Username: " + username);
+            System.out.println("AuthToken: " + token);
+            System.out.println("Expiry: " + dateOfExpiry);
+        }
         usersAuthenticated.put(username, new String[]{token, expiry});
 
         return token;
@@ -541,7 +541,7 @@ public class Server {
 
                 // Check that the token hasn't expired yet and is still valid
                 if (expiry > currentTime) {
-                    System.out.println("Not yet expired");
+//                    System.out.println("Not yet expired");
                     return true;
                 } else {
                     return false;
@@ -922,7 +922,7 @@ public class Server {
     }
 
     private static String CheckIfBillboardIsScheduled(int billboardID, boolean scheduled) {
-        if (scheduled == false) {
+        if (!scheduled) {
             return  "SELECT * FROM billboards " +
                     "LEFT JOIN schedules ON schedules.idBillboard = billboards.idBillboards " +
                     "LEFT JOIN users ON billboards.userId = users.idUsers " +

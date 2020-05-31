@@ -30,7 +30,7 @@ public class GetPropertyValues {
 
         try {
             Properties prop = new Properties();
-            String propFileName = "resources\\server.properties";
+            String propFileName = "resources/server.properties";
 
             inputStream = GetPropertyValues.class.getClassLoader().getResourceAsStream(propFileName);
 

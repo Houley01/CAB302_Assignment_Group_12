@@ -25,7 +25,7 @@ public class ServerInit {
      * @see initaliseConnection
      * @throws IOException
      */
-    public static void setupDatabaseConnectionInfo() throws IOException {
+    public static void SetupDatabaseConnectionInfo() throws IOException {
         // Attempt to open file 'db.props' and retrieve DB connection information
         try {
             InputStream in = ServerInit.class.getResourceAsStream("../../resources/db.props");
@@ -49,10 +49,10 @@ public class ServerInit {
      * @return bool         Return true if connection was successful.
      * @throws SQLException
      */
-    public static Boolean initaliseConnection() throws SQLException {
+    public static Boolean initialiseConnection() throws SQLException {
         // Attempt to make the connection to the DB
         try {
-            setupDatabaseConnectionInfo();
+            SetupDatabaseConnectionInfo();
 
             conn = DriverManager.getConnection(url, username, password);
 

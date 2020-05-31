@@ -128,7 +128,7 @@ public class TestServer {
         serverTester.GenerateAuthToken(username);
 
         // Function to add
-        serverTester.logout(username);
+        serverTester.Logout(username);
 
         assertEquals(false, serverTester.usersAuthenticated.containsKey(username));
     }
